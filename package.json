@@ -35,7 +35,6 @@
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
     "simplex-noise": "^2.4.0",
-    "sylvester-es6": "^0.0.2",
     "three": "^0.93.0"
   }
 }
