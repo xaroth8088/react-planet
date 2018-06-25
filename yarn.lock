@@ -2912,9 +2912,9 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
 
-three@0.66.97:
-  version "0.66.97"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.66.97.tgz#abfffc7e4eceda247de3d6fce810ea4f44d2a559"
+three@0.80.1:
+  version "0.80.1"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.80.1.tgz#05f6d6710e5ec7b59a4e8a4be0897920516ebf6f"
 
 through@^2.3.6:
   version "2.3.8"
