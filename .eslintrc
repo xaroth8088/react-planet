@@ -35,6 +35,7 @@
     "codeFrame": false
   },
   "rules": {
+    "no-plusplus": 0,
     "indent": [
       "error",
       4,

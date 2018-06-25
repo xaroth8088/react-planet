@@ -9,9 +9,10 @@
   "private": false,
   "scripts": {
     "build": "babel lib -d build",
+    "build:watch": "babel lib -w -d build",
     "clean": "rimraf build",
-    "lint": "eslint lib/**/*.js",
-    "fixlint": "eslint --fix *.js lib",
+    "lint": "eslint --ext js lib",
+    "fixlint": "eslint --fix --ext js lib",
     "prepublish": "yarn run build"
   },
   "devDependencies": {
@@ -28,8 +29,13 @@
     "eslint-plugin-import": "^2.13.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.9.1",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "alea": "^0.0.9",
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
-    "rimraf": "^2.6.2"
+    "sylvester-es6": "^0.0.2",
+    "three": "0.66.97"
   }
 }
