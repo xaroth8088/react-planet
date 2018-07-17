@@ -22,19 +22,19 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
-    "eslint": "^5.0.0",
+    "eslint": "^5.0.1",
     "eslint-config-airbnb": "^17.0.0",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-import-resolver-webpack": "^0.10.1",
     "eslint-plugin-import": "^2.13.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.9.1",
+    "eslint-plugin-react": "^7.10.0",
     "rimraf": "^2.6.2"
   },
   "dependencies": {
     "prop-types": "^15.6.2",
     "react": "^16.4.1",
-    "simplex-noise": "https://github.com/xaroth8088/simplex-noise.js.git",
-    "three": "^0.93.0"
+    "simplex-noise": "^2.4.0",
+    "three": "^0.94.0"
   }
 }
