@@ -11,8 +11,8 @@
     "build": "babel lib -d build",
     "build:watch": "babel lib -w -d build",
     "clean": "rimraf build",
-    "lint": "eslint --ext js lib",
-    "fixlint": "eslint --fix --ext js lib",
+    "lint": "eslint lib",
+    "lint:fix": "eslint --fix lib",
     "prepublish": "yarn run build"
   },
   "devDependencies": {
