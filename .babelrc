@@ -3,9 +3,9 @@
     "transform-class-properties"
   ],
   "presets": [
-    "react",
+    "@babel/preset-react",
     [
-      "env",
+      "@babel/preset-env",
       {
         "debug": true,
         "targets": {
