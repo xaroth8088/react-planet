@@ -33,8 +33,10 @@
   },
   "dependencies": {
     "prop-types": "^15.7.2",
-    "react": "^16.8.5",
     "simplex-noise": "^2.4.0",
     "three": "^0.102.1"
+  },
+  "peerDependencies": {
+    "react": "^16.8.5"
   }
 }
