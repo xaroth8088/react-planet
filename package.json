@@ -1,5 +1,5 @@
 {
-  "name": "react-planet",
+  "name": "@xaroth8088/react-planet",
   "version": "1.0.0",
   "description": "Procedurally generated planets in a React component",
   "main": "build/index.js",
