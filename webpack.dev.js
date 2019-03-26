@@ -21,9 +21,7 @@ module.exports = {
         libraryTarget: 'umd'
     },
 
-    externals: {
-        react: 'react'
-    },
+    externals: ['react'],
 
     module: {
         rules: [

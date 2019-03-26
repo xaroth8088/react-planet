@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const baseDir = path.resolve(__dirname);
 const srcDir = path.resolve(baseDir, 'lib');
@@ -21,9 +22,7 @@ module.exports = {
         libraryTarget: 'umd'
     },
 
-    externals: {
-        react: 'react'
-    },
+    externals: ['react'],
 
     module: {
         rules: [
@@ -54,6 +53,17 @@ module.exports = {
         modules: [
             srcDir,
             'node_modules'
+        ]
+    },
+
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                terserOptions: {
+                    module: true,
+                    keep_fnames: true
+                }
+            })
         ]
     }
 };
