@@ -39,14 +39,18 @@ module.exports = {
                 exclude: modulesDir
             },
             {
-                test: /\.wasm$/,
-                loaders: ['wasm-loader']
+                test: /\.wsm$/,
+                type: 'javascript/auto',
+                use: [{
+                    loader: 'wasm-loader',
+                    options: {}
+                }]
             }
         ]
     },
 
     resolve: {
-        extensions: ['.js'],
+        extensions: ['.js', '.wsm'],
         modules: [
             srcDir,
             'node_modules'
