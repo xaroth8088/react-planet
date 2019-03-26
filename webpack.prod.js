@@ -22,7 +22,15 @@ module.exports = {
         libraryTarget: 'umd'
     },
 
-    externals: ['react'],
+    externals: {
+        react: 'react',
+        three: {
+            commonjs: 'three',
+            commonjs2: 'three',
+            amd: 'three',
+            root: 'THREE',
+        }
+    },
 
     module: {
         rules: [
