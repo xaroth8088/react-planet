@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Procedurally generated planets in a React component",
   "main": "build/index.js",
-  "repository": "https://xaroth8088@github.com/xaroth8088/react-planet.git",
+  "repository": "https://github.com/xaroth8088/react-planet.git",
   "author": "Geoffrey Benson <xaroth@gmail.com>",
   "license": "MIT",
   "private": false,
