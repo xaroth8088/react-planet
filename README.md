@@ -66,6 +66,7 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * A fork of the noise generation library that only includes the bare minimum required.
 * Conversion of the noise generation algorithm to OpenSimplex
 * Move texture generation into a web worker, so that it doesn't block the main thread
+* Find and complete TODO's in the code
 
 # Credits
 Based on the wonderful work of [wwwtyro](https://github.com/wwwtyro/procedural.js).
