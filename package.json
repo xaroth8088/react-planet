@@ -1,15 +1,15 @@
 {
-  "name": "react-planet",
+  "name": "@xaroth8088/react-planet",
   "version": "1.0.0",
   "description": "Procedurally generated planets in a React component",
   "main": "build/index.js",
-  "repository": "https://xaroth8088@github.com/xaroth8088/react-planet.git",
+  "repository": "https://github.com/xaroth8088/react-planet.git",
   "author": "Geoffrey Benson <xaroth@gmail.com>",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "babel lib -d build",
-    "build:watch": "babel lib -w -d build",
+    "build:watch": "webpack --config webpack.dev.js --color --progress",
+    "build": "yarn clean && webpack --config webpack.prod.js --color -p --progress",
     "clean": "rimraf build",
     "lint": "eslint lib",
     "lint:fix": "eslint --fix lib",
@@ -21,6 +21,7 @@
     "@babel/preset-env": "^7.4.2",
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.5",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "eslint": "^5.15.3",
     "eslint-config-airbnb": "^17.1.0",
@@ -29,14 +30,18 @@
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4",
-    "rimraf": "^2.6.3"
+    "rimraf": "^2.6.3",
+    "terser-webpack-plugin": "^1.2.3",
+    "wasm-dce": "^1.0.2",
+    "wasm-loader": "^1.3.0",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "prop-types": "^15.7.2",
-    "simplex-noise": "^2.4.0",
-    "three": "^0.102.1"
+    "prop-types": "^15.7.2"
   },
   "peerDependencies": {
-    "react": "^16.8.5"
+    "react": "^16.8.5",
+    "three": "^0.102.1"
   }
 }
