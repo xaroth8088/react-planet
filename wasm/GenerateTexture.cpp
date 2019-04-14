@@ -5,9 +5,8 @@
 using namespace OpenSimplexNoise;
 
 extern "C" {
-    EMSCRIPTEN_KEEPALIVE
-    float test() {
+    double EMSCRIPTEN_KEEPALIVE getNoise(double x, double y, double z) {
         Noise noise;
-        return (float)(noise.eval(0.13, 0.31));
+        return noise.eval(x, y, z);
     }
 }

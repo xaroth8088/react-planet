@@ -10,10 +10,8 @@ emcc wasm/GenerateTexture.cpp wasm/OpenSimplexNoise.cpp \
     -s MALLOC='emmalloc' \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
-    -s SIDE_MODULE=1 \
     -s EMIT_EMSCRIPTEN_METADATA=1 \
-    -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE="['_memcpy','_memset','_malloc','_free','_strlen']" \
-    -s EXTRA_EXPORTED_RUNTIME_METHODS="['getTempRet0']" \
+    -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE="['memcpy','memset','malloc','free']" \
     -fno-exceptions \
     -Os \
     -o build/GenerateTexture.wasm
