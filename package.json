@@ -10,7 +10,7 @@
   "scripts": {
     "build:watch": "webpack --config webpack.dev.js --color --progress",
     "build": "yarn clean && webpack --config webpack.prod.js --color -p --progress",
-    "clean": "rimraf build",
+    "clean": "rimraf build wasm_build",
     "lint": "eslint lib",
     "lint:fix": "eslint --fix lib",
     "build:wasm": "scripts/build_wasm.sh",
@@ -33,8 +33,6 @@
     "eslint-plugin-react": "^7.12.4",
     "rimraf": "^2.6.3",
     "terser-webpack-plugin": "^1.2.3",
-    "wasm-dce": "^1.0.2",
-    "wasm-loader": "^1.3.0",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.0"
   },
