@@ -14,7 +14,7 @@ class TextureGenerator {
 		}
 
 	public:
-	    int resolution = 256;
+	    unsigned short int resolution = 256;
 	    double spin = 1;
 
         double surfaceiScale = 2;
@@ -57,7 +57,6 @@ class TextureGenerator {
         double cloudsFalloff = 1;
         double cloudsIntensity = 1;
         double normalScale = 0.05;
-        bool animate = true;
 
 		TextureGenerator(val options);
 };
