@@ -3,7 +3,7 @@
 #include <emscripten/bind.h>
 #include <cmath>
 #include <algorithm>
-
+#include "TextureGenerator.h"
 #include "OpenSimplexNoise.h"
 
 using namespace OpenSimplexNoise;
@@ -113,4 +113,7 @@ double EMSCRIPTEN_KEEPALIVE sample(
 EMSCRIPTEN_BINDINGS(my_module) {
     function("sample", &sample);
     function("getTexture", &getTexture);
+	class_<TextureGenerator>("TextureGenerator")
+    	.constructor<val>()
+    	.property("spin", &TextureGenerator::spin);
 }

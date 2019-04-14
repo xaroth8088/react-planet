@@ -22,5 +22,6 @@ emcc \
     --bind \
     -o wasm_build/GenerateTexture.mjs \
     wasm/GenerateTexture.cpp \
-    wasm/OpenSimplexNoise.cpp
+    wasm/OpenSimplexNoise.cpp \
+    wasm/TextureGenerator.cpp
 cp wasm_build/GenerateTexture.mjs lib/GenerateTexture.js
