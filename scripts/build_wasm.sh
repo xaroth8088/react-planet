@@ -4,7 +4,7 @@ source ../emsdk/emsdk_env.sh
 emcc \
     -std=c++17 \
     -s WASM=1 \
-    -s ENVIRONMENT=web \
+    -s ENVIRONMENT="'web'" \
     -s ASSERTIONS=0 \
     -s INVOKE_RUN=0 \
     -s MALLOC="'emmalloc'" \
@@ -14,7 +14,9 @@ emcc \
     -s STRICT=1 \
     -s SINGLE_FILE=1 \
     -s BINARYEN_TRAP_MODE="'clamp'" \
-    -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE="['memcpy','memset','malloc','free']" \
+    -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
+    -s DOUBLE_MODE=1 \
+    -s ERROR_ON_MISSING_LIBRARIES=1 \
     -fno-exceptions \
     -Os \
     --bind \

@@ -63,11 +63,10 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * Documentation for the various properties
 * A small demo app to put onto github.io that lets people tinker with the parameters in realtime
 * Moving the texture generation entirely into WebAssembly, to reduce the back-and-forth to the noise generation library
-* A fork of the noise generation library that only includes the bare minimum required.
-* Conversion of the noise generation algorithm to OpenSimplex
 * Move texture generation into a web worker, so that it doesn't block the main thread
 * Find and complete TODO's in the code
 
 # Credits
 Based on the wonderful work of [wwwtyro](https://github.com/wwwtyro/procedural.js).
-Uses WebAssembly for noise generation, courtesy of [Markyparky56](https://github.com/Markyparky56/WasmNoise).
+
+C port of OpenSimplex courtesy of [deerel](https://github.com/deerel/OpenSimplexNoise).
