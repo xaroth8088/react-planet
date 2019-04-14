@@ -7,12 +7,13 @@ emcc \
     -s ENVIRONMENT=web \
     -s ASSERTIONS=0 \
     -s INVOKE_RUN=0 \
-    -s MALLOC='emmalloc' \
+    -s MALLOC="'emmalloc'" \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
     -s EMIT_EMSCRIPTEN_METADATA=1 \
     -s STRICT=1 \
     -s SINGLE_FILE=1 \
+    -s BINARYEN_TRAP_MODE="'clamp'" \
     -s DEFAULT_LIBRARY_FUNCS_TO_INCLUDE="['memcpy','memset','malloc','free']" \
     -fno-exceptions \
     -Os \

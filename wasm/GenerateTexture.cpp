@@ -59,7 +59,7 @@ double EMSCRIPTEN_KEEPALIVE sample(
     double y,
     double z,
     double iScale,
-    double iOctaves,
+    unsigned short int iOctaves,
     double iFalloff,
     double iIntensity,
     double iRidginess,
@@ -70,7 +70,7 @@ double EMSCRIPTEN_KEEPALIVE sample(
 ) {
     double offset = 0.0;
 
-    if (sOctaves > 0.0) {
+    if (sOctaves > 0) {
         offset = getOctave(
             seed,
             x / sScale,
