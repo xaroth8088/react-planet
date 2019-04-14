@@ -32,11 +32,11 @@ double EMSCRIPTEN_KEEPALIVE getScaledNoise(double seed, double x, double y, doub
     );
 }
 
-double EMSCRIPTEN_KEEPALIVE getOctave(double seed, double x, double y, double z, unsigned short int octaves) {
+double EMSCRIPTEN_KEEPALIVE getOctave(double seed, double x, double y, double z, unsigned char octaves) {
     double val = 0;
     double scale = 1;
 
-    for (unsigned short int i = 0; i < octaves; i++) {
+    for (unsigned char i = 0; i < octaves; i++) {
         val += getScaledNoise(seed, x * scale, y * scale, z * scale) / scale;
         scale *= 2.0;
     }
@@ -44,7 +44,7 @@ double EMSCRIPTEN_KEEPALIVE getOctave(double seed, double x, double y, double z,
     return val;
 }
 
-double EMSCRIPTEN_KEEPALIVE getNormalizedOctave(double seed, double x, double y, double z, unsigned short int octaves) {
+double EMSCRIPTEN_KEEPALIVE getNormalizedOctave(double seed, double x, double y, double z, unsigned char octaves) {
     double q = 2.0 - ( 1.0 / (std::pow(2.0, (octaves - 1.0))) );
     return getOctave(seed, x, y, z, octaves) / q;
 }
@@ -59,12 +59,12 @@ double EMSCRIPTEN_KEEPALIVE sample(
     double y,
     double z,
     double iScale,
-    unsigned short int iOctaves,
+    unsigned char iOctaves,
     double iFalloff,
     double iIntensity,
     double iRidginess,
     double sScale,
-    unsigned short int sOctaves,
+    unsigned char sOctaves,
     double sFalloff,
     double sIntensity
 ) {
