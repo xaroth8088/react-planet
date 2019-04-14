@@ -2,14 +2,29 @@
 #include <emscripten/val.h>
 #include <emscripten/bind.h>
 #include <string>
+#include <strings.h>
 #include "TextureGenerator.h"
 
 using namespace emscripten;
 
+int fls(int mask) {
+    /*
+        https://github.com/udp/freebsd-libc/blob/master/string/fls.c
+    */
+	int bit;
+
+	if (mask == 0)
+		return (0);
+	for (bit = 1; mask != 1; bit++)
+		mask = (unsigned int)mask >> 1;
+
+	return (bit);
+}
+
 TextureGenerator::TextureGenerator(val options) {
     val opt = options["resolution"];
     if (this->isType(opt, "number")) {
-        this->resolution = opt.as<unsigned short int>();
+        this->resolution = 1 << fls(opt.as<unsigned short int>());
     }
 
     opt = options["spin"];
@@ -24,7 +39,7 @@ TextureGenerator::TextureGenerator(val options) {
 
     opt = options["surfaceiOctaves"];
     if (this->isType(opt, "number")) {
-        this->resolution = opt.as<unsigned char>();
+        this->surfaceiOctaves = opt.as<unsigned char>();
     }
 
     opt = options["surfaceiFalloff"];
@@ -60,11 +75,6 @@ TextureGenerator::TextureGenerator(val options) {
     opt = options["surfacesIntensity"];
     if (this->isType(opt, "number")) {
         this->surfacesIntensity = opt.as<double>();
-    }
-
-    opt = options["resolution"];
-    if (this->isType(opt, "number")) {
-        this->resolution = opt.as<double>();
     }
 
     opt = options["landColor1"];

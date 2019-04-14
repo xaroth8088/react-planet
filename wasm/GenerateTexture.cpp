@@ -70,5 +70,5 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("sample", &NoiseWrapper::sample);
 	class_<TextureGenerator>("TextureGenerator")
     	.constructor<val>()
-    	.property("spin", &TextureGenerator::spin); // TODO: remove this property from the interface
+    	.property("resolution", &TextureGenerator::resolution); // TODO: remove this property from the interface
 }
