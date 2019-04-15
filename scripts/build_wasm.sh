@@ -19,6 +19,7 @@ emcc \
     -s ERROR_ON_MISSING_LIBRARIES=1 \
     -fno-exceptions \
     -Os \
+    -DEIGEN_MPL2_ONLY \
     --bind \
     -o wasm_build/GenerateTexture.mjs \
     wasm/GenerateTexture.cpp \
