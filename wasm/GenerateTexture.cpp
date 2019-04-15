@@ -8,9 +8,6 @@
 using namespace OpenSimplexNoise;
 using namespace emscripten;
 
-unsigned char byteBuffer[3] = {0, 0, 0};
-size_t bufferLength = sizeof(unsigned char) * 3;
-
 NoiseWrapper* noise = nullptr;
 
 double EMSCRIPTEN_KEEPALIVE sample(
@@ -46,14 +43,9 @@ double EMSCRIPTEN_KEEPALIVE sample(
     return noise->sample(x, y, z);
 }
 
-val EMSCRIPTEN_KEEPALIVE getTexture() {
-    return val(typed_memory_view(bufferLength, byteBuffer));
-}
-
 /* Bindings */
 EMSCRIPTEN_BINDINGS(my_module) {
     function("sample", &sample);
-    function("getTexture", &getTexture);
     class_<NoiseWrapper>("NoiseWrapper")
         .constructor<
             double,
@@ -70,5 +62,10 @@ EMSCRIPTEN_BINDINGS(my_module) {
         .function("sample", &NoiseWrapper::sample);
 	class_<TextureGenerator>("TextureGenerator")
     	.constructor<val>()
+    	.function("GenerateTextures", &TextureGenerator::GenerateTextures)
+    	.function("getDiffuseTexture", &TextureGenerator::getDiffuseTexture)
+    	.function("getNormalTexture", &TextureGenerator::getNormalTexture)
+    	.function("getSpecularTexture", &TextureGenerator::getSpecularTexture)
+    	.function("getCloudTexture", &TextureGenerator::getCloudTexture)
     	.property("resolution", &TextureGenerator::resolution); // TODO: remove this property from the interface
 }
