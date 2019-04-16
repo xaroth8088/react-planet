@@ -70,5 +70,3 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 Based on the wonderful work of [wwwtyro](https://github.com/wwwtyro/procedural.js).
 
 C port of OpenSimplex courtesy of [deerel](https://github.com/deerel/OpenSimplexNoise).
-
-Texture generation uses an unmodified [Eigen3](https://eigen.tuxfamily.org) with EIGEN_MPL2_ONLY set, in compliance with the [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/) license.

@@ -17,9 +17,8 @@ emcc \
     -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
     -s DOUBLE_MODE=1 \
     -s ERROR_ON_MISSING_LIBRARIES=1 \
-    -fno-exceptions \
     -Os \
-    -DEIGEN_MPL2_ONLY \
+    -fno-exceptions \
     --bind \
     -o wasm_build/GenerateTexture.mjs \
     wasm/GenerateTexture.cpp \
@@ -27,3 +26,7 @@ emcc \
     wasm/TextureGenerator.cpp \
     wasm/NoiseWrapper.cpp
 cp wasm_build/GenerateTexture.mjs lib/GenerateTexture.js
+
+
+# -Os \
+#    -g3 \

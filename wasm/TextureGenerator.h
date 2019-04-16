@@ -23,24 +23,6 @@ class TextureGenerator {
 			return (value.typeof().as<std::string>() == type);
 		}
 
-		unsigned char* diffuseBuffer;
-		unsigned char* normalBuffer;
-		unsigned char* specularBuffer;
-		unsigned char* cloudBuffer;
-
-		NoiseWrapper* surfaceNoise;
-		NoiseWrapper* landNoise;
-		NoiseWrapper* cloudNoise;
-
-		double surfaceHeight(double x, double y, double z);
-        RGBA surfaceColor(double x, double y, double z);
-        RGBA UL2RGBA(unsigned long dwColor);
-        XYZ sphereMap(double u, double v);
-        double smootherstep(double t);
-        RGBA normalRGBA(double x, double y, double z);
-        void setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color);
-	public:
-	    // TODO: move all this into private
 	    double surfaceSeed = 0;
 	    double landSeed = 1;
 	    double cloudSeed = 2;
@@ -57,9 +39,11 @@ class TextureGenerator {
         double surfacesFalloff = 1;
         double surfacesIntensity = 1;
 
-        // TODO: change the inputs for colors to only take a 4-element UInt8Array,
+        // TODO: change the inputs for colors to only take an unsigned long,
         // TODO: and use JS (https://github.com/colorjs/color-normalize) to do the
         // TODO: conversion before calling into this library
+
+        // TODO: consider only allowing RGB (and discarding the alpha channel)
         RGBA landColor1 = this->UL2RGBA(0xe6af7eff);
         RGBA landColor2 = this->UL2RGBA(0x007200ff);
         double landiScale = 2;
@@ -72,7 +56,7 @@ class TextureGenerator {
         double landsFalloff = 1;
         double landsIntensity = 1;
 
-        RGBA waterDeep = this->UL2RGBA(0x000055ff);
+        RGBA waterDeep = this->UL2RGBA(0x000033ff);
         RGBA waterShallow = this->UL2RGBA(0x0000ffff);
         double waterLevel = 0.68;
         double waterSpecular = 1;
@@ -91,6 +75,25 @@ class TextureGenerator {
         double cloudsIntensity = 1;
         double normalScale = 0.05;
 
+		unsigned char* diffuseBuffer;
+		unsigned char* normalBuffer;
+		unsigned char* specularBuffer;
+		unsigned char* cloudBuffer;
+
+		NoiseWrapper* surfaceNoise;
+		NoiseWrapper* landNoise;
+		NoiseWrapper* cloudNoise;
+
+		double surfaceHeight(double x, double y, double z);
+        RGBA surfaceColor(double x, double y, double z);
+        RGBA UL2RGBA(unsigned long dwColor);
+        XYZ sphereMap(double u, double v);
+        double smootherstep(double t);
+        RGBA normalRGBA(double x, double y, double z);
+        void setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color);
+        void ParseOptions(val options);
+        XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3);
+	public:
 		TextureGenerator(val options);
 
         void GenerateTextures();

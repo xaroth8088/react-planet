@@ -8,11 +8,9 @@
 #include <strings.h>
 #include <stdlib.h>
 
-#include "Eigen/Dense"
 #include "TextureGenerator.h"
 
 
-using namespace Eigen;
 using namespace emscripten;
 
 int fls(int mask) {
@@ -40,60 +38,22 @@ RGBA TextureGenerator::UL2RGBA(unsigned long dwColor) {
     return tmp;
 }
 
-TextureGenerator::TextureGenerator(val options) {
-    // Initialize the noise generators
+void TextureGenerator::ParseOptions(val options) {
     val opt = options["surfaceSeed"];
     if (this->isType(opt, "number")) {
         this->surfaceSeed = opt.as<double>();
     }
-    this->surfaceNoise = new NoiseWrapper(
-        this->surfaceSeed,
-        this->surfaceiScale,
-        this->surfaceiOctaves,
-        this->surfaceiFalloff,
-        this->surfaceiIntensity,
-        this->surfaceiRidginess,
-        this->surfacesScale,
-        this->surfacesOctaves,
-        this->surfacesFalloff,
-        this->surfacesIntensity
-    );
 
     opt = options["landSeed"];
     if (this->isType(opt, "number")) {
         this->landSeed = opt.as<double>();
     }
-    this->landNoise = new NoiseWrapper(
-        this->landSeed,
-        this->landiScale,
-        this->landiOctaves,
-        this->landiFalloff,
-        this->landiIntensity,
-        this->landiRidginess,
-        this->landsScale,
-        this->landsOctaves,
-        this->landsFalloff,
-        this->landsIntensity
-    );
 
     opt = options["cloudSeed"];
     if (this->isType(opt, "number")) {
         this->cloudSeed = opt.as<double>();
     }
-    this->cloudNoise = new NoiseWrapper(
-        this->cloudSeed,
-        this->cloudiScale,
-        this->cloudiOctaves,
-        this->cloudiFalloff,
-        this->cloudiIntensity,
-        this->cloudiRidginess,
-        this->cloudsScale,
-        this->cloudsOctaves,
-        this->cloudsFalloff,
-        this->cloudsIntensity
-    );
 
-    // Initialize the buffers
     opt = options["resolution"];
     if (this->isType(opt, "number")) {
         // bump up to the nearest power of 2
@@ -102,12 +62,12 @@ TextureGenerator::TextureGenerator(val options) {
         if (resolution > 0) {
             this->resolution = 1 << powerOfTwo;
         }
-    }
 
-    this->diffuseBuffer = new unsigned char[resolution * resolution * 4];
-    this->normalBuffer = new unsigned char[resolution * resolution * 4];
-    this->specularBuffer = new unsigned char[resolution * resolution * 4];
-    this->cloudBuffer = new unsigned char[resolution * resolution * 4];
+        // The minimum resolution is 2 (otherwise the height becomes 0 when we put the textures into the 2:1 aspect ratio)
+        if (this->resolution < 2) {
+            this->resolution = 2;
+        }
+    }
 
     // Initialize all other configuration
     opt = options["surfaceiScale"];
@@ -306,6 +266,56 @@ TextureGenerator::TextureGenerator(val options) {
     */
 }
 
+TextureGenerator::TextureGenerator(val options) {
+    this->ParseOptions(options);
+
+    // Initialize the noise
+    this->surfaceNoise = new NoiseWrapper(
+        this->surfaceSeed,
+        this->surfaceiScale,
+        this->surfaceiOctaves,
+        this->surfaceiFalloff,
+        this->surfaceiIntensity,
+        this->surfaceiRidginess,
+        this->surfacesScale,
+        this->surfacesOctaves,
+        this->surfacesFalloff,
+        this->surfacesIntensity
+    );
+
+    this->landNoise = new NoiseWrapper(
+        this->landSeed,
+        this->landiScale,
+        this->landiOctaves,
+        this->landiFalloff,
+        this->landiIntensity,
+        this->landiRidginess,
+        this->landsScale,
+        this->landsOctaves,
+        this->landsFalloff,
+        this->landsIntensity
+    );
+
+    this->cloudNoise = new NoiseWrapper(
+        this->cloudSeed,
+        this->cloudiScale,
+        this->cloudiOctaves,
+        this->cloudiFalloff,
+        this->cloudiIntensity,
+        this->cloudiRidginess,
+        this->cloudsScale,
+        this->cloudsOctaves,
+        this->cloudsFalloff,
+        this->cloudsIntensity
+    );
+
+    // Initialize the buffers
+    this->diffuseBuffer = new unsigned char[resolution * resolution * 2];
+    this->normalBuffer = new unsigned char[resolution * resolution * 2];
+    this->specularBuffer = new unsigned char[resolution * resolution * 2];
+    this->cloudBuffer = new unsigned char[resolution * resolution * 2];
+}
+
 double TextureGenerator::surfaceHeight(double x, double y, double z) {
     return this->surfaceNoise->sample(x, y, z);
 }
@@ -346,9 +356,24 @@ XYZ TextureGenerator::sphereMap(double u, double v) {
     return pos;
 }
 
+XYZ TextureGenerator::normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3) {
+    XYZ retval;
+
+    retval.x = (a2 * b3 - a3 * b2);
+    retval.y = -(a1 * b3 - a3 * b1);
+    retval.z = (a1 * b2 - a2 * b1);
+
+    double len = sqrt((retval.x * retval.x) + (retval.y * retval.y) + (retval.z * retval.z));
+    retval.x /= len;
+    retval.y /= len;
+    retval.z /= len;
+
+    return retval;
+}
+
 void TextureGenerator::GenerateTextures() {
     unsigned short int width = this->resolution;
-    unsigned short int height = this->resolution;
+    unsigned short int height = this->resolution / 2;   /* The texture should have a 2:1 aspect ratio to wrap properly */
 
     for( unsigned int x = 0; x < width; x++ ) {
         for( unsigned int y = 0; y < height; y++ ) {
@@ -381,19 +406,17 @@ void TextureGenerator::GenerateTextures() {
                 XYZ py = this->sphereMap(double(x) / (double(width) - 1.0), (double(y) + dr) / (double(height) - 1.0));
                 double cx = this->surfaceHeight(px.x, px.y, px.z);
                 double cy = this->surfaceHeight(py.x, py.y, py.z);
-                Vector3d n(
+
+                XYZ n = this->normalizedCrossProduct(
                     dr / (double(width) - 1.0),
                     0.0,
-                    (cx - c0)
-                );
-                Vector3d n2(
+                    (cx - c0),
                     0.0,
                     dr / (double(height) - 1.0),
                     (cy - c0)
                 );
-                n = n.cross(n2);
-                n.normalize();
-                RGBA normalPixel = this->normalRGBA(n.x(), -n.y(), n.z());
+
+                RGBA normalPixel = this->normalRGBA(n.x, -n.y, n.z);
                 this->setPixel(
                     this->normalBuffer,
                     x,
@@ -479,17 +502,17 @@ RGBA TextureGenerator::normalRGBA(double x, double y, double z) {
 }
 
 val TextureGenerator::getDiffuseTexture() {
-    return val(typed_memory_view(4 * this->resolution * this->resolution, this->diffuseBuffer));
+    return val(typed_memory_view(2 * this->resolution * this->resolution, this->diffuseBuffer));
 }
 
 val TextureGenerator::getNormalTexture() {
-    return val(typed_memory_view(4 * this->resolution * this->resolution, this->normalBuffer));
+    return val(typed_memory_view(2 * this->resolution * this->resolution, this->normalBuffer));
 }
 
 val TextureGenerator::getSpecularTexture() {
-    return val(typed_memory_view(4 * this->resolution * this->resolution, this->specularBuffer));
+    return val(typed_memory_view(2 * this->resolution * this->resolution, this->specularBuffer));
 }
 
 val TextureGenerator::getCloudTexture() {
-    return val(typed_memory_view(4 * this->resolution * this->resolution, this->cloudBuffer));
+    return val(typed_memory_view(2 * this->resolution * this->resolution, this->cloudBuffer));
 }
