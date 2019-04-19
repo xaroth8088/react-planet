@@ -64,6 +64,7 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * A small demo app to put onto github.io that lets people tinker with the parameters in realtime
 * Moving the texture generation entirely into WebAssembly, to reduce the back-and-forth to the noise generation library
 * Move texture generation into a web worker, so that it doesn't block the main thread
+* Most textures don't require the alpha channel; convert those to use `THREE.RGBFormat` (which will reduce the size of the textures)
 * Find and complete TODO's in the code
 
 # Credits

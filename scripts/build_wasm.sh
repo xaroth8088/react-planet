@@ -26,7 +26,3 @@ emcc \
     wasm/TextureGenerator.cpp \
     wasm/NoiseWrapper.cpp
 cp wasm_build/GenerateTexture.mjs lib/GenerateTexture.js
-
-
-# -Os \
-#    -g3 \

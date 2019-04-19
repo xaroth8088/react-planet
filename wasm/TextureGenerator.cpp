@@ -30,7 +30,7 @@ int fls(int mask) {
 RGBA TextureGenerator::UL2RGBA(unsigned long dwColor) {
     RGBA tmp;
 
-    tmp.a = dwColor & 0xFF; dwColor >>= 8;
+    tmp.a = 255;    // Intentionally discarding alpha channel
     tmp.b = dwColor & 0xFF; dwColor >>= 8;
     tmp.g = dwColor & 0xFF; dwColor >>= 8;
     tmp.r = dwColor & 0xFF;
@@ -116,13 +116,13 @@ void TextureGenerator::ParseOptions(val options) {
     }
 
     opt = options["landColor1"];
-    if (this->isType(opt, "string")) {
-        this->landColor1 = this->UL2RGBA(std::strtoul(opt.as<std::string>().c_str(), nullptr, 16));
+    if (this->isType(opt, "number")) {
+        this->landColor1 = UL2RGBA(opt.as<int>());
     }
 
     opt = options["landColor2"];
-    if (this->isType(opt, "string")) {
-        this->landColor2 = this->UL2RGBA(std::strtoul(opt.as<std::string>().c_str(), nullptr, 16));
+    if (this->isType(opt, "number")) {
+        this->landColor2 = UL2RGBA(opt.as<int>());
     }
 
     opt = options["landiScale"];
@@ -171,13 +171,13 @@ void TextureGenerator::ParseOptions(val options) {
     }
 
     opt = options["waterDeep"];
-    if (this->isType(opt, "string")) {
-        this->waterDeep = this->UL2RGBA(std::strtoul(opt.as<std::string>().c_str(), nullptr, 16));
+    if (this->isType(opt, "number")) {
+        this->waterDeep = UL2RGBA(opt.as<int>());
     }
 
     opt = options["waterShallow"];
-    if (this->isType(opt, "string")) {
-        this->waterShallow = this->UL2RGBA(std::strtoul(opt.as<std::string>().c_str(), nullptr, 16));
+    if (this->isType(opt, "number")) {
+        this->waterShallow = UL2RGBA(opt.as<int>());
     }
 
     opt = options["waterLevel"];
@@ -196,8 +196,8 @@ void TextureGenerator::ParseOptions(val options) {
     }
 
     opt = options["cloudColor"];
-    if (this->isType(opt, "string")) {
-        this->cloudColor = this->UL2RGBA(std::strtoul(opt.as<std::string>().c_str(), nullptr, 16));
+    if (this->isType(opt, "number")) {
+        this->cloudColor = UL2RGBA(opt.as<int>());
     }
 
     opt = options["cloudOpacity"];

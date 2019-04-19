@@ -39,13 +39,8 @@ class TextureGenerator {
         double surfacesFalloff = 1;
         double surfacesIntensity = 1;
 
-        // TODO: change the inputs for colors to only take an unsigned long,
-        // TODO: and use JS (https://github.com/colorjs/color-normalize) to do the
-        // TODO: conversion before calling into this library
-
-        // TODO: consider only allowing RGB (and discarding the alpha channel)
-        RGBA landColor1 = this->UL2RGBA(0xe6af7eff);
-        RGBA landColor2 = this->UL2RGBA(0x007200ff);
+        RGBA landColor1 = this->UL2RGBA(0xe6af7e);
+        RGBA landColor2 = this->UL2RGBA(0x007200);
         double landiScale = 2;
         unsigned char landiOctaves = 1;
         double landiFalloff = 1;
@@ -56,13 +51,13 @@ class TextureGenerator {
         double landsFalloff = 1;
         double landsIntensity = 1;
 
-        RGBA waterDeep = this->UL2RGBA(0x000033ff);
-        RGBA waterShallow = this->UL2RGBA(0x0000ffff);
+        RGBA waterDeep = this->UL2RGBA(0x000033);
+        RGBA waterShallow = this->UL2RGBA(0x0000ff);
         double waterLevel = 0.68;
         double waterSpecular = 1;
         double waterFalloff = 1;
 
-        RGBA cloudColor = this->UL2RGBA(0xffffffff);
+        RGBA cloudColor = this->UL2RGBA(0xffffff);
         double cloudOpacity = 0.75;
         double cloudiScale = 0.5;
         unsigned char cloudiOctaves = 2;
