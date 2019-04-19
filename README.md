@@ -65,6 +65,7 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * Moving the texture generation entirely into WebAssembly, to reduce the back-and-forth to the noise generation library
 * Move texture generation into a web worker, so that it doesn't block the main thread
 * Most textures don't require the alpha channel; convert those to use `THREE.RGBFormat` (which will reduce the size of the textures)
+* Move emscripten to happen via a Docker container, instead of assuming it's in a sibling directory
 * Find and complete TODO's in the code
 
 # Credits
