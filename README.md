@@ -68,6 +68,13 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * Move emscripten to happen via a Docker container, instead of assuming it's in a sibling directory
 * Find and complete TODO's in the code
 
+# Developing
+```
+$ yarn build:wasm   // Assumes you've got emsdk in a sibling directory to this package's source
+$ yarn build:watch  // Development build, with file watching
+$ yarn build        // Production build
+```
+
 # Credits
 Based on the wonderful work of [wwwtyro](https://github.com/wwwtyro/procedural.js).
 
