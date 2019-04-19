@@ -65,3 +65,4 @@ build/
 node_modules/
 *.log
 .idea/
+wasm_build/

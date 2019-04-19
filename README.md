@@ -63,11 +63,19 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * Documentation for the various properties
 * A small demo app to put onto github.io that lets people tinker with the parameters in realtime
 * Moving the texture generation entirely into WebAssembly, to reduce the back-and-forth to the noise generation library
-* A fork of the noise generation library that only includes the bare minimum required.
-* Conversion of the noise generation algorithm to OpenSimplex
 * Move texture generation into a web worker, so that it doesn't block the main thread
+* Most textures don't require the alpha channel; convert those to use `THREE.RGBFormat` (which will reduce the size of the textures)
+* Move emscripten to happen via a Docker container, instead of assuming it's in a sibling directory
 * Find and complete TODO's in the code
+
+# Developing
+```
+$ yarn build:wasm   // Assumes you've got emsdk in a sibling directory to this package's source
+$ yarn build:watch  // Development build, with file watching
+$ yarn build        // Production build
+```
 
 # Credits
 Based on the wonderful work of [wwwtyro](https://github.com/wwwtyro/procedural.js).
-Uses WebAssembly for noise generation, courtesy of [Markyparky56](https://github.com/Markyparky56/WasmNoise).
+
+C port of OpenSimplex courtesy of [deerel](https://github.com/deerel/OpenSimplexNoise).
