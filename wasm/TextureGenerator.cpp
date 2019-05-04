@@ -251,7 +251,6 @@ void TextureGenerator::ParseOptions(val options) {
     }
 
 /*
-    // TODO: callback for when texture generation is complete; this permits us to wrap it all in a promise over in JS-land
     val optComplete = options["complete"];
     if (this->isType(optComplete, "function"))
     {

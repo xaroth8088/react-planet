@@ -8,7 +8,7 @@ function ColorControl({
     return (
         <div className="control">
             <div className="control__label">
-                <Tooltip content={tooltip}>
+                <Tooltip content={tooltip} placement="right">
                     {name}
                 </Tooltip>
             </div>

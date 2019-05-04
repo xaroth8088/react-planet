@@ -66,7 +66,7 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 * Move texture generation into a web worker, so that it doesn't block the main thread
 * Most textures don't require the alpha channel; convert those to use `THREE.RGBFormat` (which will reduce the size of the textures)
 * Move emscripten to happen via a Docker container, instead of assuming it's in a sibling directory
-* Find and complete TODO's in the code
+* Complete TODO's in TODO.md
 
 # Developing
 ```

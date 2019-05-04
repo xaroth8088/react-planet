@@ -7,14 +7,6 @@ import ColorControl from './ColorControl';
 import './Controls.css';
 import SliderControl from './SliderControl';
 
-/*
-TODO:
-    * De-bounce changes
-    * BUG IN LIBRARY: isn't freeing memory well?
-    * OPTIMIZATION IN LIBRARY: ensure that we're not loading the library more than once
-    * BUG IN LIBRARY: doesn't automatically redraw when props change
- */
-
 function Controls({
     normalScale, setNormalScale,
     resolution, setResolution,
@@ -67,7 +59,7 @@ function Controls({
         <div className="controls">
             <div className="control">
                 <div className="control__label">
-                    <Tooltip content="Whether the planet will spin around or not">
+                    <Tooltip content="Whether the planet will spin around or not" placement="right">
                         Animate
                     </Tooltip>
                 </div>
@@ -87,7 +79,7 @@ function Controls({
             </div>
             <div className="control">
                 <div className="control__label">
-                    <Tooltip content="Higher numbers take longer to generate, but look better.">
+                    <Tooltip content="Higher numbers take longer to generate, but look better." placement="right">
                         Texture Resolution:
                     </Tooltip>
                 </div>
@@ -124,7 +116,7 @@ function Controls({
                 </div>
                 <div className="control">
                     <div className="control__label">
-                        <Tooltip content="Random number generator seed">
+                        <Tooltip content="Random number generator seed" placement="right">
                             Seed
                         </Tooltip>
                     </div>
@@ -231,7 +223,7 @@ function Controls({
                 </div>
                 <div className="control">
                     <div className="control__label">
-                        <Tooltip content="Random number generator seed">
+                        <Tooltip content="Random number generator seed" placement="right">
                             Seed
                         </Tooltip>
                     </div>
@@ -391,7 +383,7 @@ function Controls({
                 </div>
                 <div className="control">
                     <div className="control__label">
-                        <Tooltip content="Random number generator seed">
+                        <Tooltip content="Random number generator seed" placement="right">
                             Seed
                         </Tooltip>
                     </div>
