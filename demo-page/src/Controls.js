@@ -1,15 +1,14 @@
+import * as PropTypes from 'prop-types';
 import 'rc-slider/assets/index.css';
 import React from 'react';
 import Tooltip from 'react-simple-tooltip';
+import ColorControl from './ColorControl';
 
 import './Controls.css';
-import ColorControl from './ColorControl';
 import SliderControl from './SliderControl';
 
 /*
 TODO:
-    * Color controls aren't doing the right thing
-    * All controls
     * De-bounce changes
     * BUG IN LIBRARY: isn't freeing memory well?
     * OPTIMIZATION IN LIBRARY: ensure that we're not loading the library more than once
@@ -17,39 +16,52 @@ TODO:
  */
 
 function Controls({
-                      resolution, setResolution,
-                      animate, setAnimate,
+    normalScale, setNormalScale,
+    resolution, setResolution,
+    animate, setAnimate,
 
-                      surfaceSeed, setSurfaceSeed,
-                      surfaceiScale, setSurfaceiScale,
-                      surfaceiOctaves, setSurfaceiOctaves,
-                      surfaceiFalloff, setSurfaceiFalloff,
-                      surfaceiIntensity, setSurfaceiIntensity,
-                      surfaceiRidginess, setSurfaceiRidginess,
-                      surfacesScale, setSurfacesScale,
-                      surfacesOctaves, setSurfacesOctaves,
-                      surfacesFalloff, setSurfacesFalloff,
-                      surfacesIntensity, setSurfacesIntensity,
+    surfaceSeed, setSurfaceSeed,
+    surfaceiScale, setSurfaceiScale,
+    surfaceiOctaves, setSurfaceiOctaves,
+    surfaceiFalloff, setSurfaceiFalloff,
+    surfaceiIntensity, setSurfaceiIntensity,
+    surfaceiRidginess, setSurfaceiRidginess,
+    surfacesScale, setSurfacesScale,
+    surfacesOctaves, setSurfacesOctaves,
+    surfacesFalloff, setSurfacesFalloff,
+    surfacesIntensity, setSurfacesIntensity,
 
-                      landColor1, setLandColor1,
-                      landColor2, setLandColor2,
-                      landSeed, setLandSeed,
-                      landiScale, setLandiScale,
-                      landiOctaves, setLandiOctaves,
-                      landiFalloff, setLandiFalloff,
-                      landiIntensity, setLandiIntensity,
-                      landiRidginess, setLandiRidginess,
-                      landsScale, setLandsScale,
-                      landsOctaves, setLandsOctaves,
-                      landsFalloff, setLandsFalloff,
-                      landsIntensity, setLandsIntensity,
+    landSeed, setLandSeed,
+    landColor1, setLandColor1,
+    landColor2, setLandColor2,
+    landiScale, setLandiScale,
+    landiOctaves, setLandiOctaves,
+    landiFalloff, setLandiFalloff,
+    landiIntensity, setLandiIntensity,
+    landiRidginess, setLandiRidginess,
+    landsScale, setLandsScale,
+    landsOctaves, setLandsOctaves,
+    landsFalloff, setLandsFalloff,
+    landsIntensity, setLandsIntensity,
 
-                      waterDeep, setWaterDeep,
-                      waterShallow, setWaterShallow,
-                      waterLevel, setWaterLevel,
-                      waterSpecular, setWaterSpecular,
-                      waterFalloff, setWaterFalloff,
+    waterDeep, setWaterDeep,
+    waterShallow, setWaterShallow,
+    waterLevel, setWaterLevel,
+    waterSpecular, setWaterSpecular,
+    waterFalloff, setWaterFalloff,
 
+    cloudSeed, setCloudSeed,
+    cloudColor, setCloudColor,
+    cloudOpacity, setCloudOpacity,
+    cloudiScale, setCloudiScale,
+    cloudiOctaves, setCloudiOctaves,
+    cloudiFalloff, setCloudiFalloff,
+    cloudiIntensity, setCloudiIntensity,
+    cloudiRidginess, setCloudiRidginess,
+    cloudsScale, setCloudsScale,
+    cloudsOctaves, setCloudsOctaves,
+    cloudsFalloff, setCloudsFalloff,
+    cloudsIntensity, setCloudsIntensity
 }) {
     return (
         <div className="controls">
@@ -94,6 +106,15 @@ function Controls({
                     </select>
                 </div>
             </div>
+            <SliderControl
+                name="normalScale"
+                tooltip="Affects lighting of the terrain"
+                min={0}
+                max={1}
+                step={0.01}
+                value={normalScale}
+                onChange={setNormalScale}
+            />
             <div className="control-group">
                 <div className="control-group__header">
                     Surface Noise
@@ -240,7 +261,7 @@ function Controls({
                 />
                 <SliderControl
                     name="iScale"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -249,7 +270,7 @@ function Controls({
                 />
                 <SliderControl
                     name="iOctaves"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={16}
                     step={1}
@@ -258,7 +279,7 @@ function Controls({
                 />
                 <SliderControl
                     name="iFalloff"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -267,7 +288,7 @@ function Controls({
                 />
                 <SliderControl
                     name="iIntensity"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -276,7 +297,7 @@ function Controls({
                 />
                 <SliderControl
                     name="iRidginess"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -285,7 +306,7 @@ function Controls({
                 />
                 <SliderControl
                     name="sScale"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -294,7 +315,7 @@ function Controls({
                 />
                 <SliderControl
                     name="sOctaves"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={16}
                     step={1}
@@ -303,7 +324,7 @@ function Controls({
                 />
                 <SliderControl
                     name="sFalloff"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -312,7 +333,7 @@ function Controls({
                 />
                 <SliderControl
                     name="sIntensity"
-                    tooltip=""
+                    tooltip="???"
                     min={0}
                     max={5}
                     step={0.1}
@@ -364,24 +385,218 @@ function Controls({
                     onChange={setWaterFalloff}
                 />
             </div>
-            <div>
-                normalScale: 0.05,
-
-                cloudSeed: null,
-                cloudColor: null,
-                cloudOpacity: null,
-                cloudiScale: null,
-                cloudiOctaves: null,
-                cloudiFalloff: null,
-                cloudiIntensity: null,
-                cloudiRidginess: null,
-                cloudsScale: null,
-                cloudsOctaves: null,
-                cloudsFalloff: null,
-                cloudsIntensity: null
+            <div className="control-group">
+                <div className="control-group__header">
+                    Clouds
+                </div>
+                <div className="control">
+                    <div className="control__label">
+                        <Tooltip content="Random number generator seed">
+                            Seed
+                        </Tooltip>
+                    </div>
+                    <div className="control__body">
+                        <input
+                            type="number"
+                            value={cloudSeed}
+                            onChange={
+                                (event) => {
+                                    setCloudSeed(event.target.value);
+                                }
+                            }
+                        />
+                    </div>
+                </div>
+                <ColorControl
+                    setColor={setCloudColor}
+                    color={cloudColor}
+                    name="Color"
+                    tooltip="The color of the clouds"
+                />
+                <SliderControl
+                    name="Opacity"
+                    tooltip="How see-through are the clouds?"
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    value={cloudOpacity}
+                    onChange={setCloudOpacity}
+                />
+                <SliderControl
+                    name="iScale"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudiScale}
+                    onChange={setCloudiScale}
+                />
+                <SliderControl
+                    name="iOctaves"
+                    tooltip="???"
+                    min={0}
+                    max={16}
+                    step={1}
+                    value={cloudiOctaves}
+                    onChange={setCloudiOctaves}
+                />
+                <SliderControl
+                    name="iFalloff"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudiFalloff}
+                    onChange={setCloudiFalloff}
+                />
+                <SliderControl
+                    name="iIntensity"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudiIntensity}
+                    onChange={setCloudiIntensity}
+                />
+                <SliderControl
+                    name="iRidginess"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudiRidginess}
+                    onChange={setCloudiRidginess}
+                />
+                <SliderControl
+                    name="sScale"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudsScale}
+                    onChange={setCloudsScale}
+                />
+                <SliderControl
+                    name="sOctaves"
+                    tooltip="???"
+                    min={0}
+                    max={16}
+                    step={1}
+                    value={cloudsOctaves}
+                    onChange={setCloudsOctaves}
+                />
+                <SliderControl
+                    name="sFalloff"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudsFalloff}
+                    onChange={setCloudsFalloff}
+                />
+                <SliderControl
+                    name="sIntensity"
+                    tooltip="???"
+                    min={0}
+                    max={5}
+                    step={0.1}
+                    value={cloudsIntensity}
+                    onChange={setCloudsIntensity}
+                />
             </div>
         </div>
     );
 }
+
+Controls.propTypes = {
+    normalScale: PropTypes.number.isRequired,
+    setNormalScale: PropTypes.number.isRequired,
+    resolution: PropTypes.number.isRequired,
+    setResolution: PropTypes.number.isRequired,
+    animate: PropTypes.number.isRequired,
+    setAnimate: PropTypes.number.isRequired,
+
+    surfaceSeed: PropTypes.number.isRequired,
+    setSurfaceSeed: PropTypes.number.isRequired,
+    surfaceiScale: PropTypes.number.isRequired,
+    setSurfaceiScale: PropTypes.number.isRequired,
+    surfaceiOctaves: PropTypes.number.isRequired,
+    setSurfaceiOctaves: PropTypes.number.isRequired,
+    surfaceiFalloff: PropTypes.number.isRequired,
+    setSurfaceiFalloff: PropTypes.number.isRequired,
+    surfaceiIntensity: PropTypes.number.isRequired,
+    setSurfaceiIntensity: PropTypes.number.isRequired,
+    surfaceiRidginess: PropTypes.number.isRequired,
+    setSurfaceiRidginess: PropTypes.number.isRequired,
+    surfacesScale: PropTypes.number.isRequired,
+    setSurfacesScale: PropTypes.number.isRequired,
+    surfacesOctaves: PropTypes.number.isRequired,
+    setSurfacesOctaves: PropTypes.number.isRequired,
+    surfacesFalloff: PropTypes.number.isRequired,
+    setSurfacesFalloff: PropTypes.number.isRequired,
+    surfacesIntensity: PropTypes.number.isRequired,
+    setSurfacesIntensity: PropTypes.number.isRequired,
+
+    landSeed: PropTypes.number.isRequired,
+    setLandSeed: PropTypes.number.isRequired,
+    landColor1: PropTypes.number.isRequired,
+    setLandColor1: PropTypes.number.isRequired,
+    landColor2: PropTypes.number.isRequired,
+    setLandColor2: PropTypes.number.isRequired,
+    landiScale: PropTypes.number.isRequired,
+    setLandiScale: PropTypes.number.isRequired,
+    landiOctaves: PropTypes.number.isRequired,
+    setLandiOctaves: PropTypes.number.isRequired,
+    landiFalloff: PropTypes.number.isRequired,
+    setLandiFalloff: PropTypes.number.isRequired,
+    landiIntensity: PropTypes.number.isRequired,
+    setLandiIntensity: PropTypes.number.isRequired,
+    landiRidginess: PropTypes.number.isRequired,
+    setLandiRidginess: PropTypes.number.isRequired,
+    landsScale: PropTypes.number.isRequired,
+    setLandsScale: PropTypes.number.isRequired,
+    landsOctaves: PropTypes.number.isRequired,
+    setLandsOctaves: PropTypes.number.isRequired,
+    landsFalloff: PropTypes.number.isRequired,
+    setLandsFalloff: PropTypes.number.isRequired,
+    landsIntensity: PropTypes.number.isRequired,
+    setLandsIntensity: PropTypes.number.isRequired,
+
+    waterDeep: PropTypes.number.isRequired,
+    setWaterDeep: PropTypes.number.isRequired,
+    waterShallow: PropTypes.number.isRequired,
+    setWaterShallow: PropTypes.number.isRequired,
+    waterLevel: PropTypes.number.isRequired,
+    setWaterLevel: PropTypes.number.isRequired,
+    waterSpecular: PropTypes.number.isRequired,
+    setWaterSpecular: PropTypes.number.isRequired,
+    waterFalloff: PropTypes.number.isRequired,
+    setWaterFalloff: PropTypes.number.isRequired,
+
+    cloudSeed: PropTypes.number.isRequired,
+    setCloudSeed: PropTypes.number.isRequired,
+    cloudColor: PropTypes.number.isRequired,
+    setCloudColor: PropTypes.number.isRequired,
+    cloudOpacity: PropTypes.number.isRequired,
+    setCloudOpacity: PropTypes.number.isRequired,
+    cloudiScale: PropTypes.number.isRequired,
+    setCloudiScale: PropTypes.number.isRequired,
+    cloudiOctaves: PropTypes.number.isRequired,
+    setCloudiOctaves: PropTypes.number.isRequired,
+    cloudiFalloff: PropTypes.number.isRequired,
+    setCloudiFalloff: PropTypes.number.isRequired,
+    cloudiIntensity: PropTypes.number.isRequired,
+    setCloudiIntensity: PropTypes.number.isRequired,
+    cloudiRidginess: PropTypes.number.isRequired,
+    setCloudiRidginess: PropTypes.number.isRequired,
+    cloudsScale: PropTypes.number.isRequired,
+    setCloudsScale: PropTypes.number.isRequired,
+    cloudsOctaves: PropTypes.number.isRequired,
+    setCloudsOctaves: PropTypes.number.isRequired,
+    cloudsFalloff: PropTypes.number.isRequired,
+    setCloudsFalloff: PropTypes.number.isRequired,
+    cloudsIntensity: PropTypes.number.isRequired,
+    setCloudsIntensity: PropTypes.number.isRequired
+};
 
 export default Controls;

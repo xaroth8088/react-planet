@@ -5,6 +5,7 @@ import './App.css';
 import Controls from './Controls';
 
 function App() {
+    const [normalScale, setNormalScale] = useState(0.05);
     const [resolution, setResolution] = useState(512);
     const [animate, setAnimate] = useState(true);
 
@@ -38,12 +39,27 @@ function App() {
     const [waterSpecular, setWaterSpecular] = useState(1);
     const [waterFalloff, setWaterFalloff] = useState(1);
 
+
+    const [cloudSeed, setCloudSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
+    const [cloudColor, setCloudColor] = useState('#ffffff');
+    const [cloudOpacity, setCloudOpacity] = useState(0.75);
+    const [cloudiScale, setCloudiScale] = useState(0.5);
+    const [cloudiOctaves, setCloudiOctaves] = useState(2);
+    const [cloudiFalloff, setCloudiFalloff] = useState(2);
+    const [cloudiIntensity, setCloudiIntensity] = useState(1.8);
+    const [cloudiRidginess, setCloudiRidginess] = useState(0);
+    const [cloudsScale, setCloudsScale] = useState(0.5);
+    const [cloudsOctaves, setCloudsOctaves] = useState(5);
+    const [cloudsFalloff, setCloudsFalloff] = useState(1);
+    const [cloudsIntensity, setCloudsIntensity] = useState(1);
+
     return (
         <div className="App">
             <Planet
                 key={uniqueId()}
 
                 className="planet"
+                normalScale={normalScale}
                 resolution={resolution}
                 animate={animate}
 
@@ -58,9 +74,9 @@ function App() {
                 surfacesFalloff={surfacesFalloff}
                 surfacesIntensity={surfacesIntensity}
 
+                landSeed={landSeed}
                 landColor1={landColor1}
                 landColor2={landColor2}
-                landSeed={landSeed}
                 landiScale={landiScale}
                 landiOctaves={landiOctaves}
                 landiFalloff={landiFalloff}
@@ -76,9 +92,24 @@ function App() {
                 waterLevel={waterLevel}
                 waterSpecular={waterSpecular}
                 waterFalloff={waterFalloff}
+
+                cloudSeed={cloudSeed}
+                cloudColor={cloudColor}
+                cloudOpacity={cloudOpacity}
+                cloudiScale={cloudiScale}
+                cloudiOctaves={cloudiOctaves}
+                cloudiFalloff={cloudiFalloff}
+                cloudiIntensity={cloudiIntensity}
+                cloudiRidginess={cloudiRidginess}
+                cloudsScale={cloudsScale}
+                cloudsOctaves={cloudsOctaves}
+                cloudsFalloff={cloudsFalloff}
+                cloudsIntensity={cloudsIntensity}
             />
             <div className="controls-container">
                 <Controls
+                    normalScale={normalScale}
+                    setNormalScale={setNormalScale}
                     resolution={resolution}
                     setResolution={setResolution}
                     animate={animate}
@@ -105,12 +136,12 @@ function App() {
                     surfacesIntensity={surfacesIntensity}
                     setSurfacesIntensity={setSurfacesIntensity}
 
+                    landSeed={landSeed}
+                    setLandSeed={setLandSeed}
                     landColor1={landColor1}
                     setLandColor1={setLandColor1}
                     landColor2={landColor2}
                     setLandColor2={setLandColor2}
-                    landSeed={landSeed}
-                    setLandSeed={setLandSeed}
                     landiScale={landiScale}
                     setLandiScale={setLandiScale}
                     landiOctaves={landiOctaves}
@@ -141,6 +172,30 @@ function App() {
                     waterFalloff={waterFalloff}
                     setWaterFalloff={setWaterFalloff}
 
+                    cloudSeed={cloudSeed}
+                    setCloudSeed={setCloudSeed}
+                    cloudColor={cloudColor}
+                    setCloudColor={setCloudColor}
+                    cloudOpacity={cloudOpacity}
+                    setCloudOpacity={setCloudOpacity}
+                    cloudiScale={cloudiScale}
+                    setCloudiScale={setCloudiScale}
+                    cloudiOctaves={cloudiOctaves}
+                    setCloudiOctaves={setCloudiOctaves}
+                    cloudiFalloff={cloudiFalloff}
+                    setCloudiFalloff={setCloudiFalloff}
+                    cloudiIntensity={cloudiIntensity}
+                    setCloudiIntensity={setCloudiIntensity}
+                    cloudiRidginess={cloudiRidginess}
+                    setCloudiRidginess={setCloudiRidginess}
+                    cloudsScale={cloudsScale}
+                    setCloudsScale={setCloudsScale}
+                    cloudsOctaves={cloudsOctaves}
+                    setCloudsOctaves={setCloudsOctaves}
+                    cloudsFalloff={cloudsFalloff}
+                    setCloudsFalloff={setCloudsFalloff}
+                    cloudsIntensity={cloudsIntensity}
+                    setCloudsIntensity={setCloudsIntensity}
                 />
             </div>
         </div>
