@@ -250,13 +250,7 @@ void TextureGenerator::ParseOptions(val options) {
         this->cloudsIntensity = opt.as<double>();
     }
 
-    opt = options["normalScale"];
-    if (this->isType(opt, "number")) {
-        this->normalScale = opt.as<double>();
-    }
-
 /*
-    // TODO: callback for when texture generation is complete; this permits us to wrap it all in a promise over in JS-land
     val optComplete = options["complete"];
     if (this->isType(optComplete, "function"))
     {

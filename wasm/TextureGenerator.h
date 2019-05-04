@@ -68,7 +68,6 @@ class TextureGenerator {
         unsigned char cloudsOctaves = 5;
         double cloudsFalloff = 1;
         double cloudsIntensity = 1;
-        double normalScale = 0.05;
 
 		unsigned char* diffuseBuffer;
 		unsigned char* normalBuffer;

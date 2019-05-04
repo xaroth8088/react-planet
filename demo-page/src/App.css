@@ -1,0 +1,23 @@
+.App {
+    text-align: center;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    background-image: url(seamless-starfield-texture.jpg);
+    background-size: contain;
+}
+
+.planet {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.controls-container {
+    flex: 1;
+    margin-left: 1rem;
+}

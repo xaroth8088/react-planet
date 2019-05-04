@@ -1,0 +1,57 @@
+.controls {
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 3px inset red;
+    margin: 100px 50px 100px 100px;
+    padding: 3rem;
+    border-radius: 10px;
+    height: 500px;
+    overflow: auto;
+}
+
+.control {
+    display: flex;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.control__label {
+    flex: 1;
+    font-weight: bold;
+    text-align: left;
+}
+
+.control__body {
+    flex: 4;
+}
+
+.control__body input, .control__body select {
+    width: 100%;
+}
+
+.control__value {
+    flex: 1;
+}
+
+.control-group {
+    border: 1px solid black;
+    padding: 1rem;
+    position: relative;
+    margin-top: 2rem;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 0.25rem;
+}
+
+.control-group__header {
+    position: absolute;
+    top: -1rem;
+    font-size: 1.25rem;
+    background-color: white;
+    border-radius: 0.25rem;
+    left: -1.25rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.control__label > div > div {
+    /* tooltip */
+    width: 20rem;
+}
