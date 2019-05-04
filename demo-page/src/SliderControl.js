@@ -4,7 +4,9 @@ import Slider from 'rc-slider/lib/Slider';
 import Tooltip from 'react-simple-tooltip';
 
 
-function SliderControl({ tooltip, name, step, min, max, value, onChange }) {
+function SliderControl({
+    tooltip, name, step, min, max, value, onChange
+}) {
     return (
         <div className="control">
             <div className="control__label">

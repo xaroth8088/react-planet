@@ -3,8 +3,8 @@ import * as PropTypes from 'prop-types';
 import Tooltip from 'react-simple-tooltip';
 
 function ColorControl({
-                          name, tooltip, color, setColor
-                      }) {
+    name, tooltip, color, setColor
+}) {
     return (
         <div className="control">
             <div className="control__label">
