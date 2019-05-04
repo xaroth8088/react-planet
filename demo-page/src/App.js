@@ -6,7 +6,7 @@ import Controls from './Controls';
 
 function App() {
     const [normalScale, setNormalScale] = useState(0.05);
-    const [resolution, setResolution] = useState(512);
+    const [resolution, setResolution] = useState(256);
     const [animate, setAnimate] = useState(true);
 
     const [surfaceSeed, setSurfaceSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
@@ -24,11 +24,11 @@ function App() {
     const [landColor2, setLandColor2] = useState('#007200');
     const [landSeed, setLandSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
     const [landiScale, setLandiScale] = useState(2);
-    const [landiOctaves, setLandiOctaves] = useState(8);
+    const [landiOctaves, setLandiOctaves] = useState(1);
     const [landiFalloff, setLandiFalloff] = useState(1);
     const [landiIntensity, setLandiIntensity] = useState(1);
-    const [landiRidginess, setLandiRidginess] = useState(0.5);
-    const [landsScale, setLandsScale] = useState(1);
+    const [landiRidginess, setLandiRidginess] = useState(0);
+    const [landsScale, setLandsScale] = useState(2);
     const [landsOctaves, setLandsOctaves] = useState(0);
     const [landsFalloff, setLandsFalloff] = useState(1);
     const [landsIntensity, setLandsIntensity] = useState(1);

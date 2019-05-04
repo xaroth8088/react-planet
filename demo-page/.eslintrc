@@ -59,7 +59,8 @@
     "react/jsx-filename-extension": 0
   },
   "plugins": [
-    "react"
+    "react",
+    "react-hooks"
   ],
   "globals": {
     "__DEVSERVER__": true,
