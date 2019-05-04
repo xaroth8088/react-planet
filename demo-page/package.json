@@ -19,7 +19,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -32,6 +34,8 @@
   ],
   "devDependencies": {
     "eslint": "^5.16.0",
-    "eslint-plugin-react-hooks": "^1.6.0"
-  }
+    "eslint-plugin-react-hooks": "^1.6.0",
+    "gh-pages": "^2.0.1"
+  },
+  "homepage": "http://xaroth8088.github.io/react-planet"
 }

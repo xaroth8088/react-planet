@@ -1,4 +1,4 @@
-Library 
+# Library 
 * A more sophisticated load-once approach for the wasm library
 * BUG IN LIBRARY: isn't freeing memory well?
 * OPTIMIZATION IN LIBRARY: ensure that we're not loading the library more than once
@@ -14,7 +14,7 @@ Library
 * Generating the textures can be time-consuming, so explore options to avoid locking the UI (promise + wireframe placeholder?  Progressive texture rendering?)
 * Add params for planet and cloud rotation speeds
 * Add params for planet and cloud rotation speeds on the x-axis
-
+* Most textures don't require the alpha channel; convert those to use `THREE.RGBFormat` (which will reduce the size of the textures)
  
-Demo Page
+# Demo Page
 * De-bounce changes in controls

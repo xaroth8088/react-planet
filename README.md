@@ -1,6 +1,9 @@
 # react-planet
 Procedurally generated planets in a React component.
 
+# Demo
+https://xaroth8088.github.io/react-planet/
+
 # Usage
 ```jsx
 import Planet from '@xaroth8088/react-planet';
@@ -61,10 +64,6 @@ Pull requests are welcome!
 
 Not sure where to start contributing? Here's a few areas that would be helpful:
 * Documentation for the various properties
-* A small demo app to put onto github.io that lets people tinker with the parameters in realtime
-* Moving the texture generation entirely into WebAssembly, to reduce the back-and-forth to the noise generation library
-* Move texture generation into a web worker, so that it doesn't block the main thread
-* Most textures don't require the alpha channel; convert those to use `THREE.RGBFormat` (which will reduce the size of the textures)
 * Move emscripten to happen via a Docker container, instead of assuming it's in a sibling directory
 * Complete TODO's in TODO.md
 
