@@ -1,10 +1,10 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "3b221dbf0643a0e7931eabaa7305785d",
+    "revision": "af9406b5d51edb269532199b0c97e24d",
     "url": "/react-planet/index.html"
   },
   {
-    "revision": "429399d934d105567027",
+    "revision": "1d20f592f5ae16967f54",
     "url": "/react-planet/static/css/2.509658c0.chunk.css"
   },
   {
@@ -12,8 +12,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/react-planet/static/css/main.72b18f0b.chunk.css"
   },
   {
-    "revision": "429399d934d105567027",
-    "url": "/react-planet/static/js/2.08636f2c.chunk.js"
+    "revision": "1d20f592f5ae16967f54",
+    "url": "/react-planet/static/js/2.6334b123.chunk.js"
   },
   {
     "revision": "26cf43cf4f3bbdfd78d4",
