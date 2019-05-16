@@ -78,16 +78,11 @@ class TextureGenerator {
 		NoiseWrapper* landNoise;
 		NoiseWrapper* cloudNoise;
 
-		double surfaceHeight(double x, double y, double z);
         RGB surfaceColor(double x, double y, double z);
         RGB UL2RGB(unsigned long dwColor);
-        XYZ sphereMap(double u, double v);
-        double smootherstep(double t);
-        RGB normalRGB(double x, double y, double z);
         void setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGB color);
         void setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity);
         void ParseOptions(val options);
-        XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3);
         int getTextureSize(bool isClouds);
 
 	public:

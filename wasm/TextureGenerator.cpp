@@ -38,6 +38,100 @@ RGB TextureGenerator::UL2RGB(unsigned long dwColor) {
     return tmp;
 }
 
+XYZ sphereMap(double u, double v) {
+    /*  Returns the 3D cartesian coordinate of a point on
+        a sphere that corresponds to the given u,v coordinate. */
+    double azimuth = 2.0 * M_PI * u;
+    double inclination = M_PI * v;
+
+    XYZ pos;
+
+    pos.x = sin(inclination) * cos(azimuth);
+    pos.y = sin(inclination) * sin(azimuth);
+    pos.z = cos(inclination);
+
+    return pos;
+}
+
+XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3) {
+    XYZ retval;
+
+    retval.x = (a2 * b3 - a3 * b2);
+    retval.y = -(a1 * b3 - a3 * b1);
+    retval.z = (a1 * b2 - a2 * b1);
+
+    double len = sqrt((retval.x * retval.x) + (retval.y * retval.y) + (retval.z * retval.z));
+    retval.x /= len;
+    retval.y /= len;
+    retval.z /= len;
+
+    return retval;
+}
+
+RGB normalRGB(double x, double y, double z) {
+    RGB color;
+
+    color.r = (x / 2.0 + 0.5) * 255;
+    color.g = (y / 2.0 + 0.5) * 255;
+    color.b = (z / 2.0 + 0.5) * 255;
+
+    return color;
+}
+
+double smootherstep(double t) {
+    return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
+}
+
+TextureGenerator::TextureGenerator(val options) {
+    ParseOptions(options);
+
+    // Initialize the noise
+    surfaceNoise = new NoiseWrapper(
+        surfaceSeed,
+        surfaceiScale,
+        surfaceiOctaves,
+        surfaceiFalloff,
+        surfaceiIntensity,
+        surfaceiRidginess,
+        surfacesScale,
+        surfacesOctaves,
+        surfacesFalloff,
+        surfacesIntensity
+    );
+
+    landNoise = new NoiseWrapper(
+        landSeed,
+        landiScale,
+        landiOctaves,
+        landiFalloff,
+        landiIntensity,
+        landiRidginess,
+        landsScale,
+        landsOctaves,
+        landsFalloff,
+        landsIntensity
+    );
+
+    cloudNoise = new NoiseWrapper(
+        cloudSeed,
+        cloudiScale,
+        cloudiOctaves,
+        cloudiFalloff,
+        cloudiIntensity,
+        cloudiRidginess,
+        cloudsScale,
+        cloudsOctaves,
+        cloudsFalloff,
+        cloudsIntensity
+    );
+
+    // Initialize the buffers
+    diffuseBuffer = new unsigned char[getTextureSize(false)];
+    normalBuffer = new unsigned char[getTextureSize(false)];
+    specularBuffer = new unsigned char[getTextureSize(false)];
+    cloudBuffer = new unsigned char[getTextureSize(true)];
+}
+
 void TextureGenerator::ParseOptions(val options) {
     val opt = options["surfaceSeed"];
     if (isType(opt, "number")) {
@@ -260,66 +354,12 @@ void TextureGenerator::ParseOptions(val options) {
     */
 }
 
-TextureGenerator::TextureGenerator(val options) {
-    ParseOptions(options);
-
-    // Initialize the noise
-    surfaceNoise = new NoiseWrapper(
-        surfaceSeed,
-        surfaceiScale,
-        surfaceiOctaves,
-        surfaceiFalloff,
-        surfaceiIntensity,
-        surfaceiRidginess,
-        surfacesScale,
-        surfacesOctaves,
-        surfacesFalloff,
-        surfacesIntensity
-    );
-
-    landNoise = new NoiseWrapper(
-        landSeed,
-        landiScale,
-        landiOctaves,
-        landiFalloff,
-        landiIntensity,
-        landiRidginess,
-        landsScale,
-        landsOctaves,
-        landsFalloff,
-        landsIntensity
-    );
-
-    cloudNoise = new NoiseWrapper(
-        cloudSeed,
-        cloudiScale,
-        cloudiOctaves,
-        cloudiFalloff,
-        cloudiIntensity,
-        cloudiRidginess,
-        cloudsScale,
-        cloudsOctaves,
-        cloudsFalloff,
-        cloudsIntensity
-    );
-
-    // Initialize the buffers
-    diffuseBuffer = new unsigned char[getTextureSize(false)];
-    normalBuffer = new unsigned char[getTextureSize(false)];
-    specularBuffer = new unsigned char[getTextureSize(false)];
-    cloudBuffer = new unsigned char[getTextureSize(true)];
-}
-
 int TextureGenerator::getTextureSize(bool isClouds) {
     if (isClouds) {
         return resolution * resolution * 2; // Technically: resolutionX * (resolutionY / 2) * 4 bytes
     }
 
     return resolution * (resolution / 2) * 3; // Technically: resolutionX * (resolutionY / 2) * 3 bytes
-}
-
-double TextureGenerator::surfaceHeight(double x, double y, double z) {
-    return surfaceNoise->sample(x, y, z);
 }
 
 RGB TextureGenerator::surfaceColor(double x, double y, double z) {
@@ -342,36 +382,6 @@ RGB TextureGenerator::surfaceColor(double x, double y, double z) {
     return retval;
 }
 
-XYZ TextureGenerator::sphereMap(double u, double v) {
-    /*  Returns the 3D cartesian coordinate of a point on
-        a sphere that corresponds to the given u,v coordinate. */
-    double azimuth = 2.0 * M_PI * u;
-    double inclination = M_PI * v;
-
-    XYZ pos;
-
-    pos.x = sin(inclination) * cos(azimuth);
-    pos.y = sin(inclination) * sin(azimuth);
-    pos.z = cos(inclination);
-
-    return pos;
-}
-
-XYZ TextureGenerator::normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3) {
-    XYZ retval;
-
-    retval.x = (a2 * b3 - a3 * b2);
-    retval.y = -(a1 * b3 - a3 * b1);
-    retval.z = (a1 * b2 - a2 * b1);
-
-    double len = sqrt((retval.x * retval.x) + (retval.y * retval.y) + (retval.z * retval.z));
-    retval.x /= len;
-    retval.y /= len;
-    retval.z /= len;
-
-    return retval;
-}
-
 void TextureGenerator::GenerateTextures() {
     unsigned short int width = resolution;
     unsigned short int height = resolution / 2;   /* The texture should have a 2:1 aspect ratio to wrap properly */
@@ -379,7 +389,7 @@ void TextureGenerator::GenerateTextures() {
     for( unsigned int x = 0; x < width; x++ ) {
         for( unsigned int y = 0; y < height; y++ ) {
             XYZ p0 = sphereMap(double(x) / (width - 1.0), double(y) / (height - 1.0));
-            double c0 = surfaceHeight(p0.x, p0.y, p0.z);
+            double c0 = surfaceNoise->sample(p0.x, p0.y, p0.z);
             double dr = 0.01;
             if (c0 > waterLevel) {
                 RGB c = surfaceColor(p0.x, p0.y, p0.z);
@@ -404,8 +414,8 @@ void TextureGenerator::GenerateTextures() {
 
                 XYZ px = sphereMap((double(x) + dr) / (double(width) - 1.0), double(y) / (double(height) - 1.0));
                 XYZ py = sphereMap(double(x) / (double(width) - 1.0), (double(y) + dr) / (double(height) - 1.0));
-                double cx = surfaceHeight(px.x, px.y, px.z);
-                double cy = surfaceHeight(py.x, py.y, py.z);
+                double cx = surfaceNoise->sample(px.x, px.y, px.z);
+                double cy = surfaceNoise->sample(py.x, py.y, py.z);
 
                 XYZ n = normalizedCrossProduct(
                     dr / (double(width) - 1.0),
@@ -491,20 +501,6 @@ void TextureGenerator::setPixel(unsigned char* buffer, unsigned int x, unsigned 
     buffer[index + 0] = color.r;
     buffer[index + 1] = color.g;
     buffer[index + 2] = color.b;
-}
-
-double TextureGenerator::smootherstep(double t) {
-    return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
-}
-
-RGB TextureGenerator::normalRGB(double x, double y, double z) {
-    RGB color;
-
-    color.r = (x / 2.0 + 0.5) * 255;
-    color.g = (y / 2.0 + 0.5) * 255;
-    color.b = (z / 2.0 + 0.5) * 255;
-
-    return color;
 }
 
 val TextureGenerator::getDiffuseTexture() {
