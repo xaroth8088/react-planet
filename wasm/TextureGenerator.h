@@ -85,8 +85,11 @@ class TextureGenerator {
         double smootherstep(double t);
         RGBA normalRGBA(double x, double y, double z);
         void setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color);
+        void setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color);
         void ParseOptions(val options);
         XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3);
+        int getTextureSize(bool isClouds);
+
 	public:
 		TextureGenerator(val options);
 

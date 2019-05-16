@@ -261,53 +261,61 @@ void TextureGenerator::ParseOptions(val options) {
 }
 
 TextureGenerator::TextureGenerator(val options) {
-    this->ParseOptions(options);
+    ParseOptions(options);
 
     // Initialize the noise
-    this->surfaceNoise = new NoiseWrapper(
-        this->surfaceSeed,
-        this->surfaceiScale,
-        this->surfaceiOctaves,
-        this->surfaceiFalloff,
-        this->surfaceiIntensity,
-        this->surfaceiRidginess,
-        this->surfacesScale,
-        this->surfacesOctaves,
-        this->surfacesFalloff,
-        this->surfacesIntensity
+    surfaceNoise = new NoiseWrapper(
+        surfaceSeed,
+        surfaceiScale,
+        surfaceiOctaves,
+        surfaceiFalloff,
+        surfaceiIntensity,
+        surfaceiRidginess,
+        surfacesScale,
+        surfacesOctaves,
+        surfacesFalloff,
+        surfacesIntensity
     );
 
-    this->landNoise = new NoiseWrapper(
-        this->landSeed,
-        this->landiScale,
-        this->landiOctaves,
-        this->landiFalloff,
-        this->landiIntensity,
-        this->landiRidginess,
-        this->landsScale,
-        this->landsOctaves,
-        this->landsFalloff,
-        this->landsIntensity
+    landNoise = new NoiseWrapper(
+        landSeed,
+        landiScale,
+        landiOctaves,
+        landiFalloff,
+        landiIntensity,
+        landiRidginess,
+        landsScale,
+        landsOctaves,
+        landsFalloff,
+        landsIntensity
     );
 
-    this->cloudNoise = new NoiseWrapper(
-        this->cloudSeed,
-        this->cloudiScale,
-        this->cloudiOctaves,
-        this->cloudiFalloff,
-        this->cloudiIntensity,
-        this->cloudiRidginess,
-        this->cloudsScale,
-        this->cloudsOctaves,
-        this->cloudsFalloff,
-        this->cloudsIntensity
+    cloudNoise = new NoiseWrapper(
+        cloudSeed,
+        cloudiScale,
+        cloudiOctaves,
+        cloudiFalloff,
+        cloudiIntensity,
+        cloudiRidginess,
+        cloudsScale,
+        cloudsOctaves,
+        cloudsFalloff,
+        cloudsIntensity
     );
 
     // Initialize the buffers
-    this->diffuseBuffer = new unsigned char[resolution * resolution * 2];
-    this->normalBuffer = new unsigned char[resolution * resolution * 2];
-    this->specularBuffer = new unsigned char[resolution * resolution * 2];
-    this->cloudBuffer = new unsigned char[resolution * resolution * 2];
+    diffuseBuffer = new unsigned char[getTextureSize(false)];
+    normalBuffer = new unsigned char[getTextureSize(false)];
+    specularBuffer = new unsigned char[getTextureSize(false)];
+    cloudBuffer = new unsigned char[getTextureSize(true)];
+}
+
+int TextureGenerator::getTextureSize(bool isClouds) {
+    if (isClouds) {
+        return resolution * resolution * 2; // Technically: resolutionX * (resolutionY / 2) * 4 bytes
+    }
+
+    return resolution * (resolution / 2) * 3; // Technically: resolutionX * (resolutionY / 2) * 3 bytes
 }
 
 double TextureGenerator::surfaceHeight(double x, double y, double z) {
@@ -461,7 +469,7 @@ void TextureGenerator::GenerateTextures() {
             double i = this->cloudNoise->sample(p0.x, p0.y, p0.z) * this->cloudOpacity;
             this->cloudColor.a = i * 255;
 
-            this->setPixel(
+            this->setCloudPixel(
                 this->cloudBuffer,
                 x,
                 y,
@@ -471,13 +479,21 @@ void TextureGenerator::GenerateTextures() {
     }
 }
 
-void TextureGenerator::setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
+void TextureGenerator::setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
     int index = (y * this->resolution * 4) + x * 4;
 
     buffer[index + 0] = color.r;
     buffer[index + 1] = color.g;
     buffer[index + 2] = color.b;
     buffer[index + 3] = color.a;
+}
+
+void TextureGenerator::setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
+    int index = (y * this->resolution * 3) + x * 3;
+
+    buffer[index + 0] = color.r;
+    buffer[index + 1] = color.g;
+    buffer[index + 2] = color.b;
 }
 
 double TextureGenerator::smootherstep(double t) {
@@ -496,17 +512,17 @@ RGBA TextureGenerator::normalRGBA(double x, double y, double z) {
 }
 
 val TextureGenerator::getDiffuseTexture() {
-    return val(typed_memory_view(2 * this->resolution * this->resolution, this->diffuseBuffer));
+    return val(typed_memory_view(getTextureSize(false), this->diffuseBuffer));
 }
 
 val TextureGenerator::getNormalTexture() {
-    return val(typed_memory_view(2 * this->resolution * this->resolution, this->normalBuffer));
+    return val(typed_memory_view(getTextureSize(false), this->normalBuffer));
 }
 
 val TextureGenerator::getSpecularTexture() {
-    return val(typed_memory_view(2 * this->resolution * this->resolution, this->specularBuffer));
+    return val(typed_memory_view(getTextureSize(false), this->specularBuffer));
 }
 
 val TextureGenerator::getCloudTexture() {
-    return val(typed_memory_view(2 * this->resolution * this->resolution, this->cloudBuffer));
+    return val(typed_memory_view(getTextureSize(true), this->cloudBuffer));
 }
