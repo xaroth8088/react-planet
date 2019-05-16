@@ -27,8 +27,8 @@ int fls(int mask) {
 	return (bit);
 }
 
-RGBA TextureGenerator::UL2RGBA(unsigned long dwColor) {
-    RGBA tmp;
+RGB TextureGenerator::UL2RGB(unsigned long dwColor) {
+    RGB tmp;
 
     // NOTE: Intentionally discarding alpha channel
     tmp.b = dwColor & 0xFF; dwColor >>= 8;
@@ -117,12 +117,12 @@ void TextureGenerator::ParseOptions(val options) {
 
     opt = options["landColor1"];
     if (isType(opt, "number")) {
-        landColor1 = UL2RGBA(opt.as<int>());
+        landColor1 = UL2RGB(opt.as<int>());
     }
 
     opt = options["landColor2"];
     if (isType(opt, "number")) {
-        landColor2 = UL2RGBA(opt.as<int>());
+        landColor2 = UL2RGB(opt.as<int>());
     }
 
     opt = options["landiScale"];
@@ -172,12 +172,12 @@ void TextureGenerator::ParseOptions(val options) {
 
     opt = options["waterDeep"];
     if (isType(opt, "number")) {
-        waterDeep = UL2RGBA(opt.as<int>());
+        waterDeep = UL2RGB(opt.as<int>());
     }
 
     opt = options["waterShallow"];
     if (isType(opt, "number")) {
-        waterShallow = UL2RGBA(opt.as<int>());
+        waterShallow = UL2RGB(opt.as<int>());
     }
 
     opt = options["waterLevel"];
@@ -197,7 +197,7 @@ void TextureGenerator::ParseOptions(val options) {
 
     opt = options["cloudColor"];
     if (isType(opt, "number")) {
-        cloudColor = UL2RGBA(opt.as<int>());
+        cloudColor = UL2RGB(opt.as<int>());
     }
 
     opt = options["cloudOpacity"];
@@ -322,7 +322,7 @@ double TextureGenerator::surfaceHeight(double x, double y, double z) {
     return surfaceNoise->sample(x, y, z);
 }
 
-RGBA TextureGenerator::surfaceColor(double x, double y, double z) {
+RGB TextureGenerator::surfaceColor(double x, double y, double z) {
     double c = landNoise->sample(
         x,
         y,
@@ -333,7 +333,7 @@ RGBA TextureGenerator::surfaceColor(double x, double y, double z) {
     double q0 = c;
     double q1 = 1.0 - c;
 
-    RGBA retval;
+    RGB retval;
 
     retval.r = landColor1.r * q0 + landColor2.r * q1;
     retval.g = landColor1.g * q0 + landColor2.g * q1;
@@ -382,7 +382,7 @@ void TextureGenerator::GenerateTextures() {
             double c0 = surfaceHeight(p0.x, p0.y, p0.z);
             double dr = 0.01;
             if (c0 > waterLevel) {
-                RGBA c = surfaceColor(p0.x, p0.y, p0.z);
+                RGB c = surfaceColor(p0.x, p0.y, p0.z);
                 setPixel(
                     diffuseBuffer,
                     x,
@@ -390,7 +390,7 @@ void TextureGenerator::GenerateTextures() {
                     c
                 );
 
-                RGBA specularC;
+                RGB specularC;
                 specularC.r = 0;
                 specularC.g = 0;
                 specularC.b = 0;
@@ -416,7 +416,7 @@ void TextureGenerator::GenerateTextures() {
                     (cy - c0)
                 );
 
-                RGBA normalPixel = normalRGBA(n.x, -n.y, n.z);
+                RGB normalPixel = normalRGB(n.x, -n.y, n.z);
                 setPixel(
                     normalBuffer,
                     x,
@@ -426,7 +426,7 @@ void TextureGenerator::GenerateTextures() {
             } else {
                 double q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
                 double q0 = 1.0 - q1;
-                RGBA rgb;
+                RGB rgb;
                 rgb.r = waterDeep.r * q0 + waterShallow.r * q1;
                 rgb.g = waterDeep.g * q0 + waterShallow.g * q1;
                 rgb.b = waterDeep.b * q0 + waterShallow.b * q1;
@@ -438,19 +438,19 @@ void TextureGenerator::GenerateTextures() {
                     rgb
                 );
 
-                RGBA waterSpecularRGBA;
-                waterSpecularRGBA.r = waterSpecular * 255;
-                waterSpecularRGBA.g = waterSpecular * 255;
-                waterSpecularRGBA.b = waterSpecular * 255;
+                RGB waterSpecularRGB;
+                waterSpecularRGB.r = waterSpecular * 255;
+                waterSpecularRGB.g = waterSpecular * 255;
+                waterSpecularRGB.b = waterSpecular * 255;
 
                 setPixel(
                     specularBuffer,
                     x,
                     y,
-                    waterSpecularRGBA
+                    waterSpecularRGB
                 );
 
-                RGBA normalPixel;
+                RGB normalPixel;
                 normalPixel.r = 128;
                 normalPixel.g = 128;
                 normalPixel.b = 255;
@@ -464,28 +464,28 @@ void TextureGenerator::GenerateTextures() {
             }
 
             double i = cloudNoise->sample(p0.x, p0.y, p0.z) * cloudOpacity;
-            cloudColor.a = i * 255;
 
             setCloudPixel(
                 cloudBuffer,
                 x,
                 y,
-                cloudColor
+                cloudColor,
+                i * 255
             );
         }
     }
 }
 
-void TextureGenerator::setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
+void TextureGenerator::setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity) {
     int index = (y * resolution * 4) + x * 4;
 
     buffer[index + 0] = color.r;
     buffer[index + 1] = color.g;
     buffer[index + 2] = color.b;
-    buffer[index + 3] = color.a;
+    buffer[index + 3] = opacity;
 }
 
-void TextureGenerator::setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
+void TextureGenerator::setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGB color) {
     int index = (y * resolution * 3) + x * 3;
 
     buffer[index + 0] = color.r;
@@ -497,8 +497,8 @@ double TextureGenerator::smootherstep(double t) {
     return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
 }
 
-RGBA TextureGenerator::normalRGBA(double x, double y, double z) {
-    RGBA color;
+RGB TextureGenerator::normalRGB(double x, double y, double z) {
+    RGB color;
 
     color.r = (x / 2.0 + 0.5) * 255;
     color.g = (y / 2.0 + 0.5) * 255;

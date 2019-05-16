@@ -6,8 +6,8 @@
 
 using namespace emscripten;
 
-struct RGBA{
-    unsigned char r, g, b, a;
+struct RGB{
+    unsigned char r, g, b;
 };
 
 struct XYZ {
@@ -39,8 +39,8 @@ class TextureGenerator {
         double surfacesFalloff = 1;
         double surfacesIntensity = 1;
 
-        RGBA landColor1 = UL2RGBA(0xe6af7e);
-        RGBA landColor2 = UL2RGBA(0x007200);
+        RGB landColor1 = UL2RGB(0xe6af7e);
+        RGB landColor2 = UL2RGB(0x007200);
         double landiScale = 2;
         unsigned char landiOctaves = 1;
         double landiFalloff = 1;
@@ -51,13 +51,13 @@ class TextureGenerator {
         double landsFalloff = 1;
         double landsIntensity = 1;
 
-        RGBA waterDeep = UL2RGBA(0x000033);
-        RGBA waterShallow = UL2RGBA(0x0000ff);
+        RGB waterDeep = UL2RGB(0x000033);
+        RGB waterShallow = UL2RGB(0x0000ff);
         double waterLevel = 0.68;
         double waterSpecular = 1;
         double waterFalloff = 1;
 
-        RGBA cloudColor = UL2RGBA(0xffffff);
+        RGB cloudColor = UL2RGB(0xffffff);
         double cloudOpacity = 0.75;
         double cloudiScale = 0.5;
         unsigned char cloudiOctaves = 2;
@@ -79,13 +79,13 @@ class TextureGenerator {
 		NoiseWrapper* cloudNoise;
 
 		double surfaceHeight(double x, double y, double z);
-        RGBA surfaceColor(double x, double y, double z);
-        RGBA UL2RGBA(unsigned long dwColor);
+        RGB surfaceColor(double x, double y, double z);
+        RGB UL2RGB(unsigned long dwColor);
         XYZ sphereMap(double u, double v);
         double smootherstep(double t);
-        RGBA normalRGBA(double x, double y, double z);
-        void setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color);
-        void setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color);
+        RGB normalRGB(double x, double y, double z);
+        void setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGB color);
+        void setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity);
         void ParseOptions(val options);
         XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1, double b2, double b3);
         int getTextureSize(bool isClouds);
