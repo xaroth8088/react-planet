@@ -30,7 +30,7 @@ int fls(int mask) {
 RGBA TextureGenerator::UL2RGBA(unsigned long dwColor) {
     RGBA tmp;
 
-    tmp.a = 255;    // Intentionally discarding alpha channel
+    // NOTE: Intentionally discarding alpha channel
     tmp.b = dwColor & 0xFF; dwColor >>= 8;
     tmp.g = dwColor & 0xFF; dwColor >>= 8;
     tmp.r = dwColor & 0xFF;
@@ -40,219 +40,219 @@ RGBA TextureGenerator::UL2RGBA(unsigned long dwColor) {
 
 void TextureGenerator::ParseOptions(val options) {
     val opt = options["surfaceSeed"];
-    if (this->isType(opt, "number")) {
-        this->surfaceSeed = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfaceSeed = opt.as<double>();
     }
 
     opt = options["landSeed"];
-    if (this->isType(opt, "number")) {
-        this->landSeed = opt.as<double>();
+    if (isType(opt, "number")) {
+        landSeed = opt.as<double>();
     }
 
     opt = options["cloudSeed"];
-    if (this->isType(opt, "number")) {
-        this->cloudSeed = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudSeed = opt.as<double>();
     }
 
     opt = options["resolution"];
-    if (this->isType(opt, "number")) {
+    if (isType(opt, "number")) {
         // bump up to the nearest power of 2
-        unsigned int resolution = opt.as<unsigned int>();
-        unsigned char powerOfTwo = fls(resolution - 1);
-        if (resolution > 0) {
-            this->resolution = 1 << powerOfTwo;
+        unsigned int configResolution = opt.as<unsigned int>();
+        unsigned char powerOfTwo = fls(configResolution - 1);
+        if (configResolution > 0) {
+            resolution = 1 << powerOfTwo;
         }
 
         // The minimum resolution is 2 (otherwise the height becomes 0 when we put the textures into the 2:1 aspect ratio)
-        if (this->resolution < 2) {
-            this->resolution = 2;
+        if (resolution < 2) {
+            resolution = 2;
         }
     }
 
     // Initialize all other configuration
     opt = options["surfaceiScale"];
-    if (this->isType(opt, "number")) {
-        this->surfaceiScale = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfaceiScale = opt.as<double>();
     }
 
     opt = options["surfaceiOctaves"];
-    if (this->isType(opt, "number")) {
-        this->surfaceiOctaves = opt.as<unsigned char>();
+    if (isType(opt, "number")) {
+        surfaceiOctaves = opt.as<unsigned char>();
     }
 
     opt = options["surfaceiFalloff"];
-    if (this->isType(opt, "number")) {
-        this->surfaceiFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfaceiFalloff = opt.as<double>();
     }
 
     opt = options["surfaceiIntensity"];
-    if (this->isType(opt, "number")) {
-        this->surfaceiIntensity = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfaceiIntensity = opt.as<double>();
     }
 
     opt = options["surfaceiRidginess"];
-    if (this->isType(opt, "number")) {
-        this->surfaceiRidginess = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfaceiRidginess = opt.as<double>();
     }
 
     opt = options["surfacesScale"];
-    if (this->isType(opt, "number")) {
-        this->surfacesScale = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfacesScale = opt.as<double>();
     }
 
     opt = options["surfacesOctaves"];
-    if (this->isType(opt, "number")) {
-        this->surfacesOctaves = opt.as<unsigned char>();
+    if (isType(opt, "number")) {
+        surfacesOctaves = opt.as<unsigned char>();
     }
 
     opt = options["surfacesFalloff"];
-    if (this->isType(opt, "number")) {
-        this->surfacesFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfacesFalloff = opt.as<double>();
     }
 
     opt = options["surfacesIntensity"];
-    if (this->isType(opt, "number")) {
-        this->surfacesIntensity = opt.as<double>();
+    if (isType(opt, "number")) {
+        surfacesIntensity = opt.as<double>();
     }
 
     opt = options["landColor1"];
-    if (this->isType(opt, "number")) {
-        this->landColor1 = UL2RGBA(opt.as<int>());
+    if (isType(opt, "number")) {
+        landColor1 = UL2RGBA(opt.as<int>());
     }
 
     opt = options["landColor2"];
-    if (this->isType(opt, "number")) {
-        this->landColor2 = UL2RGBA(opt.as<int>());
+    if (isType(opt, "number")) {
+        landColor2 = UL2RGBA(opt.as<int>());
     }
 
     opt = options["landiScale"];
-    if (this->isType(opt, "number")) {
-        this->landiScale = opt.as<double>();
+    if (isType(opt, "number")) {
+        landiScale = opt.as<double>();
     }
 
     opt = options["landiOctaves"];
-    if (this->isType(opt, "number")) {
-        this->landiOctaves = opt.as<unsigned char>();
+    if (isType(opt, "number")) {
+        landiOctaves = opt.as<unsigned char>();
     }
 
     opt = options["landiFalloff"];
-    if (this->isType(opt, "number")) {
-        this->landiFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        landiFalloff = opt.as<double>();
     }
 
     opt = options["landiIntensity"];
-    if (this->isType(opt, "number")) {
-        this->landiIntensity = opt.as<double>();
+    if (isType(opt, "number")) {
+        landiIntensity = opt.as<double>();
     }
 
     opt = options["landiRidginess"];
-    if (this->isType(opt, "number")) {
-        this->landiRidginess = opt.as<double>();
+    if (isType(opt, "number")) {
+        landiRidginess = opt.as<double>();
     }
 
     opt = options["landsScale"];
-    if (this->isType(opt, "number")) {
-        this->landsScale = opt.as<double>();
+    if (isType(opt, "number")) {
+        landsScale = opt.as<double>();
     }
 
     opt = options["landsOctaves"];
-    if (this->isType(opt, "number")) {
-        this->landsOctaves = opt.as<unsigned char>();
+    if (isType(opt, "number")) {
+        landsOctaves = opt.as<unsigned char>();
     }
 
     opt = options["landsFalloff"];
-    if (this->isType(opt, "number")) {
-        this->landsFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        landsFalloff = opt.as<double>();
     }
 
     opt = options["landsIntensity"];
-    if (this->isType(opt, "number")) {
-        this->landsIntensity = opt.as<double>();
+    if (isType(opt, "number")) {
+        landsIntensity = opt.as<double>();
     }
 
     opt = options["waterDeep"];
-    if (this->isType(opt, "number")) {
-        this->waterDeep = UL2RGBA(opt.as<int>());
+    if (isType(opt, "number")) {
+        waterDeep = UL2RGBA(opt.as<int>());
     }
 
     opt = options["waterShallow"];
-    if (this->isType(opt, "number")) {
-        this->waterShallow = UL2RGBA(opt.as<int>());
+    if (isType(opt, "number")) {
+        waterShallow = UL2RGBA(opt.as<int>());
     }
 
     opt = options["waterLevel"];
-    if (this->isType(opt, "number")) {
-        this->waterLevel = opt.as<double>();
+    if (isType(opt, "number")) {
+        waterLevel = opt.as<double>();
     }
 
     opt = options["waterSpecular"];
-    if (this->isType(opt, "number")) {
-        this->waterSpecular = opt.as<double>();
+    if (isType(opt, "number")) {
+        waterSpecular = opt.as<double>();
     }
 
     opt = options["waterFalloff"];
-    if (this->isType(opt, "number")) {
-        this->waterFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        waterFalloff = opt.as<double>();
     }
 
     opt = options["cloudColor"];
-    if (this->isType(opt, "number")) {
-        this->cloudColor = UL2RGBA(opt.as<int>());
+    if (isType(opt, "number")) {
+        cloudColor = UL2RGBA(opt.as<int>());
     }
 
     opt = options["cloudOpacity"];
-    if (this->isType(opt, "number")) {
-        this->cloudOpacity = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudOpacity = opt.as<double>();
     }
 
     opt = options["cloudiScale"];
-    if (this->isType(opt, "number")) {
-        this->cloudiScale = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudiScale = opt.as<double>();
     }
 
     opt = options["cloudiOctaves"];
-    if (this->isType(opt, "number")) {
-        this->cloudiOctaves = opt.as<unsigned char>();
+    if (isType(opt, "number")) {
+        cloudiOctaves = opt.as<unsigned char>();
     }
 
     opt = options["cloudiFalloff"];
-    if (this->isType(opt, "number")) {
-        this->cloudiFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudiFalloff = opt.as<double>();
     }
 
     opt = options["cloudiIntensity"];
-    if (this->isType(opt, "number")) {
-        this->cloudiIntensity = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudiIntensity = opt.as<double>();
     }
 
     opt = options["cloudiRidginess"];
-    if (this->isType(opt, "number")) {
-        this->cloudiRidginess = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudiRidginess = opt.as<double>();
     }
 
     opt = options["cloudsScale"];
-    if (this->isType(opt, "number")) {
-        this->cloudsScale = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudsScale = opt.as<double>();
     }
 
     opt = options["cloudsOctaves"];
-    if (this->isType(opt, "number")) {
-        this->cloudsOctaves = opt.as<unsigned char>();
+    if (isType(opt, "number")) {
+        cloudsOctaves = opt.as<unsigned char>();
     }
 
     opt = options["cloudsFalloff"];
-    if (this->isType(opt, "number")) {
-        this->cloudsFalloff = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudsFalloff = opt.as<double>();
     }
 
     opt = options["cloudsIntensity"];
-    if (this->isType(opt, "number")) {
-        this->cloudsIntensity = opt.as<double>();
+    if (isType(opt, "number")) {
+        cloudsIntensity = opt.as<double>();
     }
 
 /*
     val optComplete = options["complete"];
-    if (this->isType(optComplete, "function"))
+    if (isType(optComplete, "function"))
     {
         //No need to typecast, we store function callbacks as val
         //Do stuff with option value...
@@ -319,11 +319,11 @@ int TextureGenerator::getTextureSize(bool isClouds) {
 }
 
 double TextureGenerator::surfaceHeight(double x, double y, double z) {
-    return this->surfaceNoise->sample(x, y, z);
+    return surfaceNoise->sample(x, y, z);
 }
 
 RGBA TextureGenerator::surfaceColor(double x, double y, double z) {
-    double c = this->landNoise->sample(
+    double c = landNoise->sample(
         x,
         y,
         z
@@ -335,10 +335,9 @@ RGBA TextureGenerator::surfaceColor(double x, double y, double z) {
 
     RGBA retval;
 
-    retval.r = this->landColor1.r * q0 + this->landColor2.r * q1;
-    retval.g = this->landColor1.g * q0 + this->landColor2.g * q1;
-    retval.b = this->landColor1.b * q0 + this->landColor2.b * q1;
-    retval.a = 255;
+    retval.r = landColor1.r * q0 + landColor2.r * q1;
+    retval.g = landColor1.g * q0 + landColor2.g * q1;
+    retval.b = landColor1.b * q0 + landColor2.b * q1;
 
     return retval;
 }
@@ -374,18 +373,18 @@ XYZ TextureGenerator::normalizedCrossProduct(double a1, double a2, double a3, do
 }
 
 void TextureGenerator::GenerateTextures() {
-    unsigned short int width = this->resolution;
-    unsigned short int height = this->resolution / 2;   /* The texture should have a 2:1 aspect ratio to wrap properly */
+    unsigned short int width = resolution;
+    unsigned short int height = resolution / 2;   /* The texture should have a 2:1 aspect ratio to wrap properly */
 
     for( unsigned int x = 0; x < width; x++ ) {
         for( unsigned int y = 0; y < height; y++ ) {
-            XYZ p0 = this->sphereMap(double(x) / (width - 1.0), double(y) / (height - 1.0));
-            double c0 = this->surfaceHeight(p0.x, p0.y, p0.z);
+            XYZ p0 = sphereMap(double(x) / (width - 1.0), double(y) / (height - 1.0));
+            double c0 = surfaceHeight(p0.x, p0.y, p0.z);
             double dr = 0.01;
-            if (c0 > this->waterLevel) {
-                RGBA c = this->surfaceColor(p0.x, p0.y, p0.z);
-                this->setPixel(
-                    this->diffuseBuffer,
+            if (c0 > waterLevel) {
+                RGBA c = surfaceColor(p0.x, p0.y, p0.z);
+                setPixel(
+                    diffuseBuffer,
                     x,
                     y,
                     c
@@ -395,21 +394,20 @@ void TextureGenerator::GenerateTextures() {
                 specularC.r = 0;
                 specularC.g = 0;
                 specularC.b = 0;
-                specularC.a = 255;
 
-                this->setPixel(
-                    this->specularBuffer,
+                setPixel(
+                    specularBuffer,
                     x,
                     y,
                     specularC
                 );
 
-                XYZ px = this->sphereMap((double(x) + dr) / (double(width) - 1.0), double(y) / (double(height) - 1.0));
-                XYZ py = this->sphereMap(double(x) / (double(width) - 1.0), (double(y) + dr) / (double(height) - 1.0));
-                double cx = this->surfaceHeight(px.x, px.y, px.z);
-                double cy = this->surfaceHeight(py.x, py.y, py.z);
+                XYZ px = sphereMap((double(x) + dr) / (double(width) - 1.0), double(y) / (double(height) - 1.0));
+                XYZ py = sphereMap(double(x) / (double(width) - 1.0), (double(y) + dr) / (double(height) - 1.0));
+                double cx = surfaceHeight(px.x, px.y, px.z);
+                double cy = surfaceHeight(py.x, py.y, py.z);
 
-                XYZ n = this->normalizedCrossProduct(
+                XYZ n = normalizedCrossProduct(
                     dr / (double(width) - 1.0),
                     0.0,
                     (cx - c0),
@@ -418,36 +416,35 @@ void TextureGenerator::GenerateTextures() {
                     (cy - c0)
                 );
 
-                RGBA normalPixel = this->normalRGBA(n.x, -n.y, n.z);
-                this->setPixel(
-                    this->normalBuffer,
+                RGBA normalPixel = normalRGBA(n.x, -n.y, n.z);
+                setPixel(
+                    normalBuffer,
                     x,
                     y,
                     normalPixel
                 );
             } else {
-                double q1 = this->smootherstep(pow(c0 / this->waterLevel, this->waterFalloff));
+                double q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
                 double q0 = 1.0 - q1;
                 RGBA rgb;
                 rgb.r = waterDeep.r * q0 + waterShallow.r * q1;
                 rgb.g = waterDeep.g * q0 + waterShallow.g * q1;
                 rgb.b = waterDeep.b * q0 + waterShallow.b * q1;
-                rgb.a = 255;
 
-                this->setPixel(
-                    this->diffuseBuffer,
+                setPixel(
+                    diffuseBuffer,
                     x,
                     y,
                     rgb
                 );
 
                 RGBA waterSpecularRGBA;
-                waterSpecularRGBA.r = this->waterSpecular * 255;
-                waterSpecularRGBA.g = this->waterSpecular * 255;
-                waterSpecularRGBA.b = this->waterSpecular * 255;
-                waterSpecularRGBA.a = 255;
-                this->setPixel(
-                    this->specularBuffer,
+                waterSpecularRGBA.r = waterSpecular * 255;
+                waterSpecularRGBA.g = waterSpecular * 255;
+                waterSpecularRGBA.b = waterSpecular * 255;
+
+                setPixel(
+                    specularBuffer,
                     x,
                     y,
                     waterSpecularRGBA
@@ -457,30 +454,30 @@ void TextureGenerator::GenerateTextures() {
                 normalPixel.r = 128;
                 normalPixel.g = 128;
                 normalPixel.b = 255;
-                normalPixel.a = 255;
-                this->setPixel(
-                    this->normalBuffer,
+
+                setPixel(
+                    normalBuffer,
                     x,
                     y,
                     normalPixel
                 );
             }
 
-            double i = this->cloudNoise->sample(p0.x, p0.y, p0.z) * this->cloudOpacity;
-            this->cloudColor.a = i * 255;
+            double i = cloudNoise->sample(p0.x, p0.y, p0.z) * cloudOpacity;
+            cloudColor.a = i * 255;
 
-            this->setCloudPixel(
-                this->cloudBuffer,
+            setCloudPixel(
+                cloudBuffer,
                 x,
                 y,
-                this->cloudColor
+                cloudColor
             );
         }
     }
 }
 
 void TextureGenerator::setCloudPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
-    int index = (y * this->resolution * 4) + x * 4;
+    int index = (y * resolution * 4) + x * 4;
 
     buffer[index + 0] = color.r;
     buffer[index + 1] = color.g;
@@ -489,7 +486,7 @@ void TextureGenerator::setCloudPixel(unsigned char* buffer, unsigned int x, unsi
 }
 
 void TextureGenerator::setPixel(unsigned char* buffer, unsigned int x, unsigned int y, RGBA color) {
-    int index = (y * this->resolution * 3) + x * 3;
+    int index = (y * resolution * 3) + x * 3;
 
     buffer[index + 0] = color.r;
     buffer[index + 1] = color.g;
@@ -506,23 +503,22 @@ RGBA TextureGenerator::normalRGBA(double x, double y, double z) {
     color.r = (x / 2.0 + 0.5) * 255;
     color.g = (y / 2.0 + 0.5) * 255;
     color.b = (z / 2.0 + 0.5) * 255;
-    color.a = 255;
 
     return color;
 }
 
 val TextureGenerator::getDiffuseTexture() {
-    return val(typed_memory_view(getTextureSize(false), this->diffuseBuffer));
+    return val(typed_memory_view(getTextureSize(false), diffuseBuffer));
 }
 
 val TextureGenerator::getNormalTexture() {
-    return val(typed_memory_view(getTextureSize(false), this->normalBuffer));
+    return val(typed_memory_view(getTextureSize(false), normalBuffer));
 }
 
 val TextureGenerator::getSpecularTexture() {
-    return val(typed_memory_view(getTextureSize(false), this->specularBuffer));
+    return val(typed_memory_view(getTextureSize(false), specularBuffer));
 }
 
 val TextureGenerator::getCloudTexture() {
-    return val(typed_memory_view(getTextureSize(true), this->cloudBuffer));
+    return val(typed_memory_view(getTextureSize(true), cloudBuffer));
 }

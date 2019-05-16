@@ -25,16 +25,16 @@ NoiseWrapper::NoiseWrapper(
         sFalloff(sFalloff),
         sIntensity(sIntensity)
     {
-        this->noise = new Noise(seed);
+        noise = new Noise(seed);
     };
 
 double NoiseWrapper::getNoise(double x, double y, double z) {
-    return this->noise->eval(x, y, z);
+    return noise->eval(x, y, z);
 }
 
 double NoiseWrapper::getScaledNoise(double x, double y, double z) {
     return 0.5 + (
-        this->getNoise(x, y, z)
+        getNoise(x, y, z)
     );
 }
 
@@ -43,7 +43,7 @@ double NoiseWrapper::getOctave(double x, double y, double z, unsigned char octav
     double scale = 1;
 
     for (unsigned char i = 0; i < octaves; i++) {
-        val += this->getScaledNoise(x * scale, y * scale, z * scale) / scale;
+        val += getScaledNoise(x * scale, y * scale, z * scale) / scale;
         scale *= 2.0;
     }
 
@@ -52,7 +52,7 @@ double NoiseWrapper::getOctave(double x, double y, double z, unsigned char octav
 
 double NoiseWrapper::getNormalizedOctave(double x, double y, double z, unsigned char octaves) {
     double q = 2.0 - ( 1.0 / (std::pow(2.0, (octaves - 1.0))) );
-    return this->getOctave(x, y, z, octaves) / q;
+    return getOctave(x, y, z, octaves) / q;
 }
 
 double NoiseWrapper::ridgify(double value) {
@@ -67,34 +67,34 @@ double NoiseWrapper::sample(
 {
     double offset = 0.0;
 
-    if (this->sOctaves > 0) {
-        offset = this->getOctave(
-            x / this->sScale,
-            y / this->sScale,
-            z / this->sScale,
-            this->sOctaves
+    if (sOctaves > 0) {
+        offset = getOctave(
+            x / sScale,
+            y / sScale,
+            z / sScale,
+            sOctaves
         );
 
-        offset = std::pow( offset, this->sFalloff );
-        offset *= this->sIntensity;
+        offset = std::pow( offset, sFalloff );
+        offset *= sIntensity;
     }
 
-    double value = this->getNormalizedOctave(
-        x / this->iScale + offset,
-        y / this->iScale + offset,
-        z / this->iScale + offset,
-        this->iOctaves
+    double value = getNormalizedOctave(
+        x / iScale + offset,
+        y / iScale + offset,
+        z / iScale + offset,
+        iOctaves
     );
 
-    if (this->iRidginess > 0.0) {
-        double ridge = this->getNormalizedOctave(
-            x / this->iScale + offset,
-            y / this->iScale + offset,
-            z / this->iScale + offset + 11.0,
-            this->iOctaves
+    if (iRidginess > 0.0) {
+        double ridge = getNormalizedOctave(
+            x / iScale + offset,
+            y / iScale + offset,
+            z / iScale + offset + 11.0,
+            iOctaves
         );
 
-        value = this->iRidginess * this->ridgify(ridge) + (1.0 - this->iRidginess) * value;
+        value = iRidginess * ridgify(ridge) + (1.0 - iRidginess) * value;
     }
 
     value = std::pow( value, iFalloff );
