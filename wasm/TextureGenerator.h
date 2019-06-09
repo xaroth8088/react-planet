@@ -1,10 +1,7 @@
 #pragma once
 
-#include <emscripten/bind.h>
 #include <stdlib.h>
 #include "NoiseWrapper.h"
-
-using namespace emscripten;
 
 struct RGB
 {
@@ -19,14 +16,7 @@ struct XYZ
 class TextureGenerator
 {
 
-private:
-    //Determines if a JS value is of the specified type
-    //If a property does not exist, we will see it as undefined
-    bool isType(val value, const std::string &type)
-    {
-        return (value.typeof().as<std::string>() == type);
-    }
-
+public:
     double surfaceSeed = 0;
     double landSeed = 1;
     double cloudSeed = 2;
@@ -86,16 +76,9 @@ private:
     RGB UL2RGB(unsigned long dwColor);
     void setPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color);
     void setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity);
-    void ParseOptions(val options);
     int getTextureSize(bool isClouds);
 
-public:
-    TextureGenerator(val options);
+    TextureGenerator();
 
     void GenerateTextures();
-    val getDiffuseTexture();
-    val getNormalTexture();
-    val getSpecularTexture();
-    val getCloudTexture();
-
 };

@@ -8,7 +8,7 @@
 // This XCode project exists solely to make development of the C++ portions of the project easier.
 
 #include <iostream>
-#include "../../../wasm/TextureGenerator.h"
+#include "wasm/TextureGenerator/TextureGenerator.h"
 
 int main(int argc, const char * argv[]) {
     TextureGenerator* test = new TextureGenerator();
