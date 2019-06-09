@@ -13,7 +13,7 @@ int main(int argc, const char * argv[]) {
     TextureGenerator* test = new TextureGenerator();
     test->GenerateTextures();
     
-    //std::cout << test->getCloudTexture() << "\n";
+    std::cout << test->cloudBuffer << "\n";
     
     return 0;
 }
