@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+cd "$(dirname "$0")/.."
 mkdir -p wasm_build
 source ../emsdk/emsdk_env.sh
 emcc \

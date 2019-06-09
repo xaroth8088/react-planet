@@ -88,6 +88,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXLegacyTarget section */
+		6B73CD8122ADB9D1003E6C4F /* react-planet-ems */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 6B73CD8222ADB9D1003E6C4F /* Build configuration list for PBXLegacyTarget "react-planet-ems" */;
+			buildPhases = (
+			);
+			buildToolPath = ./build_wasm.sh;
+			buildWorkingDirectory = ../../scripts/;
+			dependencies = (
+			);
+			name = "react-planet-ems";
+			passBuildSettingsInEnvironment = 1;
+			productName = "react-planet-ems";
+		};
+/* End PBXLegacyTarget section */
+
 /* Begin PBXNativeTarget section */
 		6B73CD5C22ADB62D003E6C4F /* react-planet */ = {
 			isa = PBXNativeTarget;
@@ -118,6 +135,9 @@
 					6B73CD5C22ADB62D003E6C4F = {
 						CreatedOnToolsVersion = 10.1;
 					};
+					6B73CD8122ADB9D1003E6C4F = {
+						CreatedOnToolsVersion = 10.1;
+					};
 				};
 			};
 			buildConfigurationList = 6B73CD5822ADB62D003E6C4F /* Build configuration list for PBXProject "react-planet" */;
@@ -133,6 +153,7 @@
 			projectRoot = "";
 			targets = (
 				6B73CD5C22ADB62D003E6C4F /* react-planet */,
+				6B73CD8122ADB9D1003E6C4F /* react-planet-ems */,
 			);
 		};
 /* End PBXProject section */
@@ -281,6 +302,31 @@
 			};
 			name = Release;
 		};
+		6B73CD8322ADB9D1003E6C4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		6B73CD8422ADB9D1003E6C4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -298,6 +344,15 @@
 			buildConfigurations = (
 				6B73CD6522ADB62D003E6C4F /* Debug */,
 				6B73CD6622ADB62D003E6C4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B73CD8222ADB9D1003E6C4F /* Build configuration list for PBXLegacyTarget "react-planet-ems" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B73CD8322ADB9D1003E6C4F /* Debug */,
+				6B73CD8422ADB9D1003E6C4F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
