@@ -66,3 +66,4 @@ node_modules/
 *.log
 .idea/
 wasm_build/
+/xcode/react-planet/react-planet.xcodeproj/project.xcworkspace/xcuserdata/
