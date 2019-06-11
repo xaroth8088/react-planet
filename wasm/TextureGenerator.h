@@ -3,22 +3,26 @@
 #include <stdlib.h>
 #include "NoiseWrapper.h"
 
-struct RGB {
+struct RGB
+{
     unsigned char r, g, b;
 };
 
-struct XYZ {
+struct XYZ
+{
     double x, y, z;
 };
 
-class TextureGenerator {
+class TextureGenerator
+{
+
 public:
     double surfaceSeed = 0;
     double landSeed = 1;
     double cloudSeed = 2;
-    
+
     unsigned int resolution = 256;
-    
+
     double surfaceiScale = 2;
     unsigned char surfaceiOctaves = 8;
     double surfaceiFalloff = 1;
@@ -28,7 +32,7 @@ public:
     unsigned char surfacesOctaves = 0;
     double surfacesFalloff = 1;
     double surfacesIntensity = 1;
-    
+
     RGB landColor1 = UL2RGB(0xe6af7e);
     RGB landColor2 = UL2RGB(0x007200);
     double landiScale = 2;
@@ -40,13 +44,13 @@ public:
     unsigned char landsOctaves = 0;
     double landsFalloff = 1;
     double landsIntensity = 1;
-    
+
     RGB waterDeep = UL2RGB(0x000033);
     RGB waterShallow = UL2RGB(0x0000ff);
     double waterLevel = 0.68;
     double waterSpecular = 1;
     double waterFalloff = 1;
-    
+
     RGB cloudColor = UL2RGB(0xffffff);
     double cloudOpacity = 0.75;
     double cloudiScale = 0.5;
@@ -58,24 +62,23 @@ public:
     unsigned char cloudsOctaves = 5;
     double cloudsFalloff = 1;
     double cloudsIntensity = 1;
-    
+
     unsigned char *diffuseBuffer;
     unsigned char *normalBuffer;
     unsigned char *specularBuffer;
     unsigned char *cloudBuffer;
-    
+
     NoiseWrapper *surfaceNoise;
     NoiseWrapper *landNoise;
     NoiseWrapper *cloudNoise;
-    
+
     void init();
     RGB surfaceColor(double x, double y, double z);
     RGB UL2RGB(unsigned long dwColor);
-    void setPixel(unsigned char *buffer, unsigned int x, unsigned int y,
-                  RGB color);
-    void setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y,
-                       RGB color, unsigned int opacity);
+    void setPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color);
+    void setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity);
     unsigned long int getTextureSize(bool isClouds);
-    
+
+
     void GenerateTextures();
 };
