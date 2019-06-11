@@ -3,15 +3,18 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 50;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6B0F3CC322A80D970058425C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B0F3CC222A80D970058425C /* main.cpp */; };
+		6B73CD6122ADB62D003E6C4F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B73CD6022ADB62D003E6C4F /* main.cpp */; };
+		6B73CD7A22ADB7A6003E6C4F /* NoiseWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B73CD7522ADB7A6003E6C4F /* NoiseWrapper.cpp */; };
+		6B73CD7B22ADB7A6003E6C4F /* OpenSimplexNoise.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B73CD7622ADB7A6003E6C4F /* OpenSimplexNoise.cpp */; };
+		6B73CD7C22ADB7A6003E6C4F /* TextureGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6B73CD7822ADB7A6003E6C4F /* TextureGenerator.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		6B0F3CBD22A80D970058425C /* CopyFiles */ = {
+		6B73CD5B22ADB62D003E6C4F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -23,13 +26,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		6B0F3CBF22A80D970058425C /* react-planet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "react-planet"; sourceTree = BUILT_PRODUCTS_DIR; };
-		6B0F3CC222A80D970058425C /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		6B0F3CC922A80DC00058425C /* wasm */ = {isa = PBXFileReference; lastKnownFileType = folder; name = wasm; path = ../../../wasm; sourceTree = "<group>"; };
+		6B73CD5D22ADB62D003E6C4F /* react-planet */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "react-planet"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6B73CD6022ADB62D003E6C4F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		6B73CD7422ADB7A6003E6C4F /* TextureGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextureGenerator.h; sourceTree = "<group>"; };
+		6B73CD7522ADB7A6003E6C4F /* NoiseWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NoiseWrapper.cpp; sourceTree = "<group>"; };
+		6B73CD7622ADB7A6003E6C4F /* OpenSimplexNoise.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenSimplexNoise.cpp; sourceTree = "<group>"; };
+		6B73CD7722ADB7A6003E6C4F /* NoiseWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoiseWrapper.h; sourceTree = "<group>"; };
+		6B73CD7822ADB7A6003E6C4F /* TextureGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextureGenerator.cpp; sourceTree = "<group>"; };
+		6B73CD7922ADB7A6003E6C4F /* OpenSimplexNoise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenSimplexNoise.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		6B0F3CBC22A80D970058425C /* Frameworks */ = {
+		6B73CD5A22ADB62D003E6C4F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -39,60 +47,72 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		6B0F3CB622A80D970058425C = {
+		6B73CD5422ADB62D003E6C4F = {
 			isa = PBXGroup;
 			children = (
-				6B0F3CC122A80D970058425C /* react-planet */,
-				6B0F3CC022A80D970058425C /* Products */,
-				6B0F3CCA22A80F250058425C /* Frameworks */,
+				6B73CD7322ADB7A6003E6C4F /* wasm */,
+				6B73CD5F22ADB62D003E6C4F /* react-planet */,
+				6B73CD5E22ADB62D003E6C4F /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		6B0F3CC022A80D970058425C /* Products */ = {
+		6B73CD5E22ADB62D003E6C4F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6B0F3CBF22A80D970058425C /* react-planet */,
+				6B73CD5D22ADB62D003E6C4F /* react-planet */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		6B0F3CC122A80D970058425C /* react-planet */ = {
+		6B73CD5F22ADB62D003E6C4F /* react-planet */ = {
 			isa = PBXGroup;
 			children = (
-				6B0F3CC222A80D970058425C /* main.cpp */,
-				6B0F3CC922A80DC00058425C /* wasm */,
+				6B73CD6022ADB62D003E6C4F /* main.cpp */,
 			);
 			path = "react-planet";
 			sourceTree = "<group>";
 		};
-		6B0F3CCA22A80F250058425C /* Frameworks */ = {
+		6B73CD7322ADB7A6003E6C4F /* wasm */ = {
 			isa = PBXGroup;
 			children = (
+				6B73CD7522ADB7A6003E6C4F /* NoiseWrapper.cpp */,
+				6B73CD7722ADB7A6003E6C4F /* NoiseWrapper.h */,
+				6B73CD7622ADB7A6003E6C4F /* OpenSimplexNoise.cpp */,
+				6B73CD7922ADB7A6003E6C4F /* OpenSimplexNoise.h */,
+				6B73CD7822ADB7A6003E6C4F /* TextureGenerator.cpp */,
+				6B73CD7422ADB7A6003E6C4F /* TextureGenerator.h */,
 			);
-			name = Frameworks;
+			name = wasm;
+			path = ../../wasm;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
-/* Begin PBXHeadersBuildPhase section */
-		6B0F3CD022A812160058425C /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+/* Begin PBXLegacyTarget section */
+		6B73CD8122ADB9D1003E6C4F /* react-planet-ems */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = 6B73CD8222ADB9D1003E6C4F /* Build configuration list for PBXLegacyTarget "react-planet-ems" */;
+			buildPhases = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+			buildToolPath = ./build_wasm.sh;
+			buildWorkingDirectory = ../../scripts/;
+			dependencies = (
+			);
+			name = "react-planet-ems";
+			passBuildSettingsInEnvironment = 1;
+			productName = "react-planet-ems";
 		};
-/* End PBXHeadersBuildPhase section */
+/* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
-		6B0F3CBE22A80D970058425C /* react-planet */ = {
+		6B73CD5C22ADB62D003E6C4F /* react-planet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6B0F3CC622A80D970058425C /* Build configuration list for PBXNativeTarget "react-planet" */;
+			buildConfigurationList = 6B73CD6422ADB62D003E6C4F /* Build configuration list for PBXNativeTarget "react-planet" */;
 			buildPhases = (
-				6B0F3CD022A812160058425C /* Headers */,
-				6B0F3CBB22A80D970058425C /* Sources */,
-				6B0F3CBC22A80D970058425C /* Frameworks */,
-				6B0F3CBD22A80D970058425C /* CopyFiles */,
+				6B73CD5922ADB62D003E6C4F /* Sources */,
+				6B73CD5A22ADB62D003E6C4F /* Frameworks */,
+				6B73CD5B22ADB62D003E6C4F /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -100,53 +120,60 @@
 			);
 			name = "react-planet";
 			productName = "react-planet";
-			productReference = 6B0F3CBF22A80D970058425C /* react-planet */;
+			productReference = 6B73CD5D22ADB62D003E6C4F /* react-planet */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		6B0F3CB722A80D970058425C /* Project object */ = {
+		6B73CD5522ADB62D003E6C4F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Geoffrey Benson";
 				TargetAttributes = {
-					6B0F3CBE22A80D970058425C = {
+					6B73CD5C22ADB62D003E6C4F = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					6B73CD8122ADB9D1003E6C4F = {
 						CreatedOnToolsVersion = 10.1;
 					};
 				};
 			};
-			buildConfigurationList = 6B0F3CBA22A80D970058425C /* Build configuration list for PBXProject "react-planet" */;
-			compatibilityVersion = "Xcode 10.0";
+			buildConfigurationList = 6B73CD5822ADB62D003E6C4F /* Build configuration list for PBXProject "react-planet" */;
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 6B0F3CB622A80D970058425C;
-			productRefGroup = 6B0F3CC022A80D970058425C /* Products */;
+			mainGroup = 6B73CD5422ADB62D003E6C4F;
+			productRefGroup = 6B73CD5E22ADB62D003E6C4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6B0F3CBE22A80D970058425C /* react-planet */,
+				6B73CD5C22ADB62D003E6C4F /* react-planet */,
+				6B73CD8122ADB9D1003E6C4F /* react-planet-ems */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		6B0F3CBB22A80D970058425C /* Sources */ = {
+		6B73CD5922ADB62D003E6C4F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6B0F3CC322A80D970058425C /* main.cpp in Sources */,
+				6B73CD6122ADB62D003E6C4F /* main.cpp in Sources */,
+				6B73CD7B22ADB7A6003E6C4F /* OpenSimplexNoise.cpp in Sources */,
+				6B73CD7A22ADB7A6003E6C4F /* NoiseWrapper.cpp in Sources */,
+				6B73CD7C22ADB7A6003E6C4F /* TextureGenerator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		6B0F3CC422A80D970058425C /* Debug */ = {
+		6B73CD6222ADB62D003E6C4F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -205,7 +232,7 @@
 			};
 			name = Debug;
 		};
-		6B0F3CC522A80D970058425C /* Release */ = {
+		6B73CD6322ADB62D003E6C4F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -257,20 +284,45 @@
 			};
 			name = Release;
 		};
-		6B0F3CC722A80D970058425C /* Debug */ = {
+		6B73CD6522ADB62D003E6C4F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../../emsdk/emscripten/1.38.30/system/include\"/**";
+				HEADER_SEARCH_PATHS = ../..;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		6B0F3CC822A80D970058425C /* Release */ = {
+		6B73CD6622ADB62D003E6C4F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../../emsdk/emscripten/1.38.30/system/include\"/**";
+				HEADER_SEARCH_PATHS = ../..;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		6B73CD8322ADB9D1003E6C4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		6B73CD8422ADB9D1003E6C4F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -278,25 +330,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6B0F3CBA22A80D970058425C /* Build configuration list for PBXProject "react-planet" */ = {
+		6B73CD5822ADB62D003E6C4F /* Build configuration list for PBXProject "react-planet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6B0F3CC422A80D970058425C /* Debug */,
-				6B0F3CC522A80D970058425C /* Release */,
+				6B73CD6222ADB62D003E6C4F /* Debug */,
+				6B73CD6322ADB62D003E6C4F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6B0F3CC622A80D970058425C /* Build configuration list for PBXNativeTarget "react-planet" */ = {
+		6B73CD6422ADB62D003E6C4F /* Build configuration list for PBXNativeTarget "react-planet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				6B0F3CC722A80D970058425C /* Debug */,
-				6B0F3CC822A80D970058425C /* Release */,
+				6B73CD6522ADB62D003E6C4F /* Debug */,
+				6B73CD6622ADB62D003E6C4F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6B73CD8222ADB9D1003E6C4F /* Build configuration list for PBXLegacyTarget "react-planet-ems" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6B73CD8322ADB9D1003E6C4F /* Debug */,
+				6B73CD8422ADB9D1003E6C4F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 6B0F3CB722A80D970058425C /* Project object */;
+	rootObject = 6B73CD5522ADB62D003E6C4F /* Project object */;
 }

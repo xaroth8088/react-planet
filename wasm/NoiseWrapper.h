@@ -34,7 +34,6 @@ private:
     double sIntensity;
 
     double getNoise(double x, double y, double z);
-    double getScaledNoise(double x, double y, double z);
     double getOctave(double x, double y, double z, unsigned char octaves);
     double getNormalizedOctave(double x, double y, double z, unsigned char octaves);
     double ridgify(double value);
