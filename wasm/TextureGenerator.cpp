@@ -154,6 +154,21 @@ void TextureGenerator::GenerateTextures()
     unsigned short int width = resolution;
     unsigned short int height = resolution / 2;   /* The texture should have a 2:1 aspect ratio to wrap properly */
 
+    RGB waterSpecularRGB;
+    waterSpecularRGB.r = waterSpecular * 255;
+    waterSpecularRGB.g = waterSpecular * 255;
+    waterSpecularRGB.b = waterSpecular * 255;
+
+    RGB landSpecularRGB;
+    landSpecularRGB.r = 0;
+    landSpecularRGB.g = 0;
+    landSpecularRGB.b = 0;
+
+    RGB waterNormalPixel;
+    waterNormalPixel.r = 128;
+    waterNormalPixel.g = 128;
+    waterNormalPixel.b = 255;
+    
     for( unsigned int x = 0; x < width; x++ )
     {
         for( unsigned int y = 0; y < height; y++ )
@@ -161,6 +176,7 @@ void TextureGenerator::GenerateTextures()
             XYZ p0 = sphereMap(double(x) / (width - 1.0), double(y) / (height - 1.0));
             double c0 = surfaceNoise->sample(p0.x, p0.y, p0.z);
             double dr = 0.01;
+
             if (c0 > waterLevel)
             {
                 RGB c = surfaceColor(p0.x, p0.y, p0.z);
@@ -171,16 +187,11 @@ void TextureGenerator::GenerateTextures()
                     c
                 );
 
-                RGB specularC;
-                specularC.r = 0;
-                specularC.g = 0;
-                specularC.b = 0;
-
                 setPixel(
                     specularBuffer,
                     x,
                     y,
-                    specularC
+                    landSpecularRGB
                 );
 
                 XYZ px = sphereMap((double(x) + dr) / (double(width) - 1.0), double(y) / (double(height) - 1.0));
@@ -209,22 +220,18 @@ void TextureGenerator::GenerateTextures()
             {
                 double q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
                 double q0 = 1.0 - q1;
-                RGB rgb;
-                rgb.r = waterDeep.r * q0 + waterShallow.r * q1;
-                rgb.g = waterDeep.g * q0 + waterShallow.g * q1;
-                rgb.b = waterDeep.b * q0 + waterShallow.b * q1;
+
+                RGB waterColor;
+                waterColor.r = waterDeep.r * q0 + waterShallow.r * q1;
+                waterColor.g = waterDeep.g * q0 + waterShallow.g * q1;
+                waterColor.b = waterDeep.b * q0 + waterShallow.b * q1;
 
                 setPixel(
                     diffuseBuffer,
                     x,
                     y,
-                    rgb
+                    waterColor
                 );
-
-                RGB waterSpecularRGB;
-                waterSpecularRGB.r = waterSpecular * 255;
-                waterSpecularRGB.g = waterSpecular * 255;
-                waterSpecularRGB.b = waterSpecular * 255;
 
                 setPixel(
                     specularBuffer,
@@ -233,16 +240,11 @@ void TextureGenerator::GenerateTextures()
                     waterSpecularRGB
                 );
 
-                RGB normalPixel;
-                normalPixel.r = 128;
-                normalPixel.g = 128;
-                normalPixel.b = 255;
-
                 setPixel(
                     normalBuffer,
                     x,
                     y,
-                    normalPixel
+                    waterNormalPixel
                 );
             }
 
