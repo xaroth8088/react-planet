@@ -11,11 +11,11 @@
 #include <iostream>
 #include "wasm/TextureGenerator.h"
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char* argv[]) {
     TextureGenerator* test = new TextureGenerator();
     test->resolution = 8192;
     test->init();
     test->GenerateTextures();
-    
+
     return 0;
 }

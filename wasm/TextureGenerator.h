@@ -3,20 +3,16 @@
 #include <stdlib.h>
 #include "NoiseWrapper.h"
 
-struct RGB
-{
+struct RGB {
     unsigned char r, g, b;
 };
 
-struct XYZ
-{
+struct XYZ {
     double x, y, z;
 };
 
-class TextureGenerator
-{
-
-public:
+class TextureGenerator {
+   public:
     double surfaceSeed = 0;
     double landSeed = 1;
     double cloudSeed = 2;
@@ -75,10 +71,11 @@ public:
     void init();
     RGB surfaceColor(double x, double y, double z);
     RGB UL2RGB(unsigned long dwColor);
-    void setPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color);
-    void setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity);
+    void setPixel(unsigned char *buffer, unsigned int x, unsigned int y,
+                  RGB color);
+    void setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y,
+                       RGB color, unsigned int opacity);
     unsigned long int getTextureSize(bool isClouds);
-
 
     void GenerateTextures();
 };

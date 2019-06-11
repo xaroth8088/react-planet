@@ -4,11 +4,11 @@
 
 using namespace emscripten;
 
-
 class EmscriptenWrapper {
-private:
+   private:
     TextureGenerator* generator;
-public:
+
+   public:
     EmscriptenWrapper(val options);
 
     void ParseOptions(val options);
