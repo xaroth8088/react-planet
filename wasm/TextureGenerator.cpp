@@ -164,8 +164,8 @@ void TextureGenerator::GenerateTextures() {
 
                 // Look at the points next to us to determine what our normal
                 // should be
-                unsigned int tempX = (x + 1) % width;
-                unsigned int tempY = (y + 1) % height;
+                unsigned int tempX = (x + 1) % (width - 1);
+                unsigned int tempY = (y + 1) % (height - 1);
 
                 double cx = heightMap[y * width + tempX];
                 double cy = heightMap[tempY * width + x];
