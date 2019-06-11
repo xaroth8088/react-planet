@@ -169,13 +169,26 @@ void TextureGenerator::GenerateTextures()
     waterNormalPixel.g = 128;
     waterNormalPixel.b = 255;
     
+    RGB waterColor;
+
+    double* heightMap = new double[width * height];
+
+    // Pre-calculate the noise, since we'll need to refer to nearby points later when calculating normals
     for( unsigned int x = 0; x < width; x++ )
     {
         for( unsigned int y = 0; y < height; y++ )
         {
             XYZ p0 = sphereMap(double(x) / (width - 1.0), double(y) / (height - 1.0));
-            double c0 = surfaceNoise->sample(p0.x, p0.y, p0.z);
-            double dr = 0.01;
+            heightMap[y * width + x] = surfaceNoise->sample(p0.x, p0.y, p0.z);
+        }
+    }
+
+    for( unsigned int x = 0; x < width; x++ )
+    {
+        for( unsigned int y = 0; y < height; y++ )
+        {
+            XYZ p0 = sphereMap(double(x) / (width - 1.0), double(y) / (height - 1.0));
+            double c0 = heightMap[y * width + x];
 
             if (c0 > waterLevel)
             {
@@ -194,17 +207,19 @@ void TextureGenerator::GenerateTextures()
                     landSpecularRGB
                 );
 
-                XYZ px = sphereMap((double(x) + dr) / (double(width) - 1.0), double(y) / (double(height) - 1.0));
-                XYZ py = sphereMap(double(x) / (double(width) - 1.0), (double(y) + dr) / (double(height) - 1.0));
-                double cx = surfaceNoise->sample(px.x, px.y, px.z);
-                double cy = surfaceNoise->sample(py.x, py.y, py.z);
+                // Look at the points next to us to determine what our normal should be
+                unsigned int tempX = (x + 1) % width;
+                unsigned int tempY = (y + 1) % height;
+                
+                double cx = heightMap[y * width + tempX];
+                double cy = heightMap[tempY * width + x];
 
                 XYZ n = normalizedCrossProduct(
-                            dr / (double(width) - 1.0),
+                            1.0 / double(width),
                             0.0,
                             (cx - c0),
                             0.0,
-                            dr / (double(height) - 1.0),
+                            1.0 / double(height),
                             (cy - c0)
                         );
 
@@ -218,10 +233,11 @@ void TextureGenerator::GenerateTextures()
             }
             else
             {
+                // For the "below water" case, there's no additional sampling - we simply blend the
+                // shallow and deep water colors based on how deep the water is at this point.
                 double q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
                 double q0 = 1.0 - q1;
 
-                RGB waterColor;
                 waterColor.r = waterDeep.r * q0 + waterShallow.r * q1;
                 waterColor.g = waterDeep.g * q0 + waterShallow.g * q1;
                 waterColor.b = waterDeep.b * q0 + waterShallow.b * q1;
@@ -248,14 +264,12 @@ void TextureGenerator::GenerateTextures()
                 );
             }
 
-            double i = cloudNoise->sample(p0.x, p0.y, p0.z) * cloudOpacity;
-
             setCloudPixel(
                 cloudBuffer,
                 x,
                 y,
                 cloudColor,
-                i * 255
+                cloudNoise->sample(p0.x, p0.y, p0.z) * cloudOpacity * 255   // Cloud opacity at this point
             );
         }
     }

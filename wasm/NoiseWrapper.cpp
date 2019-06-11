@@ -28,11 +28,6 @@ NoiseWrapper::NoiseWrapper(
     noise = new Noise(seed);
 };
 
-double NoiseWrapper::getNoise(double x, double y, double z)
-{
-    return noise->eval(x, y, z);
-}
-
 double NoiseWrapper::getOctave(double x, double y, double z, unsigned char octaves)
 {
     double val = 0;
@@ -40,7 +35,7 @@ double NoiseWrapper::getOctave(double x, double y, double z, unsigned char octav
 
     for (unsigned char i = 0; i < octaves; i++)
     {
-        val += (0.5 + getNoise(x * scale, y * scale, z * scale)) / scale;
+        val += (0.5 + noise->eval(x * scale, y * scale, z * scale)) / scale;
         scale *= 2.0;
     }
 

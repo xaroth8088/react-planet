@@ -13,7 +13,7 @@
 
 int main(int argc, const char * argv[]) {
     TextureGenerator* test = new TextureGenerator();
-    test->resolution = 4096;
+    test->resolution = 8192;
     test->init();
     test->GenerateTextures();
     
