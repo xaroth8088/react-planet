@@ -72,13 +72,13 @@ public:
     NoiseWrapper *landNoise;
     NoiseWrapper *cloudNoise;
 
+    void init();
     RGB surfaceColor(double x, double y, double z);
     RGB UL2RGB(unsigned long dwColor);
     void setPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color);
     void setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity);
-    int getTextureSize(bool isClouds);
+    unsigned long int getTextureSize(bool isClouds);
 
-    TextureGenerator();
 
     void GenerateTextures();
 };

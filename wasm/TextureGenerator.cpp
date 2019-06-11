@@ -70,48 +70,47 @@ double smootherstep(double t)
     return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
 }
 
-TextureGenerator::TextureGenerator()
-{
+void TextureGenerator::init() {
     // Initialize the noise
     surfaceNoise = new NoiseWrapper(
-        surfaceSeed,
-        surfaceiScale,
-        surfaceiOctaves,
-        surfaceiFalloff,
-        surfaceiIntensity,
-        surfaceiRidginess,
-        surfacesScale,
-        surfacesOctaves,
-        surfacesFalloff,
-        surfacesIntensity
-    );
-
+                                    surfaceSeed,
+                                    surfaceiScale,
+                                    surfaceiOctaves,
+                                    surfaceiFalloff,
+                                    surfaceiIntensity,
+                                    surfaceiRidginess,
+                                    surfacesScale,
+                                    surfacesOctaves,
+                                    surfacesFalloff,
+                                    surfacesIntensity
+                                    );
+    
     landNoise = new NoiseWrapper(
-        landSeed,
-        landiScale,
-        landiOctaves,
-        landiFalloff,
-        landiIntensity,
-        landiRidginess,
-        landsScale,
-        landsOctaves,
-        landsFalloff,
-        landsIntensity
-    );
-
+                                 landSeed,
+                                 landiScale,
+                                 landiOctaves,
+                                 landiFalloff,
+                                 landiIntensity,
+                                 landiRidginess,
+                                 landsScale,
+                                 landsOctaves,
+                                 landsFalloff,
+                                 landsIntensity
+                                 );
+    
     cloudNoise = new NoiseWrapper(
-        cloudSeed,
-        cloudiScale,
-        cloudiOctaves,
-        cloudiFalloff,
-        cloudiIntensity,
-        cloudiRidginess,
-        cloudsScale,
-        cloudsOctaves,
-        cloudsFalloff,
-        cloudsIntensity
-    );
-
+                                  cloudSeed,
+                                  cloudiScale,
+                                  cloudiOctaves,
+                                  cloudiFalloff,
+                                  cloudiIntensity,
+                                  cloudiRidginess,
+                                  cloudsScale,
+                                  cloudsOctaves,
+                                  cloudsFalloff,
+                                  cloudsIntensity
+                                  );
+    
     // Initialize the buffers
     diffuseBuffer = new unsigned char[getTextureSize(false)];
     normalBuffer = new unsigned char[getTextureSize(false)];
@@ -119,7 +118,7 @@ TextureGenerator::TextureGenerator()
     cloudBuffer = new unsigned char[getTextureSize(true)];
 }
 
-int TextureGenerator::getTextureSize(bool isClouds)
+unsigned long int TextureGenerator::getTextureSize(bool isClouds)
 {
     if (isClouds)
     {
@@ -262,7 +261,7 @@ void TextureGenerator::GenerateTextures()
 
 void TextureGenerator::setCloudPixel(unsigned char *buffer, unsigned int x, unsigned int y, RGB color, unsigned int opacity)
 {
-    int index = (y * resolution * 4) + x * 4;
+    unsigned long int index = (y * resolution * 4) + x * 4;
 
     buffer[index + 0] = color.r;
     buffer[index + 1] = color.g;

@@ -6,14 +6,16 @@
 //  Copyright © 2019 Geoffrey Benson. All rights reserved.
 //
 
+// This is effectively the unit test wrapping program
+
 #include <iostream>
 #include "wasm/TextureGenerator.h"
 
 int main(int argc, const char * argv[]) {
     TextureGenerator* test = new TextureGenerator();
+    test->resolution = 1024;
+    test->init();
     test->GenerateTextures();
-    
-    std::cout << test->cloudBuffer << "\n";
     
     return 0;
 }

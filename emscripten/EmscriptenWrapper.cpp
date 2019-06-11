@@ -290,6 +290,8 @@ void EmscriptenWrapper::ParseOptions(val options)
      //Do stuff with option value...
      }
      */
+
+     generator->init();
 }
 
 void EmscriptenWrapper::GenerateTextures()
