@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+cd "$(dirname "$0")/.."
 mkdir -p wasm_build
 source ../emsdk/emsdk_env.sh
 emcc \
@@ -21,7 +22,8 @@ emcc \
     -fno-exceptions \
     --bind \
     -o wasm_build/GenerateTexture.mjs \
-    wasm/GenerateTexture.cpp \
+    emscripten/GenerateTexture.cpp \
+    emscripten/EmscriptenWrapper.cpp \
     wasm/OpenSimplexNoise.cpp \
     wasm/TextureGenerator.cpp \
     wasm/NoiseWrapper.cpp
