@@ -1544,10 +1544,10 @@
     "@webassemblyjs/wast-parser" "1.8.5"
     "@xtuc/long" "4.2.2"
 
-"@xaroth8088/react-planet@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@xaroth8088/react-planet/-/react-planet-1.1.1.tgz#18579877d036b230dbae7e8b2b2a0bb20d7a6310"
-  integrity sha512-ENt+qETRDjSC36TgQylt1aSU9cIUWw4w7Cd6IJgv7enOVjZ7J+GYrjKh1N1wiU3vajzk0enhz6WjP/3OsbEUNg==
+"@xaroth8088/react-planet@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@xaroth8088/react-planet/-/react-planet-1.2.0.tgz#80c4658ed8b9a41c2af28b1c8f11859f1b58cafa"
+  integrity sha512-oRLxqTwA7qGlTCBCxTkZt8mBdqiGE5WcX48CZOfkapKcDQ59vmQy84TXdZTCxGJEq1lSInCU2ACGBz6IbSpMAw==
   dependencies:
     css-color-converter "^1.1.0"
     prop-types "^15.7.2"
