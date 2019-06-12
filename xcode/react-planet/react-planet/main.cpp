@@ -16,6 +16,8 @@ int main(int argc, const char* argv[]) {
     test->resolution = 8192;
     test->init();
     test->GenerateTextures();
+    
+    delete test;
 
     return 0;
 }

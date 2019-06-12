@@ -1,5 +1,4 @@
-/* Based on https://github.com/deerel/OpenSimplexNoise and used under the
- * UNLICENSE */
+/* Based on https://github.com/deerel/OpenSimplexNoise and used under the UNLICENSE */
 #include "OpenSimplexNoise.h"
 
 #include <cmath>

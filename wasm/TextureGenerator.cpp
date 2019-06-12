@@ -7,6 +7,36 @@
 
 #include "TextureGenerator.h"
 
+TextureGenerator::~TextureGenerator() {
+    if( surfaceNoise != NULL) {
+        delete surfaceNoise;
+    }
+    
+    if( landNoise != NULL) {
+        delete landNoise;
+    }
+    
+    if( cloudNoise != NULL) {
+        delete cloudNoise;
+    }
+    
+    if( diffuseBuffer != NULL) {
+        delete diffuseBuffer;
+    }
+    
+    if( normalBuffer != NULL) {
+        delete normalBuffer;
+    }
+    
+    if( specularBuffer != NULL) {
+        delete specularBuffer;
+    }
+    
+    if( cloudBuffer != NULL) {
+        delete cloudBuffer;
+    }
+}
+
 RGB TextureGenerator::UL2RGB(unsigned long dwColor) {
     RGB tmp;
 
@@ -67,6 +97,17 @@ double smootherstep(double t) {
 }
 
 void TextureGenerator::init() {
+    if (surfaceNoise != NULL) {
+        // Re-init
+        delete surfaceNoise;
+        delete landNoise;
+        delete cloudNoise;
+        delete diffuseBuffer;
+        delete normalBuffer;
+        delete specularBuffer;
+        delete cloudBuffer;
+    }
+
     // Initialize the noise
     surfaceNoise = new NoiseWrapper(
         surfaceSeed, surfaceiScale, surfaceiOctaves, surfaceiFalloff,
@@ -200,6 +241,8 @@ void TextureGenerator::GenerateTextures() {
             );
         }
     }
+    
+    delete[] heightMap;
 }
 
 void TextureGenerator::setCloudPixel(unsigned char *buffer, unsigned int x,

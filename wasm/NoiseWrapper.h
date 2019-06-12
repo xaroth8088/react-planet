@@ -10,6 +10,8 @@ class NoiseWrapper {
                  double iFalloff, double iIntensity, double iRidginess,
                  double sScale, unsigned char sOctaves, double sFalloff,
                  double sIntensity);
+    ~NoiseWrapper();
+
     double sample(double x, double y, double z);
 
    private:
