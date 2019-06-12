@@ -2,8 +2,6 @@
 
 #include "OpenSimplexNoise.h"
 
-using namespace OpenSimplexNoise;
-
 class NoiseWrapper {
    public:
     NoiseWrapper(double seed, double iScale, unsigned char iOctaves,
@@ -15,7 +13,7 @@ class NoiseWrapper {
     double sample(double x, double y, double z);
 
    private:
-    Noise *noise;
+    OpenSimplexNoise *noise;
     double seed;
     double iScale;
     unsigned char iOctaves;

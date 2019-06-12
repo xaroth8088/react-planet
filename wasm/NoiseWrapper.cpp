@@ -16,7 +16,7 @@ NoiseWrapper::NoiseWrapper(double seed, double iScale, unsigned char iOctaves,
       sOctaves(sOctaves),
       sFalloff(sFalloff),
       sIntensity(sIntensity) {
-    noise = new Noise(seed);
+    noise = new OpenSimplexNoise(seed);
 };
 
 NoiseWrapper::~NoiseWrapper() {
@@ -29,7 +29,7 @@ double NoiseWrapper::getOctave(double x, double y, double z,
     double scale = 1;
 
     for (unsigned char i = 0; i < octaves; i++) {
-        val += (0.5 + noise->eval(x * scale, y * scale, z * scale)) / scale;
+        val += (0.5 + noise->Evaluate(x * scale, y * scale, z * scale)) / scale;
         scale *= 2.0;
     }
 
