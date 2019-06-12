@@ -8,7 +8,6 @@
  Used under the UNLICENSE
  *******************************************************************************/
 #include <array>
-#include <ctime>   // time for random seed
 #include <memory>  // unique_ptr
 #include <vector>
 
@@ -201,9 +200,6 @@ class OpenSimplexNoise {
     }
 
    public:
-    OpenSimplexNoise()
-        : OpenSimplexNoise(static_cast<int64_t>(time(nullptr))) {}
-
     OpenSimplexNoise(int64_t seed) {
         std::array<char, 256> source;
         for (int i = 0; i < 256; i++) {
