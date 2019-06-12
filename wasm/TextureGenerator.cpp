@@ -8,31 +8,31 @@
 #include "TextureGenerator.h"
 
 TextureGenerator::~TextureGenerator() {
-    if( surfaceNoise != NULL) {
+    if (surfaceNoise != NULL) {
         delete surfaceNoise;
     }
-    
-    if( landNoise != NULL) {
+
+    if (landNoise != NULL) {
         delete landNoise;
     }
-    
-    if( cloudNoise != NULL) {
+
+    if (cloudNoise != NULL) {
         delete cloudNoise;
     }
-    
-    if( diffuseBuffer != NULL) {
+
+    if (diffuseBuffer != NULL) {
         delete diffuseBuffer;
     }
-    
-    if( normalBuffer != NULL) {
+
+    if (normalBuffer != NULL) {
         delete normalBuffer;
     }
-    
-    if( specularBuffer != NULL) {
+
+    if (specularBuffer != NULL) {
         delete specularBuffer;
     }
-    
-    if( cloudBuffer != NULL) {
+
+    if (cloudBuffer != NULL) {
         delete cloudBuffer;
     }
 }
@@ -241,7 +241,7 @@ void TextureGenerator::GenerateTextures() {
             );
         }
     }
-    
+
     delete[] heightMap;
 }
 

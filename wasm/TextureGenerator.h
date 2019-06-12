@@ -14,7 +14,7 @@ struct XYZ {
 class TextureGenerator {
    public:
     ~TextureGenerator();
-    
+
     double surfaceSeed = 0;
     double landSeed = 1;
     double cloudSeed = 2;

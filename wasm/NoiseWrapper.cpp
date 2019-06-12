@@ -19,9 +19,7 @@ NoiseWrapper::NoiseWrapper(double seed, double iScale, unsigned char iOctaves,
     noise = new OpenSimplexNoise(seed);
 };
 
-NoiseWrapper::~NoiseWrapper() {
-    delete noise;
-}
+NoiseWrapper::~NoiseWrapper() { delete noise; }
 
 double NoiseWrapper::getOctave(double x, double y, double z,
                                unsigned char octaves) {
