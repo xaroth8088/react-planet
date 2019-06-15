@@ -1544,10 +1544,10 @@
     "@webassemblyjs/wast-parser" "1.8.5"
     "@xtuc/long" "4.2.2"
 
-"@xaroth8088/react-planet@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@xaroth8088/react-planet/-/react-planet-1.1.1.tgz#18579877d036b230dbae7e8b2b2a0bb20d7a6310"
-  integrity sha512-ENt+qETRDjSC36TgQylt1aSU9cIUWw4w7Cd6IJgv7enOVjZ7J+GYrjKh1N1wiU3vajzk0enhz6WjP/3OsbEUNg==
+"@xaroth8088/react-planet@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@xaroth8088/react-planet/-/react-planet-1.2.0.tgz#80c4658ed8b9a41c2af28b1c8f11859f1b58cafa"
+  integrity sha512-oRLxqTwA7qGlTCBCxTkZt8mBdqiGE5WcX48CZOfkapKcDQ59vmQy84TXdZTCxGJEq1lSInCU2ACGBz6IbSpMAw==
   dependencies:
     css-color-converter "^1.1.0"
     prop-types "^15.7.2"
@@ -8103,10 +8103,10 @@ rc-animate@2.x:
     raf "^3.4.0"
     react-lifecycles-compat "^3.0.4"
 
-rc-slider@^8.6.12:
-  version "8.6.12"
-  resolved "https://registry.yarnpkg.com/rc-slider/-/rc-slider-8.6.12.tgz#40bb0a6e35f13183f08a3e6aa9a2adbd8dabd39d"
-  integrity sha512-mfYRg7H/smb2MlbqAB+/a34e8PeVqAr7t7hrfSS5+0njuDin4qCwoUHkX1jygGeEwtMAdGJ3buE0wRW988R7Xw==
+rc-slider@^8.6.13:
+  version "8.6.13"
+  resolved "https://registry.yarnpkg.com/rc-slider/-/rc-slider-8.6.13.tgz#88a8150c2dda6709f3f119135de11fba80af765b"
+  integrity sha512-fCUe8pPn8n9pq1ARX44nN2nzJoATtna4x/PdskUrxIvZXN8ja7HuceN/hq6kokZjo3FBD2B1yMZvZh6oi68l6Q==
   dependencies:
     babel-runtime "6.x"
     classnames "^2.2.5"
