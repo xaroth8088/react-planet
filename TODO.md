@@ -1,7 +1,5 @@
 # Library 
-* A more sophisticated load-once approach for the wasm library
 * BUG IN LIBRARY: isn't freeing memory well?
-* OPTIMIZATION IN LIBRARY: ensure that we're not loading the library more than once
 * BUG IN LIBRARY: doesn't automatically redraw when props change
 * Can we move opacity of clouds into the renderer instead of requiring a new texture be generated when this changes?
 * Callback for when texture generation is complete; this permits us to wrap it all in a promise over in JS-land
@@ -12,6 +10,7 @@
 * Generating the textures can be time-consuming, so explore options to avoid locking the UI (promise + wireframe placeholder?  Progressive texture rendering?)
 * Add params for planet and cloud rotation speeds
 * Add params for planet and cloud rotation speeds on the x-axis
+* Resilience for failure of the wasm module to load (in Application.js::loadModule())
 
 # Demo Page
 * De-bounce changes in controls
