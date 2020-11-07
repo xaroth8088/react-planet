@@ -8,6 +8,11 @@ const modulesDir = path.join(baseDir, 'node_modules');
 
 module.exports = {
     mode: 'development',
+    devtool: 'source-map',
+
+    experiments: {
+        asyncWebAssembly: true
+    },
 
     entry: [
         'views/Planet.js'

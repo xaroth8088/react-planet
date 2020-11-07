@@ -57,12 +57,10 @@ function App() {
         <div className="App">
             <Planet
                 key={uniqueId()}
-
                 className="planet"
                 normalScale={normalScale}
                 resolution={resolution}
                 animate={animate}
-
                 surfaceSeed={surfaceSeed}
                 surfaceiScale={surfaceiScale}
                 surfaceiOctaves={surfaceiOctaves}
@@ -73,7 +71,6 @@ function App() {
                 surfacesOctaves={surfacesOctaves}
                 surfacesFalloff={surfacesFalloff}
                 surfacesIntensity={surfacesIntensity}
-
                 landSeed={landSeed}
                 landColor1={landColor1}
                 landColor2={landColor2}
@@ -86,13 +83,11 @@ function App() {
                 landsOctaves={landsOctaves}
                 landsFalloff={landsFalloff}
                 landsIntensity={landsIntensity}
-
                 waterDeep={waterDeep}
                 waterShallow={waterShallow}
                 waterLevel={waterLevel}
                 waterSpecular={waterSpecular}
                 waterFalloff={waterFalloff}
-
                 cloudSeed={cloudSeed}
                 cloudColor={cloudColor}
                 cloudOpacity={cloudOpacity}
@@ -114,7 +109,6 @@ function App() {
                     setResolution={setResolution}
                     animate={animate}
                     setAnimate={setAnimate}
-
                     surfaceSeed={surfaceSeed}
                     setSurfaceSeed={setSurfaceSeed}
                     surfaceiScale={surfaceiScale}
@@ -135,7 +129,6 @@ function App() {
                     setSurfacesFalloff={setSurfacesFalloff}
                     surfacesIntensity={surfacesIntensity}
                     setSurfacesIntensity={setSurfacesIntensity}
-
                     landSeed={landSeed}
                     setLandSeed={setLandSeed}
                     landColor1={landColor1}
@@ -160,7 +153,6 @@ function App() {
                     setLandsFalloff={setLandsFalloff}
                     landsIntensity={landsIntensity}
                     setLandsIntensity={setLandsIntensity}
-
                     waterDeep={waterDeep}
                     setWaterDeep={setWaterDeep}
                     waterShallow={waterShallow}
@@ -171,7 +163,6 @@ function App() {
                     setWaterSpecular={setWaterSpecular}
                     waterFalloff={waterFalloff}
                     setWaterFalloff={setWaterFalloff}
-
                     cloudSeed={cloudSeed}
                     setCloudSeed={setCloudSeed}
                     cloudColor={cloudColor}

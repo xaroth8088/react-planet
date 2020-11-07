@@ -10,6 +10,10 @@ const modulesDir = path.join(baseDir, 'node_modules');
 module.exports = {
     mode: 'production',
 
+    experiments: {
+        asyncWebAssembly: true
+    },
+
     entry: [
         'views/Planet.js'
     ],
