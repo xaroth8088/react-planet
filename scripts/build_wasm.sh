@@ -14,10 +14,9 @@ emcc \
     -s EMIT_EMSCRIPTEN_METADATA=1 \
     -s STRICT=1 \
     -s SINGLE_FILE=1 \
-    -s BINARYEN_TRAP_MODE="'clamp'" \
-    -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
-    -s DOUBLE_MODE=1 \
-    -s ERROR_ON_MISSING_LIBRARIES=1 \
+    -s USE_ES6_IMPORT_META=0 \
+    -s EXPORT_ES6=1 \
+    --no-entry \
     -Os \
     -fno-exceptions \
     --bind \
