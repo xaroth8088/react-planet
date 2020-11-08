@@ -26,17 +26,17 @@ EmscriptenWrapper::EmscriptenWrapper(val options) {
 void EmscriptenWrapper::ParseOptions(val options) {
     val opt = options["surfaceSeed"];
     if (isType(opt, "number")) {
-        generator->surfaceSeed = opt.as<double>();
+        generator->surfaceSeed = opt.as<float>();
     }
 
     opt = options["landSeed"];
     if (isType(opt, "number")) {
-        generator->landSeed = opt.as<double>();
+        generator->landSeed = opt.as<float>();
     }
 
     opt = options["cloudSeed"];
     if (isType(opt, "number")) {
-        generator->cloudSeed = opt.as<double>();
+        generator->cloudSeed = opt.as<float>();
     }
 
     opt = options["resolution"];
@@ -58,7 +58,7 @@ void EmscriptenWrapper::ParseOptions(val options) {
     // Initialize all other configuration
     opt = options["surfaceiScale"];
     if (isType(opt, "number")) {
-        generator->surfaceiScale = opt.as<double>();
+        generator->surfaceiScale = opt.as<float>();
     }
 
     opt = options["surfaceiOctaves"];
@@ -68,22 +68,22 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["surfaceiFalloff"];
     if (isType(opt, "number")) {
-        generator->surfaceiFalloff = opt.as<double>();
+        generator->surfaceiFalloff = opt.as<float>();
     }
 
     opt = options["surfaceiIntensity"];
     if (isType(opt, "number")) {
-        generator->surfaceiIntensity = opt.as<double>();
+        generator->surfaceiIntensity = opt.as<float>();
     }
 
     opt = options["surfaceiRidginess"];
     if (isType(opt, "number")) {
-        generator->surfaceiRidginess = opt.as<double>();
+        generator->surfaceiRidginess = opt.as<float>();
     }
 
     opt = options["surfacesScale"];
     if (isType(opt, "number")) {
-        generator->surfacesScale = opt.as<double>();
+        generator->surfacesScale = opt.as<float>();
     }
 
     opt = options["surfacesOctaves"];
@@ -93,12 +93,12 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["surfacesFalloff"];
     if (isType(opt, "number")) {
-        generator->surfacesFalloff = opt.as<double>();
+        generator->surfacesFalloff = opt.as<float>();
     }
 
     opt = options["surfacesIntensity"];
     if (isType(opt, "number")) {
-        generator->surfacesIntensity = opt.as<double>();
+        generator->surfacesIntensity = opt.as<float>();
     }
 
     opt = options["landColor1"];
@@ -113,7 +113,7 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["landiScale"];
     if (isType(opt, "number")) {
-        generator->landiScale = opt.as<double>();
+        generator->landiScale = opt.as<float>();
     }
 
     opt = options["landiOctaves"];
@@ -123,22 +123,22 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["landiFalloff"];
     if (isType(opt, "number")) {
-        generator->landiFalloff = opt.as<double>();
+        generator->landiFalloff = opt.as<float>();
     }
 
     opt = options["landiIntensity"];
     if (isType(opt, "number")) {
-        generator->landiIntensity = opt.as<double>();
+        generator->landiIntensity = opt.as<float>();
     }
 
     opt = options["landiRidginess"];
     if (isType(opt, "number")) {
-        generator->landiRidginess = opt.as<double>();
+        generator->landiRidginess = opt.as<float>();
     }
 
     opt = options["landsScale"];
     if (isType(opt, "number")) {
-        generator->landsScale = opt.as<double>();
+        generator->landsScale = opt.as<float>();
     }
 
     opt = options["landsOctaves"];
@@ -148,12 +148,12 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["landsFalloff"];
     if (isType(opt, "number")) {
-        generator->landsFalloff = opt.as<double>();
+        generator->landsFalloff = opt.as<float>();
     }
 
     opt = options["landsIntensity"];
     if (isType(opt, "number")) {
-        generator->landsIntensity = opt.as<double>();
+        generator->landsIntensity = opt.as<float>();
     }
 
     opt = options["waterDeep"];
@@ -168,17 +168,17 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["waterLevel"];
     if (isType(opt, "number")) {
-        generator->waterLevel = opt.as<double>();
+        generator->waterLevel = opt.as<float>();
     }
 
     opt = options["waterSpecular"];
     if (isType(opt, "number")) {
-        generator->waterSpecular = opt.as<double>();
+        generator->waterSpecular = opt.as<float>();
     }
 
     opt = options["waterFalloff"];
     if (isType(opt, "number")) {
-        generator->waterFalloff = opt.as<double>();
+        generator->waterFalloff = opt.as<float>();
     }
 
     opt = options["cloudColor"];
@@ -188,12 +188,12 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["cloudOpacity"];
     if (isType(opt, "number")) {
-        generator->cloudOpacity = opt.as<double>();
+        generator->cloudOpacity = opt.as<float>();
     }
 
     opt = options["cloudiScale"];
     if (isType(opt, "number")) {
-        generator->cloudiScale = opt.as<double>();
+        generator->cloudiScale = opt.as<float>();
     }
 
     opt = options["cloudiOctaves"];
@@ -203,22 +203,22 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["cloudiFalloff"];
     if (isType(opt, "number")) {
-        generator->cloudiFalloff = opt.as<double>();
+        generator->cloudiFalloff = opt.as<float>();
     }
 
     opt = options["cloudiIntensity"];
     if (isType(opt, "number")) {
-        generator->cloudiIntensity = opt.as<double>();
+        generator->cloudiIntensity = opt.as<float>();
     }
 
     opt = options["cloudiRidginess"];
     if (isType(opt, "number")) {
-        generator->cloudiRidginess = opt.as<double>();
+        generator->cloudiRidginess = opt.as<float>();
     }
 
     opt = options["cloudsScale"];
     if (isType(opt, "number")) {
-        generator->cloudsScale = opt.as<double>();
+        generator->cloudsScale = opt.as<float>();
     }
 
     opt = options["cloudsOctaves"];
@@ -228,12 +228,12 @@ void EmscriptenWrapper::ParseOptions(val options) {
 
     opt = options["cloudsFalloff"];
     if (isType(opt, "number")) {
-        generator->cloudsFalloff = opt.as<double>();
+        generator->cloudsFalloff = opt.as<float>();
     }
 
     opt = options["cloudsIntensity"];
     if (isType(opt, "number")) {
-        generator->cloudsIntensity = opt.as<double>();
+        generator->cloudsIntensity = opt.as<float>();
     }
 
     /*
