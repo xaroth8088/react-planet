@@ -4,7 +4,8 @@
  Ported from https://gist.github.com/digitalshadow/134a3a02b67cecd72181
  Originally from https://gist.github.com/KdotJPG/b1270127455a94ac5d19
  Optimised by DigitalShadow
- This version by Mark A. Ropper (Markyparky56)
+ Converted by Mark A. Ropper (Markyparky56)
+ Modified by Geoff Benson (xaroth8088)
  Used under the UNLICENSE
  *******************************************************************************/
 #include <array>
@@ -24,24 +25,6 @@ class OpenSimplexNoise {
 
    protected:
     // Contribution structs
-    struct Contribution2 {
-       public:
-        double dx, dy;
-        int xsb, ysb;
-        Contribution2 *Next;
-
-        Contribution2(double multiplier, int _xsb, int _ysb)
-            : xsb(_xsb), ysb(_ysb), Next(nullptr) {
-            dx = -_xsb - multiplier * SQUISH_2D;
-            dy = -_ysb - multiplier * SQUISH_2D;
-        }
-        ~Contribution2() {
-            if (Next != nullptr) {
-                delete Next;
-            }
-        }
-    };
-    using pContribution2 = std::unique_ptr<Contribution2>;
     struct Contribution3 {
        public:
         double dx, dy, dz;
@@ -63,31 +46,21 @@ class OpenSimplexNoise {
     using pContribution3 = std::unique_ptr<Contribution3>;
 
     // Constants
-    static const double STRETCH_2D;
     static const double STRETCH_3D;
-    static const double SQUISH_2D;
     static const double SQUISH_3D;
-    static const double NORM_2D;
     static const double NORM_3D;
 
     std::array<unsigned char, 256> perm;
-    std::array<unsigned char, 256> perm2D;
     std::array<unsigned char, 256> perm3D;
 
-    static std::array<double, 16> gradients2D;
     static std::array<double, 72> gradients3D;
 
-    static std::vector<Contribution2 *> lookup2D;
     static std::vector<Contribution3 *> lookup3D;
 
-    static std::vector<pContribution2> contributions2D;
     static std::vector<pContribution3> contributions3D;
 
     struct StaticConstructor {
         StaticConstructor() {
-            gradients2D = {
-                5, 2, 2, 5, -5, 2, -2, 5, 5, -2, 2, -5, -5, -2, -2, -5,
-            };
             gradients3D = {
                 -11, 4,  4,   -4, 11, 4,   -4,  4,   11,  11, 4,   4,
                 4,   11, 4,   4,  4,  11,  -11, -4,  4,   -4, -11, 4,
@@ -96,40 +69,6 @@ class OpenSimplexNoise {
                 4,   11, -4,  4,  4,  -11, -11, -4,  -4,  -4, -11, -4,
                 -4,  -4, -11, 11, -4, -4,  4,   -11, -4,  4,  -4,  -11,
             };
-
-            // Create Contribution2s for lookup2D
-            std::vector<std::vector<int>> base2D = {
-                {1, 1, 0, 1, 0, 1, 0, 0, 0}, {1, 1, 0, 1, 0, 1, 2, 1, 1}};
-            std::vector<int> p2D = {0, 0, 1, -1, 0, 0, -1, 1, 0, 2, 1, 1,
-                                    1, 2, 2, 0,  1, 2, 0,  2, 1, 0, 0, 0};
-            std::vector<int> lookupPairs2D = {0,  1, 1,  0, 4,  1, 17, 0,
-                                              20, 2, 21, 2, 22, 5, 23, 5,
-                                              26, 4, 39, 3, 42, 4, 43, 3};
-
-            contributions2D.resize(6);
-            for (int i = 0; i < static_cast<int>(p2D.size()); i += 4) {
-                std::vector<int> baseSet = base2D[p2D[i]];
-                Contribution2 *previous = nullptr, *current = nullptr;
-                for (int k = 0; k < static_cast<int>(baseSet.size()); k += 3) {
-                    current = new Contribution2(baseSet[k], baseSet[k + 1],
-                                                baseSet[k + 2]);
-                    if (previous == nullptr) {
-                        contributions2D[i / 4].reset(current);
-                    } else {
-                        previous->Next = current;
-                    }
-                    previous = current;
-                }
-                current->Next =
-                    new Contribution2(p2D[i + 1], p2D[i + 2], p2D[i + 3]);
-            }
-
-            lookup2D.resize(64);
-            for (int i = 0; i < static_cast<int>(lookupPairs2D.size());
-                 i += 2) {
-                lookup2D[lookupPairs2D[i]] =
-                    contributions2D[lookupPairs2D[i + 1]].get();
-            }
 
             // Create Contribution3s for lookup3D
             std::vector<std::vector<int>> base3D = {
@@ -215,55 +154,9 @@ class OpenSimplexNoise {
                 r += (i + 1);
             }
             perm[i] = source[r];
-            perm2D[i] = perm[i] & 0x0E;
             perm3D[i] = (perm[i] % 24) * 3;
             source[r] = source[i];
         }
-    }
-
-    double Evaluate(double x, double y) {
-        double stretchOffset = (x + y) * STRETCH_2D;
-        double xs = x + stretchOffset;
-        double ys = y + stretchOffset;
-
-        int xsb = FastFloor(xs);
-        int ysb = FastFloor(ys);
-
-        double squishOffset = (xsb + ysb) * SQUISH_2D;
-        double dx0 = x - (xsb + squishOffset);
-        double dy0 = y - (ysb + squishOffset);
-
-        double xins = xs - xsb;
-        double yins = ys - ysb;
-
-        double inSum = xins + yins;
-        int hash = static_cast<int>(xins - yins + 1) |
-                   static_cast<int>(inSum) << 1 |
-                   static_cast<int>(inSum + yins) << 2 |
-                   static_cast<int>(inSum + xins) << 4;
-
-        Contribution2 *c = lookup2D[hash];
-
-        double value = 0.0;
-        while (c != nullptr) {
-            double dx = dx0 + c->dx;
-            double dy = dy0 + c->dy;
-            double attn = 2 - dx * dx - dy * dy;
-            if (attn > 0) {
-                int px = xsb + c->xsb;
-                int py = ysb + c->ysb;
-
-                int i = perm2D[(perm[px & 0xFF] + py) & 0xFF];
-                double valuePart =
-                    gradients2D[i] * dx + gradients2D[i + 1] * dy;
-
-                attn *= attn;
-                value += attn * attn * valuePart;
-            }
-            c = c->Next;
-        }
-
-        return value * NORM_2D;
     }
 
     double Evaluate(double x, double y, double z) {
