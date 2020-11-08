@@ -27,11 +27,11 @@ class OpenSimplexNoise {
     // Contribution structs
     struct Contribution3 {
        public:
-        double dx, dy, dz;
+        float dx, dy, dz;
         int xsb, ysb, zsb;
         Contribution3 *Next;
 
-        Contribution3(double multiplier, int _xsb, int _ysb, int _zsb)
+        Contribution3(float multiplier, int _xsb, int _ysb, int _zsb)
             : xsb(_xsb), ysb(_ysb), zsb(_zsb), Next(nullptr) {
             dx = -xsb - multiplier * SQUISH_3D;
             dy = -ysb - multiplier * SQUISH_3D;
@@ -46,14 +46,14 @@ class OpenSimplexNoise {
     using pContribution3 = std::unique_ptr<Contribution3>;
 
     // Constants
-    static const double STRETCH_3D;
-    static const double SQUISH_3D;
-    static const double NORM_3D;
+    static const float STRETCH_3D;
+    static const float SQUISH_3D;
+    static const float NORM_3D;
 
     std::array<unsigned char, 256> perm;
     std::array<unsigned char, 256> perm3D;
 
-    static std::array<double, 72> gradients3D;
+    static std::array<float, 72> gradients3D;
 
     static std::vector<Contribution3 *> lookup3D;
 
@@ -133,7 +133,7 @@ class OpenSimplexNoise {
     };
     static StaticConstructor staticConstructor;
 
-    FORCE_INLINE static int FastFloor(double x) {
+    FORCE_INLINE static int FastFloor(float x) {
         int xi = static_cast<int>(x);
         return x < xi ? xi - 1 : xi;
     }
@@ -159,26 +159,26 @@ class OpenSimplexNoise {
         }
     }
 
-    double Evaluate(double x, double y, double z) {
-        double stretchOffset = (x + y + z) * STRETCH_3D;
-        double xs = x + stretchOffset;
-        double ys = y + stretchOffset;
-        double zs = z + stretchOffset;
+    float Evaluate(float x, float y, float z) {
+        float stretchOffset = (x + y + z) * STRETCH_3D;
+        float xs = x + stretchOffset;
+        float ys = y + stretchOffset;
+        float zs = z + stretchOffset;
 
         int xsb = FastFloor(xs);
         int ysb = FastFloor(ys);
         int zsb = FastFloor(zs);
 
-        double squishOffset = (xsb + ysb + zsb) * SQUISH_3D;
-        double dx0 = x - (xsb + squishOffset);
-        double dy0 = y - (ysb + squishOffset);
-        double dz0 = z - (zsb + squishOffset);
+        float squishOffset = (xsb + ysb + zsb) * SQUISH_3D;
+        float dx0 = x - (xsb + squishOffset);
+        float dy0 = y - (ysb + squishOffset);
+        float dz0 = z - (zsb + squishOffset);
 
-        double xins = xs - xsb;
-        double yins = ys - ysb;
-        double zins = zs - zsb;
+        float xins = xs - xsb;
+        float yins = ys - ysb;
+        float zins = zs - zsb;
 
-        double inSum = xins + yins + zins;
+        float inSum = xins + yins + zins;
         int hash = static_cast<int>(yins - zins + 1) |
                    static_cast<int>(xins - yins + 1) << 1 |
                    static_cast<int>(xins - zins + 1) << 2 |
@@ -189,13 +189,13 @@ class OpenSimplexNoise {
 
         Contribution3 *c = lookup3D[hash];
 
-        double value = 0.0;
+        float value = 0.0;
         while (c != nullptr) {
-            double dx = dx0 + c->dx;
-            double dy = dy0 + c->dy;
-            double dz = dz0 + c->dz;
+            float dx = dx0 + c->dx;
+            float dy = dy0 + c->dy;
+            float dz = dz0 + c->dz;
 
-            double attn = 2 - dx * dx - dy * dy - dz * dz;
+            float attn = 2 - dx * dx - dy * dy - dz * dz;
             if (attn > 0) {
                 int px = xsb + c->xsb;
                 int py = ysb + c->ysb;
@@ -203,7 +203,7 @@ class OpenSimplexNoise {
 
                 int i =
                     perm3D[(perm[(perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF];
-                double valuePart = gradients3D[i] * dx +
+                float valuePart = gradients3D[i] * dx +
                                    gradients3D[i + 1] * dy +
                                    gradients3D[i + 2] * dz;
 

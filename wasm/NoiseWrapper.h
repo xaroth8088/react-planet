@@ -4,29 +4,29 @@
 
 class NoiseWrapper {
    public:
-    NoiseWrapper(double seed, double iScale, unsigned char iOctaves,
-                 double iFalloff, double iIntensity, double iRidginess,
-                 double sScale, unsigned char sOctaves, double sFalloff,
-                 double sIntensity);
+    NoiseWrapper(float seed, float iScale, unsigned char iOctaves,
+                 float iFalloff, float iIntensity, float iRidginess,
+                 float sScale, unsigned char sOctaves, float sFalloff,
+                 float sIntensity);
     ~NoiseWrapper();
 
-    double sample(double x, double y, double z);
+    float sample(float x, float y, float z);
 
    private:
     OpenSimplexNoise *noise;
-    double seed;
-    double iScale;
+    float seed;
+    float iScale;
     unsigned char iOctaves;
-    double iFalloff;
-    double iIntensity;
-    double iRidginess;
-    double sScale;
+    float iFalloff;
+    float iIntensity;
+    float iRidginess;
+    float sScale;
     unsigned char sOctaves;
-    double sFalloff;
-    double sIntensity;
+    float sFalloff;
+    float sIntensity;
 
-    double getOctave(double x, double y, double z, unsigned char octaves);
-    double getNormalizedOctave(double x, double y, double z,
+    float getOctave(float x, float y, float z, unsigned char octaves);
+    float getNormalizedOctave(float x, float y, float z,
                                unsigned char octaves);
-    double ridgify(double value);
+    float ridgify(float value);
 };

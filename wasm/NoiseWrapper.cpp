@@ -2,11 +2,11 @@
 #include <algorithm>
 #include <cmath>
 
-NoiseWrapper::NoiseWrapper(double seed, double iScale, unsigned char iOctaves,
-                           double iFalloff, double iIntensity,
-                           double iRidginess, double sScale,
-                           unsigned char sOctaves, double sFalloff,
-                           double sIntensity)
+NoiseWrapper::NoiseWrapper(float seed, float iScale, unsigned char iOctaves,
+                           float iFalloff, float iIntensity,
+                           float iRidginess, float sScale,
+                           unsigned char sOctaves, float sFalloff,
+                           float sIntensity)
     : iScale(iScale),
       iOctaves(iOctaves),
       iFalloff(iFalloff),
@@ -21,10 +21,10 @@ NoiseWrapper::NoiseWrapper(double seed, double iScale, unsigned char iOctaves,
 
 NoiseWrapper::~NoiseWrapper() { delete noise; }
 
-double NoiseWrapper::getOctave(double x, double y, double z,
+float NoiseWrapper::getOctave(float x, float y, float z,
                                unsigned char octaves) {
-    double val = 0;
-    double scale = 1;
+    float val = 0;
+    float scale = 1;
 
     for (unsigned char i = 0; i < octaves; i++) {
         val += (0.5 + noise->Evaluate(x * scale, y * scale, z * scale)) / scale;
@@ -34,18 +34,18 @@ double NoiseWrapper::getOctave(double x, double y, double z,
     return val;
 }
 
-double NoiseWrapper::getNormalizedOctave(double x, double y, double z,
+float NoiseWrapper::getNormalizedOctave(float x, float y, float z,
                                          unsigned char octaves) {
-    double q = 2.0 - (1.0 / (std::pow(2.0, (octaves - 1.0))));
+    float q = 2.0 - (1.0 / (std::pow(2.0, (octaves - 1.0))));
     return getOctave(x, y, z, octaves) / q;
 }
 
-double NoiseWrapper::ridgify(double value) {
+float NoiseWrapper::ridgify(float value) {
     return 1.0 - (2.0 * abs(value - 0.5));
 }
 
-double NoiseWrapper::sample(double x, double y, double z) {
-    double offset = 0.0;
+float NoiseWrapper::sample(float x, float y, float z) {
+    float offset = 0.0;
 
     if (sOctaves > 0) {
         offset = getOctave(x / sScale, y / sScale, z / sScale, sOctaves);
@@ -54,11 +54,11 @@ double NoiseWrapper::sample(double x, double y, double z) {
         offset *= sIntensity;
     }
 
-    double value = getNormalizedOctave(x / iScale + offset, y / iScale + offset,
+    float value = getNormalizedOctave(x / iScale + offset, y / iScale + offset,
                                        z / iScale + offset, iOctaves);
 
     if (iRidginess > 0.0) {
-        double ridge =
+        float ridge =
             getNormalizedOctave(x / iScale + offset, y / iScale + offset,
                                 z / iScale + offset + 11.0, iOctaves);
 
@@ -66,7 +66,7 @@ double NoiseWrapper::sample(double x, double y, double z) {
     }
 
     value = std::pow(value, iFalloff);
-    value = std::max(0.0, std::min(1.0, value * iIntensity));
+    value = std::max(0.0f, std::min(1.0f, value * iIntensity));
 
     return value;
 }

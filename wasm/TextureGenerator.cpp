@@ -50,11 +50,11 @@ RGB TextureGenerator::UL2RGB(unsigned long dwColor) {
     return tmp;
 }
 
-XYZ sphereMap(double u, double v) {
+XYZ sphereMap(float u, float v) {
     /*  Returns the 3D cartesian coordinate of a point on
         a sphere that corresponds to the given u,v coordinate. */
-    double azimuth = 2.0 * M_PI * u;
-    double inclination = M_PI * v;
+    float azimuth = 2.0 * M_PI * u;
+    float inclination = M_PI * v;
 
     XYZ pos;
 
@@ -65,15 +65,15 @@ XYZ sphereMap(double u, double v) {
     return pos;
 }
 
-XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1,
-                           double b2, double b3) {
+XYZ normalizedCrossProduct(float a1, float a2, float a3, float b1,
+                           float b2, float b3) {
     XYZ retval;
 
     retval.x = (a2 * b3 - a3 * b2);
     retval.y = -(a1 * b3 - a3 * b1);
     retval.z = (a1 * b2 - a2 * b1);
 
-    double len = sqrt((retval.x * retval.x) + (retval.y * retval.y) +
+    float len = sqrt((retval.x * retval.x) + (retval.y * retval.y) +
                       (retval.z * retval.z));
     retval.x /= len;
     retval.y /= len;
@@ -82,7 +82,7 @@ XYZ normalizedCrossProduct(double a1, double a2, double a3, double b1,
     return retval;
 }
 
-RGB normalRGB(double x, double y, double z) {
+RGB normalRGB(float x, float y, float z) {
     RGB color;
 
     color.r = (x / 2.0 + 0.5) * 255;
@@ -92,7 +92,7 @@ RGB normalRGB(double x, double y, double z) {
     return color;
 }
 
-double smootherstep(double t) {
+float smootherstep(float t) {
     return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
 }
 
@@ -140,12 +140,12 @@ unsigned long int TextureGenerator::getTextureSize(bool isClouds) {
            3;  // Technically: resolutionX * (resolutionY / 2) * 3 bytes
 }
 
-RGB TextureGenerator::surfaceColor(double x, double y, double z) {
-    double c = landNoise->sample(x, y, z);
+RGB TextureGenerator::surfaceColor(float x, float y, float z) {
+    float c = landNoise->sample(x, y, z);
 
     // Blend landColor1 and landColor2
-    double q0 = c;
-    double q1 = 1.0 - c;
+    float q0 = c;
+    float q1 = 1.0 - c;
 
     RGB retval;
 
@@ -179,23 +179,23 @@ void TextureGenerator::GenerateTextures() {
 
     RGB waterColor;
 
-    double *heightMap = new double[width * height];
+    float *heightMap = new float[width * height];
 
     // Pre-calculate the noise, since we'll need to refer to nearby points later
     // when calculating normals
     for (unsigned int x = 0; x < width; x++) {
         for (unsigned int y = 0; y < height; y++) {
-            XYZ p0 = sphereMap(double(x) / (width - 1.0),
-                               double(y) / (height - 1.0));
+            XYZ p0 = sphereMap(float(x) / (width - 1.0),
+                               float(y) / (height - 1.0));
             heightMap[y * width + x] = surfaceNoise->sample(p0.x, p0.y, p0.z);
         }
     }
 
     for (unsigned int x = 0; x < width; x++) {
         for (unsigned int y = 0; y < height; y++) {
-            XYZ p0 = sphereMap(double(x) / (width - 1.0),
-                               double(y) / (height - 1.0));
-            double c0 = heightMap[y * width + x];
+            XYZ p0 = sphereMap(float(x) / (width - 1.0),
+                               float(y) / (height - 1.0));
+            float c0 = heightMap[y * width + x];
 
             if (c0 > waterLevel) {
                 RGB c = surfaceColor(p0.x, p0.y, p0.z);
@@ -208,12 +208,12 @@ void TextureGenerator::GenerateTextures() {
                 unsigned int tempX = (x + 1) % (width - 1);
                 unsigned int tempY = (y + 1) % (height - 1);
 
-                double cx = heightMap[y * width + tempX];
-                double cy = heightMap[tempY * width + x];
+                float cx = heightMap[y * width + tempX];
+                float cy = heightMap[tempY * width + x];
 
-                XYZ n = normalizedCrossProduct(1.0 / double(width), 0.0,
+                XYZ n = normalizedCrossProduct(1.0 / float(width), 0.0,
                                                (cx - c0), 0.0,
-                                               1.0 / double(height), (cy - c0));
+                                               1.0 / float(height), (cy - c0));
 
                 RGB normalPixel = normalRGB(n.x, -n.y, n.z);
                 setPixel(normalBuffer, x, y, normalPixel);
@@ -221,8 +221,8 @@ void TextureGenerator::GenerateTextures() {
                 // For the "below water" case, there's no additional sampling -
                 // we simply blend the shallow and deep water colors based on
                 // how deep the water is at this point.
-                double q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
-                double q0 = 1.0 - q1;
+                float q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
+                float q0 = 1.0 - q1;
 
                 waterColor.r = waterDeep.r * q0 + waterShallow.r * q1;
                 waterColor.g = waterDeep.g * q0 + waterShallow.g * q1;
