@@ -11,6 +11,7 @@
 #include <array>
 #include <memory>  // unique_ptr
 #include <vector>
+#include <wasm_simd128.h>
 
 #if defined(__clang__)  // Couldn't find one for clang
 #define FORCE_INLINE inline
@@ -161,22 +162,35 @@ class OpenSimplexNoise {
 
     float Evaluate(float x, float y, float z) {
         float stretchOffset = (x + y + z) * STRETCH_3D;
-        float xs = x + stretchOffset;
-        float ys = y + stretchOffset;
-        float zs = z + stretchOffset;
+
+        v128_t pointSIMD = wasm_f32x4_make(x, y, z, 0);
+        v128_t stretchOffsetSIMD = wasm_f32x4_splat(stretchOffset);
+        v128_t stretchResult = wasm_f32x4_add(pointSIMD, stretchOffsetSIMD);
+
+        // THIS SECTION SHOULD START WORKING AFTER CHROME 87
+//        v128_t flooredStretch = __builtin_wasm_floor_f32x4(stretchResult);
+//        int xsb = wasm_f32x4_extract_lane(flooredStretch, 0);
+//        int ysb = wasm_f32x4_extract_lane(flooredStretch, 1);
+//        int zsb = wasm_f32x4_extract_lane(flooredStretch, 2);
+        // END SECTION
+
+        // THIS SECTION CAN BE REPLACED WITH THE ABOVE AFTER CHROME 87
+        float xs = wasm_f32x4_extract_lane(stretchResult, 0);
+        float ys = wasm_f32x4_extract_lane(stretchResult, 1);
+        float zs = wasm_f32x4_extract_lane(stretchResult, 2);
 
         int xsb = FastFloor(xs);
         int ysb = FastFloor(ys);
         int zsb = FastFloor(zs);
 
-        float squishOffset = (xsb + ysb + zsb) * SQUISH_3D;
-        float dx0 = x - (xsb + squishOffset);
-        float dy0 = y - (ysb + squishOffset);
-        float dz0 = z - (zsb + squishOffset);
+        v128_t flooredStretch = wasm_f32x4_make(xsb, ysb, zsb, 0);
+        // END SECTION
 
-        float xins = xs - xsb;
-        float yins = ys - ysb;
-        float zins = zs - zsb;
+        v128_t insResult = wasm_f32x4_sub(stretchResult, flooredStretch);
+
+        float xins = wasm_f32x4_extract_lane(insResult, 0);
+        float yins = wasm_f32x4_extract_lane(insResult, 1);
+        float zins = wasm_f32x4_extract_lane(insResult, 2);
 
         float inSum = xins + yins + zins;
         int hash = static_cast<int>(yins - zins + 1) |
@@ -189,23 +203,48 @@ class OpenSimplexNoise {
 
         Contribution3 *c = lookup3D[hash];
 
+//        float dx0 = x - (xsb + squishOffset);
+//        float dy0 = y - (ysb + squishOffset);
+//        float dz0 = z - (zsb + squishOffset);
+        float squishOffset = (xsb + ysb + zsb) * SQUISH_3D;
+        v128_t squishOffsetSIMD = wasm_f32x4_splat(squishOffset);
+        v128_t sbSIMD = wasm_f32x4_make(xsb, ysb, zsb, 0);
+        v128_t dSIMDPartial = wasm_f32x4_sub(pointSIMD, sbSIMD);
+        v128_t d0SIMD = wasm_f32x4_sub(dSIMDPartial, squishOffsetSIMD);
+
         float value = 0.0;
         while (c != nullptr) {
-            float dx = dx0 + c->dx;
-            float dy = dy0 + c->dy;
-            float dz = dz0 + c->dz;
+//            float dx = dx0 + c->dx;
+//            float dy = dy0 + c->dy;
+//            float dz = dz0 + c->dz;
+            v128_t cdSIMD = wasm_f32x4_make(c->dx, c->dy, c->dz, 0);
+            v128_t dSIMD = wasm_f32x4_add(d0SIMD, cdSIMD);
+
+            float dx = wasm_f32x4_extract_lane(dSIMD, 0);
+            float dy = wasm_f32x4_extract_lane(dSIMD, 1);
+            float dz = wasm_f32x4_extract_lane(dSIMD, 2);
 
             float attn = 2 - dx * dx - dy * dy - dz * dz;
             if (attn > 0) {
-                int px = xsb + c->xsb;
-                int py = ysb + c->ysb;
-                int pz = zsb + c->zsb;
+//                int px = xsb + c->xsb;
+//                int py = ysb + c->ysb;
+//                int pz = zsb + c->zsb;
+                v128_t csbSIMD = wasm_f32x4_make(c->xsb, c->ysb, c->zsb, 0);
+                v128_t pSIMD = wasm_f32x4_add(sbSIMD, csbSIMD);
+                int px = wasm_f32x4_extract_lane(pSIMD, 0);
+                int py = wasm_f32x4_extract_lane(pSIMD, 1);
+                int pz = wasm_f32x4_extract_lane(pSIMD, 2);
 
-                int i =
-                    perm3D[(perm[(perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF];
-                float valuePart = gradients3D[i] * dx +
-                                   gradients3D[i + 1] * dy +
-                                   gradients3D[i + 2] * dz;
+                int i = perm3D[(perm[(perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF];
+
+//                float valuePart = gradients3D[i] * dx +
+//                                   gradients3D[i + 1] * dy +
+//                                   gradients3D[i + 2] * dz;
+                v128_t gradients3DSIMD = wasm_f32x4_make(gradients3D[i], gradients3D[i + 1], gradients3D[i + 2], 0);
+                v128_t dGradients3D = wasm_f32x4_mul(gradients3DSIMD, dSIMD);
+                float valuePart = wasm_f32x4_extract_lane(dGradients3D, 0)
+                                  + wasm_f32x4_extract_lane(dGradients3D, 1)
+                                  + wasm_f32x4_extract_lane(dGradients3D, 2);
 
                 attn *= attn;
                 value += attn * attn * valuePart;
