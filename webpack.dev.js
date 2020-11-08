@@ -32,7 +32,7 @@ module.exports = {
             commonjs: 'three',
             commonjs2: 'three',
             amd: 'three',
-            root: 'THREE',
+            root: 'THREE'
         }
     },
 
