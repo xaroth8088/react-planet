@@ -10,7 +10,7 @@
   "scripts": {
 	"build:watch": "webpack --config webpack.dev.js --color --progress",
 	"build": "yarn clean && webpack --config webpack.prod.js --color -p --progress",
-	"clean": "rimraf build wasm_build",
+	"clean": "rimraf build wasm_build demo-page/public/static/js lib/GenerateTexture.js",
 	"lint": "eslint lib",
 	"lint:fix": "eslint --fix lib",
 	"build:wasm": "scripts/build_wasm.sh",
