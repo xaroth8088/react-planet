@@ -3,7 +3,6 @@ cd "$(dirname "$0")/.."
 mkdir -p wasm_build
 source ../emsdk/emsdk_env.sh
 em++ \
-    -std=c++17 \
     -s WASM=1 \
     -s ENVIRONMENT=web \
     -s ASSERTIONS=0 \
@@ -18,6 +17,7 @@ em++ \
     -s MODULARIZE=1 \
     -s INVOKE_RUN=0 \
     --no-entry \
+    -std=c++20 \
     -O3 \
     -fno-exceptions \
     --bind \
