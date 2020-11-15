@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit
 mkdir -p wasm_build
+rm wasm_build/*
+
 source ../emsdk/emsdk_env.sh
 em++ \
     -s WASM=1 \
@@ -36,9 +38,9 @@ cp wasm_build/GenerateTexture.js lib/GenerateTexture.js
 #    -s SINGLE_FILE=0 \
 #    -g4 \
 #    --source-map-base /react-planet/static/js/ \
-
-# mkdir -p demo-page/public/static/js
-# cp -R emscripten demo-page/public/static/js/
-# cp -R wasm demo-page/public/static/js/
-# cp wasm_build/GenerateTexture.wasm demo-page/public/static/js/GenerateTexture.wasm
-# cp wasm_build/GenerateTexture.wasm.map demo-page/public/static/js/GenerateTexture.wasm.map
+#
+#mkdir -p demo-page/public/static/js
+#cp -R emscripten demo-page/public/static/js/
+#cp -R wasm demo-page/public/static/js/
+#cp wasm_build/GenerateTexture.wasm demo-page/public/static/js/GenerateTexture.wasm
+#cp wasm_build/GenerateTexture.wasm.map demo-page/public/static/js/GenerateTexture.wasm.map
