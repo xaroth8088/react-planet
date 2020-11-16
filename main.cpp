@@ -14,7 +14,7 @@
 int main() {
     std::cout << "BEGIN PROFILING\n";
     TextureGenerator* test = new TextureGenerator();
-    test->resolution = 2048;
+    test->resolution = 8192;
     test->init();
     test->GenerateTextures();
 

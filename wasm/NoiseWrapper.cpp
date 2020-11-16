@@ -21,46 +21,57 @@ NoiseWrapper::NoiseWrapper(float seed, float iScale, unsigned char iOctaves,
 
 NoiseWrapper::~NoiseWrapper() { delete noise; }
 
-float NoiseWrapper::getOctave(float x, float y, float z,
-                               unsigned char octaves) {
+float NoiseWrapper::getOctave(XYZ p0, unsigned char octaves) {
     float val = 0;
     float scale = 1;
+    XYZ p;
 
     for (unsigned char i = 0; i < octaves; i++) {
-        val += (0.5 + noise->Evaluate(x * scale, y * scale, z * scale)) / scale;
+        p.x = p0.x * scale;
+        p.y = p0.y * scale;
+        p.z = p0.z * scale;
+
+        val += (0.5 + noise->Evaluate(p)) / scale;
         scale *= 2.0;
     }
 
     return val;
 }
 
-float NoiseWrapper::getNormalizedOctave(float x, float y, float z,
-                                         unsigned char octaves) {
+float NoiseWrapper::getNormalizedOctave(XYZ p0, unsigned char octaves) {
     float q = 2.0 - (1.0 / (std::pow(2.0, (octaves - 1.0))));
-    return getOctave(x, y, z, octaves) / q;
+    return getOctave(p0, octaves) / q;
 }
 
 float NoiseWrapper::ridgify(float value) {
     return 1.0 - (2.0 * abs(value - 0.5));
 }
 
-float NoiseWrapper::sample(float x, float y, float z) {
+float NoiseWrapper::sample(XYZ p0) {
     float offset = 0.0;
+    XYZ p;
+    p.x = p0.x / sScale;
+    p.y = p0.y / sScale;
+    p.z = p0.z / sScale;
 
     if (sOctaves > 0) {
-        offset = getOctave(x / sScale, y / sScale, z / sScale, sOctaves);
+        offset = getOctave( p, sOctaves );
 
         offset = std::pow(offset, sFalloff);
         offset *= sIntensity;
     }
 
-    float value = getNormalizedOctave(x / iScale + offset, y / iScale + offset,
-                                       z / iScale + offset, iOctaves);
+    p.x = p0.x / iScale + offset;
+    p.y = p0.y / iScale + offset;
+    p.z = p0.z / iScale + offset;
+
+    float value = getNormalizedOctave( p, iOctaves );
 
     if (iRidginess > 0.0) {
-        float ridge =
-            getNormalizedOctave(x / iScale + offset, y / iScale + offset,
-                                z / iScale + offset + 11.0, iOctaves);
+        p.x = p0.x / iScale + offset;
+        p.y = p0.y / iScale + offset;
+        p.z = p0.z / iScale + offset + 11.0f;
+        float ridge = getNormalizedOctave( p, iOctaves );
 
         value = iRidginess * ridgify(ridge) + (1.0 - iRidginess) * value;
     }

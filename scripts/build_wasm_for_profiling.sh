@@ -15,6 +15,7 @@ em++ \
     -s EMIT_EMSCRIPTEN_METADATA=1 \
     -s USE_ES6_IMPORT_META=0 \
     -std=c++20 \
+    -msimd128 \
     --bind \
     -O3 \
     ../emscripten/GenerateTexture.cpp \

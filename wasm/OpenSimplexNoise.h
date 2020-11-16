@@ -11,14 +11,10 @@
 #include <array>
 #include <memory>  // unique_ptr
 #include <vector>
+#include <math.h>
+#include <iostream>
 
-#if defined(__clang__)  // Couldn't find one for clang
-#define FORCE_INLINE inline
-#elif defined(__GNUC__) || defined(__GNUG__)
-#define FORCE_INLINE __attribute__((always_inline))
-#elif defined(_MSC_VER)
-#define FORCE_INLINE __forceinline
-#endif
+#include "DataTypes.h"
 
 class OpenSimplexNoise {
     friend class StaticConstructor;
@@ -26,22 +22,23 @@ class OpenSimplexNoise {
    protected:
     // Contribution structs
     struct Contribution3 {
-       public:
-        float dx, dy, dz;
-        int xsb, ysb, zsb;
-        Contribution3 *Next;
+        public:
+            XYZ d;
+            iXYZ sb;
+            Contribution3 *Next;
 
-        Contribution3(float multiplier, int _xsb, int _ysb, int _zsb)
-            : xsb(_xsb), ysb(_ysb), zsb(_zsb), Next(nullptr) {
-            dx = -xsb - multiplier * SQUISH_3D;
-            dy = -ysb - multiplier * SQUISH_3D;
-            dz = -zsb - multiplier * SQUISH_3D;
-        }
-        ~Contribution3() {
-            if (Next != nullptr) {
-                delete Next;
+            Contribution3(float multiplier, iXYZ _sb) : sb(_sb), Next(nullptr) {
+                d = {
+                    -sb.x - multiplier * SQUISH_3D,
+                    -sb.y - multiplier * SQUISH_3D,
+                    -sb.z - multiplier * SQUISH_3D
+                };
             }
-        }
+            ~Contribution3() {
+                if (Next != nullptr) {
+                    delete Next;
+                }
+            }
     };
     using pContribution3 = std::unique_ptr<Contribution3>;
 
@@ -108,8 +105,8 @@ class OpenSimplexNoise {
                 auto baseSet = base3D[p3D[i]];
                 Contribution3 *previous = nullptr, *current = nullptr;
                 for (int k = 0; k < static_cast<int>(baseSet.size()); k += 4) {
-                    current = new Contribution3(baseSet[k], baseSet[k + 1],
-                                                baseSet[k + 2], baseSet[k + 3]);
+                    current = new Contribution3(baseSet[k], { baseSet[k + 1], baseSet[k + 2], baseSet[k + 3] });
+
                     if (previous == nullptr) {
                         contributions3D[i / 9] = pContribution3(current);
                     } else {
@@ -117,25 +114,34 @@ class OpenSimplexNoise {
                     }
                     previous = current;
                 }
-                current->Next = new Contribution3(p3D[i + 1], p3D[i + 2],
-                                                  p3D[i + 3], p3D[i + 4]);
-                current->Next->Next = new Contribution3(p3D[i + 5], p3D[i + 6],
-                                                        p3D[i + 7], p3D[i + 8]);
+                current->Next = new Contribution3(p3D[i + 1], { p3D[i + 2], p3D[i + 3], p3D[i + 4] });
+                current->Next->Next = new Contribution3(p3D[i + 5], { p3D[i + 6], p3D[i + 7], p3D[i + 8] });
             }
 
             lookup3D.resize(2048);
-            for (int i = 0; i < static_cast<int>(lookupPairs3D.size());
-                 i += 2) {
-                lookup3D[lookupPairs3D[i]] =
-                    contributions3D[lookupPairs3D[i + 1]].get();
+
+            for (int i = 0; i < static_cast<int>(lookupPairs3D.size()); i += 2) {
+                lookup3D[lookupPairs3D[i]] = contributions3D[lookupPairs3D[i + 1]].get();
             }
         }
     };
     static StaticConstructor staticConstructor;
 
-    FORCE_INLINE static int FastFloor(float x) {
-        int xi = static_cast<int>(x);
-        return x < xi ? xi - 1 : xi;
+    static iXYZ FastFloor(XYZ p) {
+        // TODO: when SIMD floor operations are added, revisit this function
+        iXYZ floored = {
+            static_cast<int>(p.x),
+            static_cast<int>(p.y),
+            static_cast<int>(p.z)
+        };
+
+        floored = {
+            p.x < floored.x ? floored.x - 1 : floored.x,
+            p.y < floored.y ? floored.y - 1 : floored.y,
+            p.z < floored.z ? floored.z - 1 : floored.z
+        };
+
+        return floored;
     }
 
    public:
@@ -159,53 +165,60 @@ class OpenSimplexNoise {
         }
     }
 
-    float Evaluate(float x, float y, float z) {
-        float stretchOffset = (x + y + z) * STRETCH_3D;
-        float xs = x + stretchOffset;
-        float ys = y + stretchOffset;
-        float zs = z + stretchOffset;
+    float Evaluate(XYZ p) {
+        float stretchOffset = (p.x + p.y + p.z) * STRETCH_3D;
+        XYZ s = {
+            p.x + stretchOffset,
+            p.y + stretchOffset,
+            p.z + stretchOffset
+        };
 
-        int xsb = FastFloor(xs);
-        int ysb = FastFloor(ys);
-        int zsb = FastFloor(zs);
+        iXYZ sb = FastFloor(s); // int part
 
-        float squishOffset = (xsb + ysb + zsb) * SQUISH_3D;
-        float dx0 = x - (xsb + squishOffset);
-        float dy0 = y - (ysb + squishOffset);
-        float dz0 = z - (zsb + squishOffset);
+        XYZ ins = { // frac part
+            s.x - sb.x,
+            s.y - sb.y,
+            s.z - sb.z
+        };
 
-        float xins = xs - xsb;
-        float yins = ys - ysb;
-        float zins = zs - zsb;
-
-        float inSum = xins + yins + zins;
-        int hash = static_cast<int>(yins - zins + 1) |
-                   static_cast<int>(xins - yins + 1) << 1 |
-                   static_cast<int>(xins - zins + 1) << 2 |
+        float inSum = ins.x + ins.y + ins.z;
+        int hash = static_cast<int>(ins.y - ins.z + 1) |
+                   static_cast<int>(ins.x - ins.y + 1) << 1 |
+                   static_cast<int>(ins.x - ins.z + 1) << 2 |
                    static_cast<int>(inSum) << 3 |
-                   static_cast<int>(inSum + zins) << 5 |
-                   static_cast<int>(inSum + yins) << 7 |
-                   static_cast<int>(inSum + xins) << 9;
+                   static_cast<int>(inSum + ins.z) << 5 |
+                   static_cast<int>(inSum + ins.y) << 7 |
+                   static_cast<int>(inSum + ins.x) << 9;
 
         Contribution3 *c = lookup3D[hash];
 
+        float squishOffset = (sb.x + sb.y + sb.z) * SQUISH_3D;
+        XYZ d0 = {
+            p.x - (sb.x + squishOffset),
+            p.y - (sb.y + squishOffset),
+            p.z - (sb.z + squishOffset)
+        };
+
         float value = 0.0;
         while (c != nullptr) {
-            float dx = dx0 + c->dx;
-            float dy = dy0 + c->dy;
-            float dz = dz0 + c->dz;
+            XYZ d = {
+                d0.x + c->d.x,
+                d0.y + c->d.y,
+                d0.z + c->d.z
+            };
 
-            float attn = 2 - dx * dx - dy * dy - dz * dz;
+            float attn = 2 - d.x * d.x - d.y * d.y - d.z * d.z;
             if (attn > 0) {
-                int px = xsb + c->xsb;
-                int py = ysb + c->ysb;
-                int pz = zsb + c->zsb;
+                iXYZ pa = {
+                    sb.x + c->sb.x,
+                    sb.y + c->sb.y,
+                    sb.z + c->sb.z
+                };
 
-                int i =
-                    perm3D[(perm[(perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF];
-                float valuePart = gradients3D[i] * dx +
-                                   gradients3D[i + 1] * dy +
-                                   gradients3D[i + 2] * dz;
+                int i = perm3D[(perm[(perm[pa.x & 0xFF] + pa.y) & 0xFF] + pa.z) & 0xFF];
+                float valuePart = gradients3D[i] * d.x +
+                                   gradients3D[i + 1] * d.y +
+                                   gradients3D[i + 2] * d.z;
 
                 attn *= attn;
                 value += attn * attn * valuePart;

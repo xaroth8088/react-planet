@@ -82,12 +82,12 @@ XYZ normalizedCrossProduct(float a1, float a2, float a3, float b1,
     return retval;
 }
 
-RGB normalRGB(float x, float y, float z) {
+RGB normalRGB(XYZ p) {
     RGB color;
 
-    color.r = (x / 2.0 + 0.5) * 255;
-    color.g = (y / 2.0 + 0.5) * 255;
-    color.b = (z / 2.0 + 0.5) * 255;
+    color.r = (p.x / 2.0 + 0.5) * 255;
+    color.g = (p.y / 2.0 + 0.5) * 255;
+    color.b = (p.z / 2.0 + 0.5) * 255;
 
     return color;
 }
@@ -132,16 +132,16 @@ void TextureGenerator::init() {
 
 unsigned long int TextureGenerator::getTextureSize(bool isClouds) {
     if (isClouds) {
-        return resolution * resolution *
-               2;  // Technically: resolutionX * (resolutionY / 2) * 4 bytes
+        // Technically: resolutionX * (resolutionY / 2) * 4 bytes
+        return resolution * resolution * 2;
     }
 
-    return resolution * (resolution / 2) *
-           3;  // Technically: resolutionX * (resolutionY / 2) * 3 bytes
+    // Technically: resolutionX * (resolutionY / 2) * 3 bytes
+    return resolution * (resolution / 2) * 3;
 }
 
-RGB TextureGenerator::surfaceColor(float x, float y, float z) {
-    float c = landNoise->sample(x, y, z);
+RGB TextureGenerator::surfaceColor(XYZ p) {
+    float c = landNoise->sample(p);
 
     // Blend landColor1 and landColor2
     float q0 = c;
@@ -158,9 +158,9 @@ RGB TextureGenerator::surfaceColor(float x, float y, float z) {
 
 void TextureGenerator::GenerateTextures() {
     unsigned short int width = resolution;
-    unsigned short int height =
-        resolution /
-        2; /* The texture should have a 2:1 aspect ratio to wrap properly */
+
+    /* The texture should have a 2:1 aspect ratio to wrap properly */
+    unsigned short int height = resolution / 2;
 
     RGB waterSpecularRGB;
     waterSpecularRGB.r = waterSpecular * 255;
@@ -187,7 +187,7 @@ void TextureGenerator::GenerateTextures() {
         for (unsigned int y = 0; y < height; y++) {
             XYZ p0 = sphereMap(float(x) / (width - 1.0),
                                float(y) / (height - 1.0));
-            heightMap[y * width + x] = surfaceNoise->sample(p0.x, p0.y, p0.z);
+            heightMap[y * width + x] = surfaceNoise->sample(p0);
         }
     }
 
@@ -198,7 +198,7 @@ void TextureGenerator::GenerateTextures() {
             float c0 = heightMap[y * width + x];
 
             if (c0 > waterLevel) {
-                RGB c = surfaceColor(p0.x, p0.y, p0.z);
+                RGB c = surfaceColor(p0);
                 setPixel(diffuseBuffer, x, y, c);
 
                 setPixel(specularBuffer, x, y, landSpecularRGB);
@@ -211,11 +211,17 @@ void TextureGenerator::GenerateTextures() {
                 float cx = heightMap[y * width + tempX];
                 float cy = heightMap[tempY * width + x];
 
-                XYZ n = normalizedCrossProduct(1.0 / float(width), 0.0,
-                                               (cx - c0), 0.0,
-                                               1.0 / float(height), (cy - c0));
+                XYZ n = normalizedCrossProduct(
+                    1.0 / float(width),
+                    0.0,
+                    (cx - c0),
+                    0.0,
+                    1.0 / float(height),
+                    (cy - c0)
+                );
+                n.y *= -1;
 
-                RGB normalPixel = normalRGB(n.x, -n.y, n.z);
+                RGB normalPixel = normalRGB(n);
                 setPixel(normalBuffer, x, y, normalPixel);
             } else {
                 // For the "below water" case, there's no additional sampling -
@@ -235,9 +241,12 @@ void TextureGenerator::GenerateTextures() {
                 setPixel(normalBuffer, x, y, waterNormalPixel);
             }
 
-            setCloudPixel(cloudBuffer, x, y, cloudColor,
-                          cloudNoise->sample(p0.x, p0.y, p0.z) * cloudOpacity *
-                              255  // Cloud opacity at this point
+            setCloudPixel(
+                cloudBuffer,
+                x,
+                y,
+                cloudColor,
+                cloudNoise->sample(p0) * cloudOpacity * 255  // Cloud opacity at this point
             );
         }
     }

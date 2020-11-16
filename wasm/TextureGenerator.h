@@ -1,15 +1,8 @@
 #pragma once
 
 #include <stdlib.h>
+#include "DataTypes.h"
 #include "NoiseWrapper.h"
-
-struct RGB {
-    unsigned char r, g, b;
-};
-
-struct XYZ {
-    float x, y, z;
-};
 
 class TextureGenerator {
    public:
@@ -71,7 +64,7 @@ class TextureGenerator {
     NoiseWrapper *cloudNoise;
 
     void init();
-    RGB surfaceColor(float x, float y, float z);
+    RGB surfaceColor(XYZ p);
     RGB UL2RGB(unsigned long dwColor);
     void setPixel(unsigned char *buffer, unsigned int x, unsigned int y,
                   RGB color);

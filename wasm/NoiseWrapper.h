@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DataTypes.h"
 #include "OpenSimplexNoise.h"
 
 class NoiseWrapper {
@@ -10,7 +11,7 @@ class NoiseWrapper {
                  float sIntensity);
     ~NoiseWrapper();
 
-    float sample(float x, float y, float z);
+    float sample(XYZ p);
 
    private:
     OpenSimplexNoise *noise;
@@ -25,8 +26,7 @@ class NoiseWrapper {
     float sFalloff;
     float sIntensity;
 
-    float getOctave(float x, float y, float z, unsigned char octaves);
-    float getNormalizedOctave(float x, float y, float z,
-                               unsigned char octaves);
+    float getOctave(XYZ p0, unsigned char octaves);
+    float getNormalizedOctave(XYZ p0, unsigned char octaves);
     float ridgify(float value);
 };
