@@ -98,9 +98,6 @@ Point normalizedCrossProduct(float a1, float a2, float a3, float b1, float b2, f
         wasm_f32x4_splat(len)
     );
 
-    std::cout << wasm_f32x4_extract_lane(retval, 0) << "," << wasm_f32x4_extract_lane(retval, 1) << "," << wasm_f32x4_extract_lane(retval, 2) << "," << std::endl;
-    std::cout << "----" << std::endl;
-
     return retval;
 }
 

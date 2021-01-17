@@ -44,28 +44,41 @@ float NoiseWrapper::ridgify(float value) {
 
 float NoiseWrapper::sample(Point p0) {
     float offset = 0.0;
-    Point p = wasm_f32x4_div(p0, wasm_f32x4_splat(sScale));
 
     if (sOctaves > 0) {
-        offset = getOctave( p, sOctaves );
+        Point p = wasm_f32x4_div(
+            p0,
+            wasm_f32x4_splat(sScale)
+        );
+        offset = getOctave(p, sOctaves);
 
         offset = std::pow(offset, sFalloff);
         offset *= sIntensity;
     }
 
-    p = wasm_f32x4_add(
-        wasm_f32x4_div(p0, wasm_f32x4_splat(iScale)),
+    Point i = wasm_f32x4_add(
+        wasm_f32x4_div(
+            p0,
+            wasm_f32x4_splat(iScale)
+        ),
         wasm_f32x4_splat(offset)
     );
-
-    float value = getNormalizedOctave( p, iOctaves );
+    float value = getNormalizedOctave(i, iOctaves);
 
     if (iRidginess > 0.0) {
-        p = wasm_f32x4_add(
-            wasm_f32x4_div(p0, wasm_f32x4_splat(iScale)),
-            wasm_f32x4_make(offset, offset, offset + 11.0f, 0)
+        Point r = wasm_f32x4_add(
+            wasm_f32x4_div(
+                p0,
+                wasm_f32x4_splat(iScale)
+            ),
+            wasm_f32x4_make(
+                offset,
+                offset,
+                offset + 11.0,
+                0
+            )
         );
-        float ridge = getNormalizedOctave( p, iOctaves );
+        float ridge = getNormalizedOctave(r, iOctaves);
 
         value = iRidginess * ridgify(ridge) + (1.0 - iRidginess) * value;
     }
