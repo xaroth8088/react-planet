@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <string>
+#include <iostream>
 
 #include "TextureGenerator.h"
 
@@ -66,8 +67,12 @@ Point sphereMap(float u, float v) {
     return pos;
 }
 
-Point normalizedCrossProduct(float a1, float a2, float a3, float b1,
-                           float b2, float b3) {
+Point normalizedCrossProduct(float a1, float a2, float a3, float b1, float b2, float b3) {
+//    XYZ retval;
+
+//    retval.x = (a2 * b3 - a3 * b2);
+//    retval.y = -(a1 * b3 - a3 * b1);
+//    retval.z = (a1 * b2 - a2 * b1);
     Point retval = wasm_f32x4_make(
         (a2 * b3 - a3 * b2),
         -(a1 * b3 - a3 * b1),
@@ -75,20 +80,28 @@ Point normalizedCrossProduct(float a1, float a2, float a3, float b1,
         0
     );
 
-    // The normalizing part of the function can probably be greatly improved with SSE intrinsics
-    Point retvalSquared = wasm_f32x4_mul(
-        retval,
-        retval
+//    float len = sqrt((retval.x * retval.x) + (retval.y * retval.y) +
+//                      (retval.z * retval.z));
+    float retvalOut[4];
+    wasm_v128_store(retvalOut, retval);
+    float len = sqrt(
+        (retvalOut[0] * retvalOut[0]) +
+        (retvalOut[1] * retvalOut[1]) +
+        (retvalOut[2] * retvalOut[2])
     );
 
-    float retvalSquaredOut[4];
-    wasm_v128_store(retvalSquaredOut, retvalSquared);
-
-    float len = sqrt(retvalSquaredOut[0] + retvalSquaredOut[1] + retvalSquaredOut[2]);
-    return wasm_f32x4_div(
+//    retval.x /= len;
+//    retval.y /= len;
+//    retval.z /= len;
+    retval = wasm_f32x4_div(
         retval,
         wasm_f32x4_splat(len)
     );
+
+    std::cout << wasm_f32x4_extract_lane(retval, 0) << "," << wasm_f32x4_extract_lane(retval, 1) << "," << wasm_f32x4_extract_lane(retval, 2) << "," << std::endl;
+    std::cout << "----" << std::endl;
+
+    return retval;
 }
 
 RGB normalRGB(Point p) {
