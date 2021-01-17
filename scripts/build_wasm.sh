@@ -20,6 +20,7 @@ em++ \
     -s INVOKE_RUN=0 \
     --no-entry \
     -std=c++20 \
+    -msimd128 \
     -O3 \
     -fno-exceptions \
     --bind \
@@ -40,7 +41,7 @@ cp wasm_build/GenerateTexture.js lib/GenerateTexture.js
 #    --source-map-base /react-planet/static/js/ \
 #
 #mkdir -p demo-page/public/static/js
-#cp -R emscripten demo-page/public/static/js/
-#cp -R wasm demo-page/public/static/js/
+#cp -R emscripten demo-page/public/static/
+#cp -R wasm demo-page/public/static/
 #cp wasm_build/GenerateTexture.wasm demo-page/public/static/js/GenerateTexture.wasm
 #cp wasm_build/GenerateTexture.wasm.map demo-page/public/static/js/GenerateTexture.wasm.map

@@ -200,7 +200,7 @@ void TextureGenerator::GenerateTextures() {
     RGB waterNormalPixel = {
         128,
         128,
-        128
+        255
     };
 
     RGB waterColor;

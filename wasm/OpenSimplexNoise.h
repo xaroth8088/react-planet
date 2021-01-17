@@ -29,12 +29,12 @@ class OpenSimplexNoise {
             Contribution3 *Next;
 
             Contribution3(float multiplier, Point _sb) : sb(_sb), Next(nullptr) {
-                d = wasm_f32x4_mul(
-                    wasm_f32x4_splat(-1),
-                    wasm_f32x4_add(
+                d = wasm_f32x4_sub(
+                    wasm_f32x4_mul(
                         sb,
-                        wasm_f32x4_splat(multiplier * SQUISH_3D)
-                    )
+                        wasm_f32x4_splat(-1.0f)
+                    ),
+                    wasm_f32x4_splat(multiplier * SQUISH_3D)
                 );
             }
             ~Contribution3() {
@@ -166,10 +166,11 @@ class OpenSimplexNoise {
     }
 
     float Evaluate(Point p) {
+        float pOut[4];
+        wasm_v128_store(pOut, p);
+
         float stretchOffset = STRETCH_3D * (
-            wasm_f32x4_extract_lane(p, 0) +
-            wasm_f32x4_extract_lane(p, 1) +
-            wasm_f32x4_extract_lane(p, 2)
+            pOut[0] + pOut[1] + pOut[2]
         );
 
         Point s = wasm_f32x4_add(
@@ -178,7 +179,27 @@ class OpenSimplexNoise {
         );
 
         Point sb = __builtin_wasm_floor_f32x4(s);
+///* /////////////////////////////////////////////
+        float sOut[4];
+        wasm_v128_store(sOut, s);
 
+        int sOutDown[3] = {
+            static_cast<int>(sOut[0]),
+            static_cast<int>(sOut[1]),
+            static_cast<int>(sOut[2])
+        };
+
+        Point sb2 = wasm_f32x4_make(
+            sOut[0] < sOutDown[0] ? sOutDown[0] - 1 : sOutDown[0],
+            sOut[1] < sOutDown[1] ? sOutDown[1] - 1 : sOutDown[1],
+            sOut[2] < sOutDown[2] ? sOutDown[2] - 1 : sOutDown[2],
+            0
+        );
+
+        if (wasm_f32x4_extract_lane(sb, 0) != wasm_f32x4_extract_lane(sb2, 0)) {
+            exit(-1);
+        }
+////////////////////////////////////////////// */
         Point ins = wasm_f32x4_sub(s, sb);
 
         float insOut[4];
