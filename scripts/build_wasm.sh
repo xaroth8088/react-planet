@@ -32,9 +32,6 @@ em++ \
     wasm/NoiseWrapper.cpp
 cp wasm_build/GenerateTexture.js lib/GenerateTexture.js
 
-# To enable SIMD autovectorization...
-#    -msimd128 \
-
 # To enable debugging via the demo page...
 #    -s SINGLE_FILE=0 \
 #    -g4 \
