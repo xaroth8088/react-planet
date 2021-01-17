@@ -14,7 +14,7 @@
 	"lint": "eslint lib",
 	"lint:fix": "eslint --fix lib",
 	"build:wasm": "scripts/build_wasm.sh",
-	"profile:wasm": "scripts/build_wasm_for_profiling.sh && time node --experimental-wasm-simd wasm_build/a.out.js && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep v128 | wc -l) SIMD stores\" && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep f32x4 | wc -l) SIMD f32x4 instructions\" && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep i32x4 | wc -l) SIMD i32x4 instructions\"",
+	"profile:wasm": "scripts/build_wasm_for_profiling.sh && time node --experimental-wasm-simd --wasm-simd-post-mvp wasm_build/a.out.js && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep v128 | wc -l) SIMD stores\" && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep f32x4 | wc -l) SIMD f32x4 instructions\" && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep i32x4 | wc -l) SIMD i32x4 instructions\"",
 	"prepublish": "yarn run build"
   },
   "devDependencies": {

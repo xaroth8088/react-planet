@@ -11,7 +11,7 @@ class NoiseWrapper {
                  float sIntensity);
     ~NoiseWrapper();
 
-    float sample(XYZ p);
+    float sample(Point p);
 
    private:
     OpenSimplexNoise *noise;
@@ -26,7 +26,7 @@ class NoiseWrapper {
     float sFalloff;
     float sIntensity;
 
-    float getOctave(XYZ p0, unsigned char octaves);
-    float getNormalizedOctave(XYZ p0, unsigned char octaves);
+    float getOctave(Point p0, unsigned char octaves);
+    float getNormalizedOctave(Point p0, unsigned char octaves);
     float ridgify(float value);
 };

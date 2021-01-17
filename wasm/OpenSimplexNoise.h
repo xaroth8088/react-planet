@@ -13,6 +13,7 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <wasm_simd128.h>
 
 #include "DataTypes.h"
 
@@ -23,16 +24,18 @@ class OpenSimplexNoise {
     // Contribution structs
     struct Contribution3 {
         public:
-            XYZ d;
-            iXYZ sb;
+            Point d;
+            Point sb;
             Contribution3 *Next;
 
-            Contribution3(float multiplier, iXYZ _sb) : sb(_sb), Next(nullptr) {
-                d = {
-                    -sb.x - multiplier * SQUISH_3D,
-                    -sb.y - multiplier * SQUISH_3D,
-                    -sb.z - multiplier * SQUISH_3D
-                };
+            Contribution3(float multiplier, Point _sb) : sb(_sb), Next(nullptr) {
+                d = wasm_f32x4_mul(
+                    wasm_f32x4_splat(-1),
+                    wasm_f32x4_add(
+                        sb,
+                        wasm_f32x4_splat(multiplier * SQUISH_3D)
+                    )
+                );
             }
             ~Contribution3() {
                 if (Next != nullptr) {
@@ -105,7 +108,15 @@ class OpenSimplexNoise {
                 auto baseSet = base3D[p3D[i]];
                 Contribution3 *previous = nullptr, *current = nullptr;
                 for (int k = 0; k < static_cast<int>(baseSet.size()); k += 4) {
-                    current = new Contribution3(baseSet[k], { baseSet[k + 1], baseSet[k + 2], baseSet[k + 3] });
+                    current = new Contribution3(
+                        baseSet[k],
+                        wasm_f32x4_make(
+                            baseSet[k + 1],
+                            baseSet[k + 2],
+                            baseSet[k + 3],
+                            0
+                        )
+                    );
 
                     if (previous == nullptr) {
                         contributions3D[i / 9] = pContribution3(current);
@@ -114,8 +125,14 @@ class OpenSimplexNoise {
                     }
                     previous = current;
                 }
-                current->Next = new Contribution3(p3D[i + 1], { p3D[i + 2], p3D[i + 3], p3D[i + 4] });
-                current->Next->Next = new Contribution3(p3D[i + 5], { p3D[i + 6], p3D[i + 7], p3D[i + 8] });
+                current->Next = new Contribution3(
+                    p3D[i + 1],
+                    wasm_f32x4_make(p3D[i + 2], p3D[i + 3], p3D[i + 4], 0)
+                );
+                current->Next->Next = new Contribution3(
+                    p3D[i + 5],
+                    wasm_f32x4_make( p3D[i + 6], p3D[i + 7], p3D[i + 8], 0)
+                );
             }
 
             lookup3D.resize(2048);
@@ -126,23 +143,6 @@ class OpenSimplexNoise {
         }
     };
     static StaticConstructor staticConstructor;
-
-    static iXYZ FastFloor(XYZ p) {
-        // TODO: when SIMD floor operations are added, revisit this function
-        iXYZ floored = {
-            static_cast<int>(p.x),
-            static_cast<int>(p.y),
-            static_cast<int>(p.z)
-        };
-
-        floored = {
-            p.x < floored.x ? floored.x - 1 : floored.x,
-            p.y < floored.y ? floored.y - 1 : floored.y,
-            p.z < floored.z ? floored.z - 1 : floored.z
-        };
-
-        return floored;
-    }
 
    public:
     OpenSimplexNoise(int64_t seed) {
@@ -165,60 +165,75 @@ class OpenSimplexNoise {
         }
     }
 
-    float Evaluate(XYZ p) {
-        float stretchOffset = (p.x + p.y + p.z) * STRETCH_3D;
-        XYZ s = {
-            p.x + stretchOffset,
-            p.y + stretchOffset,
-            p.z + stretchOffset
-        };
+    float Evaluate(Point p) {
+        float stretchOffset = STRETCH_3D * (
+            wasm_f32x4_extract_lane(p, 0) +
+            wasm_f32x4_extract_lane(p, 1) +
+            wasm_f32x4_extract_lane(p, 2)
+        );
 
-        iXYZ sb = FastFloor(s); // int part
+        Point s = wasm_f32x4_add(
+            p,
+            wasm_f32x4_splat(stretchOffset)
+        );
 
-        XYZ ins = { // frac part
-            s.x - sb.x,
-            s.y - sb.y,
-            s.z - sb.z
-        };
+        Point sb = __builtin_wasm_floor_f32x4(s);
 
-        float inSum = ins.x + ins.y + ins.z;
-        int hash = static_cast<int>(ins.y - ins.z + 1) |
-                   static_cast<int>(ins.x - ins.y + 1) << 1 |
-                   static_cast<int>(ins.x - ins.z + 1) << 2 |
+        Point ins = wasm_f32x4_sub(s, sb);
+
+        float insOut[4];
+        wasm_v128_store(insOut, ins);
+
+        float inSum = insOut[0] + insOut[1] + insOut[2];
+        int hash = static_cast<int>(insOut[1] - insOut[2] + 1) |
+                   static_cast<int>(insOut[0] - insOut[1] + 1) << 1 |
+                   static_cast<int>(insOut[0] - insOut[2] + 1) << 2 |
                    static_cast<int>(inSum) << 3 |
-                   static_cast<int>(inSum + ins.z) << 5 |
-                   static_cast<int>(inSum + ins.y) << 7 |
-                   static_cast<int>(inSum + ins.x) << 9;
+                   static_cast<int>(inSum + insOut[2]) << 5 |
+                   static_cast<int>(inSum + insOut[1]) << 7 |
+                   static_cast<int>(inSum + insOut[0]) << 9;
 
         Contribution3 *c = lookup3D[hash];
 
-        float squishOffset = (sb.x + sb.y + sb.z) * SQUISH_3D;
-        XYZ d0 = {
-            p.x - (sb.x + squishOffset),
-            p.y - (sb.y + squishOffset),
-            p.z - (sb.z + squishOffset)
-        };
+        float sbOut[4];
+        wasm_v128_store(sbOut, sb);
+        float squishOffset = (sbOut[0] + sbOut[1] + sbOut[2]) * SQUISH_3D;
+        Point d0 = wasm_f32x4_sub(
+            p,
+            wasm_f32x4_add(
+                sb,
+                wasm_f32x4_splat(squishOffset)
+            )
+        );
 
-        float value = 0.0;
+        float value = 0;
         while (c != nullptr) {
-            XYZ d = {
-                d0.x + c->d.x,
-                d0.y + c->d.y,
-                d0.z + c->d.z
-            };
+            Point d = wasm_f32x4_add(
+                d0, c->d
+            );
+            float dOut[4];
+            wasm_v128_store(dOut, d);
 
-            float attn = 2 - d.x * d.x - d.y * d.y - d.z * d.z;
+            Point dSquared = wasm_f32x4_mul(
+                d0,
+                d0
+            );
+
+            float dSquaredOut[4];
+            wasm_v128_store(dSquaredOut, dSquared);
+            float attn = 2 - dSquaredOut[0] - dSquaredOut[1] - dSquaredOut[2];
             if (attn > 0) {
-                iXYZ pa = {
-                    sb.x + c->sb.x,
-                    sb.y + c->sb.y,
-                    sb.z + c->sb.z
-                };
+                Point pa = wasm_f32x4_add(
+                    sb,
+                    c->sb
+                );
 
-                int i = perm3D[(perm[(perm[pa.x & 0xFF] + pa.y) & 0xFF] + pa.z) & 0xFF];
-                float valuePart = gradients3D[i] * d.x +
-                                   gradients3D[i + 1] * d.y +
-                                   gradients3D[i + 2] * d.z;
+                float paOut[4];
+                wasm_v128_store(paOut, pa);
+                int i = perm3D[(perm[(perm[static_cast<int>(paOut[0]) & 0xFF] + static_cast<int>(paOut[1])) & 0xFF] + static_cast<int>(paOut[2])) & 0xFF];
+                float valuePart = gradients3D[i] * dOut[0] +
+                                   gradients3D[i + 1] * dOut[1] +
+                                   gradients3D[i + 2] * dOut[2];
 
                 attn *= attn;
                 value += attn * attn * valuePart;

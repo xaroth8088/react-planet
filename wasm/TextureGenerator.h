@@ -64,7 +64,7 @@ class TextureGenerator {
     NoiseWrapper *cloudNoise;
 
     void init();
-    RGB surfaceColor(XYZ p);
+    RGB surfaceColor(Point p);
     RGB UL2RGB(unsigned long dwColor);
     void setPixel(unsigned char *buffer, unsigned int x, unsigned int y,
                   RGB color);
