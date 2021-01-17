@@ -67,38 +67,28 @@ Point sphereMap(float u, float v) {
     return pos;
 }
 
-Point normalizedCrossProduct(float a1, float a2, float a3, float b1, float b2, float b3) {
-//    XYZ retval;
-
-//    retval.x = (a2 * b3 - a3 * b2);
-//    retval.y = -(a1 * b3 - a3 * b1);
-//    retval.z = (a1 * b2 - a2 * b1);
-    Point retval = wasm_f32x4_make(
+v128_t normalizedCrossProduct(float a1, float a2, float a3, float b1, float b2, float b3) {
+    // Cross-product
+    v128_t crossProduct = wasm_f32x4_make(
         (a2 * b3 - a3 * b2),
         -(a1 * b3 - a3 * b1),
         (a1 * b2 - a2 * b1),
         0
     );
 
-//    float len = sqrt((retval.x * retval.x) + (retval.y * retval.y) +
-//                      (retval.z * retval.z));
-    float retvalOut[4];
-    wasm_v128_store(retvalOut, retval);
-    float len = sqrt(
-        (retvalOut[0] * retvalOut[0]) +
-        (retvalOut[1] * retvalOut[1]) +
-        (retvalOut[2] * retvalOut[2])
+    // Normalization
+    v128_t crossProductSquared = wasm_f32x4_mul(crossProduct, crossProduct);
+    float crossProductSquaredOut[4];
+    wasm_v128_store(crossProductSquaredOut, crossProductSquared);
+
+    v128_t normalizedCrossProduct = wasm_f32x4_div(
+        crossProduct,
+        wasm_f32x4_splat(
+            sqrt(crossProductSquaredOut[0] + crossProductSquaredOut[1] + crossProductSquaredOut[2])
+        )
     );
 
-//    retval.x /= len;
-//    retval.y /= len;
-//    retval.z /= len;
-    retval = wasm_f32x4_div(
-        retval,
-        wasm_f32x4_splat(len)
-    );
-
-    return retval;
+    return normalizedCrossProduct;
 }
 
 RGB normalRGB(Point p) {
