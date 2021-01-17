@@ -12,7 +12,6 @@
 #include <memory>  // unique_ptr
 #include <vector>
 #include <math.h>
-#include <iostream>
 #include <wasm_simd128.h>
 
 #include "DataTypes.h"
@@ -179,27 +178,6 @@ class OpenSimplexNoise {
         );
 
         Point sb = __builtin_wasm_floor_f32x4(s);
-///* /////////////////////////////////////////////
-        float sOut[4];
-        wasm_v128_store(sOut, s);
-
-        int sOutDown[3] = {
-            static_cast<int>(sOut[0]),
-            static_cast<int>(sOut[1]),
-            static_cast<int>(sOut[2])
-        };
-
-        Point sb2 = wasm_f32x4_make(
-            sOut[0] < sOutDown[0] ? sOutDown[0] - 1 : sOutDown[0],
-            sOut[1] < sOutDown[1] ? sOutDown[1] - 1 : sOutDown[1],
-            sOut[2] < sOutDown[2] ? sOutDown[2] - 1 : sOutDown[2],
-            0
-        );
-
-        if (wasm_f32x4_extract_lane(sb, 0) != wasm_f32x4_extract_lane(sb2, 0)) {
-            exit(-1);
-        }
-////////////////////////////////////////////// */
         Point ins = wasm_f32x4_sub(s, sb);
 
         float insOut[4];
@@ -236,8 +214,8 @@ class OpenSimplexNoise {
             wasm_v128_store(dOut, d);
 
             Point dSquared = wasm_f32x4_mul(
-                d0,
-                d0
+                d,
+                d
             );
 
             float dSquaredOut[4];
