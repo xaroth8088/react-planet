@@ -102,24 +102,24 @@ Point normalizedCrossProduct(float a1, float a2, float a3, float b1, float b2, f
 }
 
 RGB normalRGB(Point p) {
-    Point p0 = wasm_f32x4_mul(
+    Point converted = wasm_f32x4_mul(
         wasm_f32x4_add(
             wasm_f32x4_div(
                 p,
-                wasm_f32x4_splat(2)
+                wasm_f32x4_splat(2.0)
             ),
             wasm_f32x4_splat(0.5)
         ),
-        wasm_f32x4_splat(255)
+        wasm_f32x4_splat(255.0)
     );
 
-    float pOut[4];
-    wasm_v128_store(pOut, p);
+    float convertedOut[4];
+    wasm_v128_store(convertedOut, converted);
 
     RGB color = {
-        static_cast<unsigned char>(pOut[0]),
-        static_cast<unsigned char>(pOut[1]),
-        static_cast<unsigned char>(pOut[2])
+        static_cast<unsigned char>(convertedOut[0]),
+        static_cast<unsigned char>(convertedOut[1]),
+        static_cast<unsigned char>(convertedOut[2])
     };
 
     return color;

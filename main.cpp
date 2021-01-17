@@ -12,14 +12,14 @@
 #include "wasm/TextureGenerator.h"
 
 int main() {
-    std::cout << "BEGIN PROFILING\n";
+    std::cout << "BEGIN PROFILING" << std::endl;
     TextureGenerator* test = new TextureGenerator();
     test->resolution = 8192;
     test->init();
     test->GenerateTextures();
 
     delete test;
-    std::cout << "END PROFILING\n";
+    std::cout << "END PROFILING" << std::endl;
 
     return 0;
 }
