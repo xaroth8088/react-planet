@@ -68,3 +68,5 @@ node_modules/
 wasm_build/
 xcode/react-planet/react-planet.xcodeproj/project.xcworkspace/xcuserdata/
 xcode/react-planet/react-planet.xcodeproj/xcuserdata/
+demo-page/public/static/wasm
+demo-page/public/static/emscripten

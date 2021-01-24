@@ -11,14 +11,10 @@
 #include <array>
 #include <memory>  // unique_ptr
 #include <vector>
+#include <math.h>
+#include <wasm_simd128.h>
 
-#if defined(__clang__)  // Couldn't find one for clang
-#define FORCE_INLINE inline
-#elif defined(__GNUC__) || defined(__GNUG__)
-#define FORCE_INLINE __attribute__((always_inline))
-#elif defined(_MSC_VER)
-#define FORCE_INLINE __forceinline
-#endif
+#include "DataTypes.h"
 
 class OpenSimplexNoise {
     friend class StaticConstructor;
@@ -26,22 +22,25 @@ class OpenSimplexNoise {
    protected:
     // Contribution structs
     struct Contribution3 {
-       public:
-        float dx, dy, dz;
-        int xsb, ysb, zsb;
-        Contribution3 *Next;
+        public:
+            Point d;
+            Point sb;
+            Contribution3 *Next;
 
-        Contribution3(float multiplier, int _xsb, int _ysb, int _zsb)
-            : xsb(_xsb), ysb(_ysb), zsb(_zsb), Next(nullptr) {
-            dx = -xsb - multiplier * SQUISH_3D;
-            dy = -ysb - multiplier * SQUISH_3D;
-            dz = -zsb - multiplier * SQUISH_3D;
-        }
-        ~Contribution3() {
-            if (Next != nullptr) {
-                delete Next;
+            Contribution3(float multiplier, Point _sb) : sb(_sb), Next(nullptr) {
+                d = wasm_f32x4_sub(
+                    wasm_f32x4_mul(
+                        sb,
+                        wasm_f32x4_splat(-1.0f)
+                    ),
+                    wasm_f32x4_splat(multiplier * SQUISH_3D)
+                );
             }
-        }
+            ~Contribution3() {
+                if (Next != nullptr) {
+                    delete Next;
+                }
+            }
     };
     using pContribution3 = std::unique_ptr<Contribution3>;
 
@@ -108,8 +107,16 @@ class OpenSimplexNoise {
                 auto baseSet = base3D[p3D[i]];
                 Contribution3 *previous = nullptr, *current = nullptr;
                 for (int k = 0; k < static_cast<int>(baseSet.size()); k += 4) {
-                    current = new Contribution3(baseSet[k], baseSet[k + 1],
-                                                baseSet[k + 2], baseSet[k + 3]);
+                    current = new Contribution3(
+                        baseSet[k],
+                        wasm_f32x4_make(
+                            baseSet[k + 1],
+                            baseSet[k + 2],
+                            baseSet[k + 3],
+                            0
+                        )
+                    );
+
                     if (previous == nullptr) {
                         contributions3D[i / 9] = pContribution3(current);
                     } else {
@@ -117,26 +124,24 @@ class OpenSimplexNoise {
                     }
                     previous = current;
                 }
-                current->Next = new Contribution3(p3D[i + 1], p3D[i + 2],
-                                                  p3D[i + 3], p3D[i + 4]);
-                current->Next->Next = new Contribution3(p3D[i + 5], p3D[i + 6],
-                                                        p3D[i + 7], p3D[i + 8]);
+                current->Next = new Contribution3(
+                    p3D[i + 1],
+                    wasm_f32x4_make(p3D[i + 2], p3D[i + 3], p3D[i + 4], 0)
+                );
+                current->Next->Next = new Contribution3(
+                    p3D[i + 5],
+                    wasm_f32x4_make( p3D[i + 6], p3D[i + 7], p3D[i + 8], 0)
+                );
             }
 
             lookup3D.resize(2048);
-            for (int i = 0; i < static_cast<int>(lookupPairs3D.size());
-                 i += 2) {
-                lookup3D[lookupPairs3D[i]] =
-                    contributions3D[lookupPairs3D[i + 1]].get();
+
+            for (int i = 0; i < static_cast<int>(lookupPairs3D.size()); i += 2) {
+                lookup3D[lookupPairs3D[i]] = contributions3D[lookupPairs3D[i + 1]].get();
             }
         }
     };
     static StaticConstructor staticConstructor;
-
-    FORCE_INLINE static int FastFloor(float x) {
-        int xi = static_cast<int>(x);
-        return x < xi ? xi - 1 : xi;
-    }
 
    public:
     OpenSimplexNoise(int64_t seed) {
@@ -159,53 +164,75 @@ class OpenSimplexNoise {
         }
     }
 
-    float Evaluate(float x, float y, float z) {
-        float stretchOffset = (x + y + z) * STRETCH_3D;
-        float xs = x + stretchOffset;
-        float ys = y + stretchOffset;
-        float zs = z + stretchOffset;
+    float Evaluate(Point p) {
+        float pOut[4];
+        wasm_v128_store(pOut, p);
 
-        int xsb = FastFloor(xs);
-        int ysb = FastFloor(ys);
-        int zsb = FastFloor(zs);
+        float stretchOffset = STRETCH_3D * (
+            pOut[0] + pOut[1] + pOut[2]
+        );
 
-        float squishOffset = (xsb + ysb + zsb) * SQUISH_3D;
-        float dx0 = x - (xsb + squishOffset);
-        float dy0 = y - (ysb + squishOffset);
-        float dz0 = z - (zsb + squishOffset);
+        Point s = wasm_f32x4_add(
+            p,
+            wasm_f32x4_splat(stretchOffset)
+        );
 
-        float xins = xs - xsb;
-        float yins = ys - ysb;
-        float zins = zs - zsb;
+        Point sb = __builtin_wasm_floor_f32x4(s);
+        Point ins = wasm_f32x4_sub(s, sb);
 
-        float inSum = xins + yins + zins;
-        int hash = static_cast<int>(yins - zins + 1) |
-                   static_cast<int>(xins - yins + 1) << 1 |
-                   static_cast<int>(xins - zins + 1) << 2 |
+        float insOut[4];
+        wasm_v128_store(insOut, ins);
+
+        float inSum = insOut[0] + insOut[1] + insOut[2];
+        int hash = static_cast<int>(insOut[1] - insOut[2] + 1) |
+                   static_cast<int>(insOut[0] - insOut[1] + 1) << 1 |
+                   static_cast<int>(insOut[0] - insOut[2] + 1) << 2 |
                    static_cast<int>(inSum) << 3 |
-                   static_cast<int>(inSum + zins) << 5 |
-                   static_cast<int>(inSum + yins) << 7 |
-                   static_cast<int>(inSum + xins) << 9;
+                   static_cast<int>(inSum + insOut[2]) << 5 |
+                   static_cast<int>(inSum + insOut[1]) << 7 |
+                   static_cast<int>(inSum + insOut[0]) << 9;
 
         Contribution3 *c = lookup3D[hash];
 
-        float value = 0.0;
+        float sbOut[4];
+        wasm_v128_store(sbOut, sb);
+        float squishOffset = (sbOut[0] + sbOut[1] + sbOut[2]) * SQUISH_3D;
+        Point d0 = wasm_f32x4_sub(
+            p,
+            wasm_f32x4_add(
+                sb,
+                wasm_f32x4_splat(squishOffset)
+            )
+        );
+
+        float value = 0;
         while (c != nullptr) {
-            float dx = dx0 + c->dx;
-            float dy = dy0 + c->dy;
-            float dz = dz0 + c->dz;
+            Point d = wasm_f32x4_add(
+                d0, c->d
+            );
+            float dOut[4];
+            wasm_v128_store(dOut, d);
 
-            float attn = 2 - dx * dx - dy * dy - dz * dz;
+            Point dSquared = wasm_f32x4_mul(
+                d,
+                d
+            );
+
+            float dSquaredOut[4];
+            wasm_v128_store(dSquaredOut, dSquared);
+            float attn = 2 - dSquaredOut[0] - dSquaredOut[1] - dSquaredOut[2];
             if (attn > 0) {
-                int px = xsb + c->xsb;
-                int py = ysb + c->ysb;
-                int pz = zsb + c->zsb;
+                Point pa = wasm_f32x4_add(
+                    sb,
+                    c->sb
+                );
 
-                int i =
-                    perm3D[(perm[(perm[px & 0xFF] + py) & 0xFF] + pz) & 0xFF];
-                float valuePart = gradients3D[i] * dx +
-                                   gradients3D[i + 1] * dy +
-                                   gradients3D[i + 2] * dz;
+                float paOut[4];
+                wasm_v128_store(paOut, pa);
+                int i = perm3D[(perm[(perm[static_cast<int>(paOut[0]) & 0xFF] + static_cast<int>(paOut[1])) & 0xFF] + static_cast<int>(paOut[2])) & 0xFF];
+                float valuePart = gradients3D[i] * dOut[0] +
+                                   gradients3D[i + 1] * dOut[1] +
+                                   gradients3D[i + 2] * dOut[2];
 
                 attn *= attn;
                 value += attn * attn * valuePart;

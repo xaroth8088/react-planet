@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <string>
+#include <iostream>
 
 #include "TextureGenerator.h"
 
@@ -50,44 +51,66 @@ RGB TextureGenerator::UL2RGB(unsigned long dwColor) {
     return tmp;
 }
 
-XYZ sphereMap(float u, float v) {
+Point sphereMap(float u, float v) {
     /*  Returns the 3D cartesian coordinate of a point on
         a sphere that corresponds to the given u,v coordinate. */
     float azimuth = 2.0 * M_PI * u;
     float inclination = M_PI * v;
 
-    XYZ pos;
-
-    pos.x = sin(inclination) * cos(azimuth);
-    pos.y = sin(inclination) * sin(azimuth);
-    pos.z = cos(inclination);
+    Point pos = wasm_f32x4_make(
+        sin(inclination) * cos(azimuth),
+        sin(inclination) * sin(azimuth),
+        cos(inclination),
+        0
+    );
 
     return pos;
 }
 
-XYZ normalizedCrossProduct(float a1, float a2, float a3, float b1,
-                           float b2, float b3) {
-    XYZ retval;
+v128_t normalizedCrossProduct(float a1, float a2, float a3, float b1, float b2, float b3) {
+    // Cross-product
+    v128_t crossProduct = wasm_f32x4_make(
+        (a2 * b3 - a3 * b2),
+        -(a1 * b3 - a3 * b1),
+        (a1 * b2 - a2 * b1),
+        0
+    );
 
-    retval.x = (a2 * b3 - a3 * b2);
-    retval.y = -(a1 * b3 - a3 * b1);
-    retval.z = (a1 * b2 - a2 * b1);
+    // Normalization
+    v128_t crossProductSquared = wasm_f32x4_mul(crossProduct, crossProduct);
+    float crossProductSquaredOut[4];
+    wasm_v128_store(crossProductSquaredOut, crossProductSquared);
 
-    float len = sqrt((retval.x * retval.x) + (retval.y * retval.y) +
-                      (retval.z * retval.z));
-    retval.x /= len;
-    retval.y /= len;
-    retval.z /= len;
+    v128_t normalizedCrossProduct = wasm_f32x4_div(
+        crossProduct,
+        wasm_f32x4_splat(
+            sqrt(crossProductSquaredOut[0] + crossProductSquaredOut[1] + crossProductSquaredOut[2])
+        )
+    );
 
-    return retval;
+    return normalizedCrossProduct;
 }
 
-RGB normalRGB(float x, float y, float z) {
-    RGB color;
+RGB normalRGB(Point p) {
+    Point converted = wasm_f32x4_mul(
+        wasm_f32x4_add(
+            wasm_f32x4_div(
+                p,
+                wasm_f32x4_splat(2.0)
+            ),
+            wasm_f32x4_splat(0.5)
+        ),
+        wasm_f32x4_splat(255.0)
+    );
 
-    color.r = (x / 2.0 + 0.5) * 255;
-    color.g = (y / 2.0 + 0.5) * 255;
-    color.b = (z / 2.0 + 0.5) * 255;
+    float convertedOut[4];
+    wasm_v128_store(convertedOut, converted);
+
+    RGB color = {
+        static_cast<unsigned char>(convertedOut[0]),
+        static_cast<unsigned char>(convertedOut[1]),
+        static_cast<unsigned char>(convertedOut[2])
+    };
 
     return color;
 }
@@ -132,50 +155,53 @@ void TextureGenerator::init() {
 
 unsigned long int TextureGenerator::getTextureSize(bool isClouds) {
     if (isClouds) {
-        return resolution * resolution *
-               2;  // Technically: resolutionX * (resolutionY / 2) * 4 bytes
+        // Technically: resolutionX * (resolutionY / 2) * 4 bytes
+        return resolution * resolution * 2;
     }
 
-    return resolution * (resolution / 2) *
-           3;  // Technically: resolutionX * (resolutionY / 2) * 3 bytes
+    // Technically: resolutionX * (resolutionY / 2) * 3 bytes
+    return resolution * (resolution / 2) * 3;
 }
 
-RGB TextureGenerator::surfaceColor(float x, float y, float z) {
-    float c = landNoise->sample(x, y, z);
+RGB TextureGenerator::surfaceColor(Point p) {
+    float c = landNoise->sample(p);
 
     // Blend landColor1 and landColor2
     float q0 = c;
     float q1 = 1.0 - c;
 
-    RGB retval;
-
-    retval.r = landColor1.r * q0 + landColor2.r * q1;
-    retval.g = landColor1.g * q0 + landColor2.g * q1;
-    retval.b = landColor1.b * q0 + landColor2.b * q1;
+    RGB retval = {
+        static_cast<unsigned char>(landColor1.r * q0 + landColor2.r * q1),
+        static_cast<unsigned char>(landColor1.g * q0 + landColor2.g * q1),
+        static_cast<unsigned char>(landColor1.b * q0 + landColor2.b * q1)
+    };
 
     return retval;
 }
 
 void TextureGenerator::GenerateTextures() {
     unsigned short int width = resolution;
-    unsigned short int height =
-        resolution /
-        2; /* The texture should have a 2:1 aspect ratio to wrap properly */
 
-    RGB waterSpecularRGB;
-    waterSpecularRGB.r = waterSpecular * 255;
-    waterSpecularRGB.g = waterSpecular * 255;
-    waterSpecularRGB.b = waterSpecular * 255;
+    /* The texture should have a 2:1 aspect ratio to wrap properly */
+    unsigned short int height = resolution / 2;
 
-    RGB landSpecularRGB;
-    landSpecularRGB.r = 0;
-    landSpecularRGB.g = 0;
-    landSpecularRGB.b = 0;
+    RGB waterSpecularRGB = {
+        static_cast<unsigned char>(waterSpecular * 255),
+        static_cast<unsigned char>(waterSpecular * 255),
+        static_cast<unsigned char>(waterSpecular * 255)
+    };
 
-    RGB waterNormalPixel;
-    waterNormalPixel.r = 128;
-    waterNormalPixel.g = 128;
-    waterNormalPixel.b = 255;
+    RGB landSpecularRGB = {
+        0,
+        0,
+        0
+    };
+
+    RGB waterNormalPixel = {
+        128,
+        128,
+        255
+    };
 
     RGB waterColor;
 
@@ -185,20 +211,20 @@ void TextureGenerator::GenerateTextures() {
     // when calculating normals
     for (unsigned int x = 0; x < width; x++) {
         for (unsigned int y = 0; y < height; y++) {
-            XYZ p0 = sphereMap(float(x) / (width - 1.0),
+            Point p0 = sphereMap(float(x) / (width - 1.0),
                                float(y) / (height - 1.0));
-            heightMap[y * width + x] = surfaceNoise->sample(p0.x, p0.y, p0.z);
+            heightMap[y * width + x] = surfaceNoise->sample(p0);
         }
     }
 
     for (unsigned int x = 0; x < width; x++) {
         for (unsigned int y = 0; y < height; y++) {
-            XYZ p0 = sphereMap(float(x) / (width - 1.0),
+            Point p0 = sphereMap(float(x) / (width - 1.0),
                                float(y) / (height - 1.0));
             float c0 = heightMap[y * width + x];
 
             if (c0 > waterLevel) {
-                RGB c = surfaceColor(p0.x, p0.y, p0.z);
+                RGB c = surfaceColor(p0);
                 setPixel(diffuseBuffer, x, y, c);
 
                 setPixel(specularBuffer, x, y, landSpecularRGB);
@@ -211,11 +237,22 @@ void TextureGenerator::GenerateTextures() {
                 float cx = heightMap[y * width + tempX];
                 float cy = heightMap[tempY * width + x];
 
-                XYZ n = normalizedCrossProduct(1.0 / float(width), 0.0,
-                                               (cx - c0), 0.0,
-                                               1.0 / float(height), (cy - c0));
+                Point n = normalizedCrossProduct(
+                    1.0 / float(width),
+                    0.0,
+                    (cx - c0),
+                    0.0,
+                    1.0 / float(height),
+                    (cy - c0)
+                );
+                n = wasm_f32x4_mul(
+                    n,
+                    wasm_f32x4_make(
+                        1, -1, 1, 1
+                    )
+                );
 
-                RGB normalPixel = normalRGB(n.x, -n.y, n.z);
+                RGB normalPixel = normalRGB(n);
                 setPixel(normalBuffer, x, y, normalPixel);
             } else {
                 // For the "below water" case, there's no additional sampling -
@@ -235,9 +272,12 @@ void TextureGenerator::GenerateTextures() {
                 setPixel(normalBuffer, x, y, waterNormalPixel);
             }
 
-            setCloudPixel(cloudBuffer, x, y, cloudColor,
-                          cloudNoise->sample(p0.x, p0.y, p0.z) * cloudOpacity *
-                              255  // Cloud opacity at this point
+            setCloudPixel(
+                cloudBuffer,
+                x,
+                y,
+                cloudColor,
+                cloudNoise->sample(p0) * cloudOpacity * 255  // Cloud opacity at this point
             );
         }
     }
