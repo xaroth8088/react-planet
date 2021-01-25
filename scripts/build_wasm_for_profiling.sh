@@ -7,13 +7,16 @@ cd wasm_build || exit
 source ../../emsdk/emsdk_env.sh
 em++ \
     -s STRICT=1 \
-    -s WASM=1 \
-    -s ASSERTIONS=0 \
+    -s ENVIRONMENT=web,worker \
+    -s ASSERTIONS=1 \
     -s MALLOC=emmalloc \
-    -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
-    -s EMIT_EMSCRIPTEN_METADATA=1 \
     -s USE_ES6_IMPORT_META=0 \
+    -s INITIAL_MEMORY=256mb \
+    -s ALLOW_BLOCKING_ON_MAIN_THREAD=0 \
+    -s EXPORT_NAME=GenerateTextureModule \
+    -s PTHREAD_POOL_SIZE=8 \
+    -pthread \
     -std=c++20 \
     -msimd128 \
     --bind \

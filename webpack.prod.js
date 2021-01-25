@@ -23,7 +23,7 @@ module.exports = {
         filename: 'index.js',
         publicPath: '',
         library: 'ReactPlanet',
-        libraryTarget: 'umd'
+        libraryTarget: 'module'
     },
 
     externals: {

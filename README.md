@@ -11,6 +11,8 @@ import Planet from '@xaroth8088/react-planet';
 <Planet />
 ```
 
+Additionally, the file `@xaroth8088/react-planet/GenerateTexture.worker.js` must be served from the same location as your `index.html` due to the way that emscripten handles threaded wasm applications.
+
 # PropTypes
 ```
         resolution: PropTypes.number, // This _MUST_ be a power of 2

@@ -1,10 +1,12 @@
 #define _USE_MATH_DEFINES
+#define NUM_THREADS 8
 #include <cmath>
 
 #include <stdlib.h>
 #include <strings.h>
 #include <string>
 #include <iostream>
+#include <pthread.h>
 
 #include "TextureGenerator.h"
 
@@ -179,6 +181,32 @@ RGB TextureGenerator::surfaceColor(Point p) {
     return retval;
 }
 
+struct thread_data {
+   int  thread_id;
+   unsigned short int width;
+   unsigned short int height;
+   float *heightMap;
+   NoiseWrapper *surfaceNoise;
+};
+
+void *NoiseThread(void *threadarg) {
+    std::cout << "TEST" << std::endl;
+    struct thread_data *my_data;
+    my_data = (struct thread_data *) threadarg;
+
+    std::cout << "Starting thread " << my_data->thread_id << std::endl;
+
+    for (unsigned int x = my_data->thread_id; x < my_data->width; x += NUM_THREADS) {
+        for (unsigned int y = 0; y < my_data->height; y++) {
+            Point p0 = sphereMap(float(x) / (my_data->width - 1.0),
+                               float(y) / (my_data->height - 1.0));
+            my_data->heightMap[y * my_data->width + x] = my_data->surfaceNoise->sample(p0);
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
 void TextureGenerator::GenerateTextures() {
     unsigned short int width = resolution;
 
@@ -209,13 +237,46 @@ void TextureGenerator::GenerateTextures() {
 
     // Pre-calculate the noise, since we'll need to refer to nearby points later
     // when calculating normals
-    for (unsigned int x = 0; x < width; x++) {
-        for (unsigned int y = 0; y < height; y++) {
-            Point p0 = sphereMap(float(x) / (width - 1.0),
-                               float(y) / (height - 1.0));
-            heightMap[y * width + x] = surfaceNoise->sample(p0);
+
+    ///////// Threading test
+    struct thread_data thread_data_array[NUM_THREADS];
+    pthread_t thread[NUM_THREADS];
+    pthread_attr_t attr;
+    int rc;
+    void *status;
+    long t;
+
+    /* Initialize and set thread detached attribute */
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+    for(t=0; t<NUM_THREADS; t++) {
+        thread_data_array[t].surfaceNoise = surfaceNoise;
+        thread_data_array[t].heightMap = heightMap;
+        thread_data_array[t].thread_id = t;
+        thread_data_array[t].width = width;
+        thread_data_array[t].height = height;
+
+        std::cout << "Init thread " << t << std::endl;
+
+        rc = pthread_create(&thread[t], &attr, NoiseThread, (void *)&thread_data_array[t]);
+        if (rc) {
+            std::cout << "ERROR; return code from pthread_create() is " << rc << std::endl;
+            exit(-1);
         }
     }
+
+    /* Free attribute and wait for the other threads */
+    pthread_attr_destroy(&attr);
+    for(t=0; t<NUM_THREADS; t++) {
+        std::cout << "Joining thread " << t << std::endl;
+        rc = pthread_join(thread[t], &status);
+        if (rc) {
+            std::cout << "ERROR; return code from pthread_join() is " << rc << std::endl;
+            exit(-1);
+        }
+        std::cout << "Main: completed join with thread " << t << "having a status of " << status << std::endl;
+    }
+    ///////// End threading test
 
     for (unsigned int x = 0; x < width; x++) {
         for (unsigned int y = 0; y < height; y++) {
