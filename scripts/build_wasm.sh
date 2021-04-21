@@ -11,7 +11,6 @@ em++ \
     -s MALLOC=emmalloc \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
-    -s EMIT_EMSCRIPTEN_METADATA=1 \
     -s STRICT=1 \
     -s SINGLE_FILE=1 \
     -s USE_ES6_IMPORT_META=0 \
