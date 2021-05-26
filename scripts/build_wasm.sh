@@ -2,16 +2,17 @@
 cd "$(dirname "$0")/.." || exit
 mkdir -p wasm_build
 rm wasm_build/*
+export NODE=''
 
 source ../emsdk/emsdk_env.sh
 em++ \
-    -s WASM=1 \
     -s ENVIRONMENT=web \
+    -s STRICT=1 \
+    -s WASM=1 \
     -s ASSERTIONS=0 \
     -s MALLOC=emmalloc \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
-    -s STRICT=1 \
     -s SINGLE_FILE=1 \
     -s USE_ES6_IMPORT_META=0 \
     -s EXPORT_ES6=1 \
