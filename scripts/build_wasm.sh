@@ -14,9 +14,8 @@ em++ \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
     -s SINGLE_FILE=1 \
-    -s USE_ES6_IMPORT_META=0 \
+    -s USE_ES6_IMPORT_META=1 \
     -s EXPORT_ES6=1 \
-    -s MODULARIZE=1 \
     -s INVOKE_RUN=0 \
     --no-entry \
     -std=c++20 \
