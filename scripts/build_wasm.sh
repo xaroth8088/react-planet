@@ -12,6 +12,7 @@ em++ \
     -s ASSERTIONS=0 \
     -s MALLOC=emmalloc \
     -s ALLOW_MEMORY_GROWTH=1 \
+    -s USE_ES6_IMPORT_META=0 \
     -s FILESYSTEM=0 \
     -s SINGLE_FILE=1 \
     -s EXPORT_ES6=1 \
@@ -32,23 +33,23 @@ em++ \
     -fno-exceptions \
     -flto \
     --bind \
-    -o wasm_build/GenerateTexture.js \
+    -o wasm_build/GenerateTexture.mjs \
     emscripten/GenerateTexture.cpp \
     emscripten/EmscriptenWrapper.cpp \
     wasm/OpenSimplexNoise.cpp \
     wasm/TextureGenerator.cpp \
     wasm/NoiseWrapper.cpp
-cp wasm_build/GenerateTexture.js lib/GenerateTexture.js
+cp wasm_build/GenerateTexture.mjs lib/GenerateTexture.mjs
 cp wasm_build/GenerateTexture.worker.js lib/GenerateTexture.worker.js
-mkdir -p demo-page/public/static/js
-cp wasm_build/GenerateTexture.wasm demo-page/public/static/js/GenerateTexture.wasm
-cp wasm_build/GenerateTexture.worker.js demo-page/public/static/js/GenerateTexture.worker.js
 
 # To enable debugging via the demo page...
 #    -s SINGLE_FILE=0 \
 #    -g4 \
 #    --source-map-base /react-planet/static/js/ \
 #
+#mkdir -p demo-page/public/static/js
 #cp -R emscripten demo-page/public/static/
 #cp -R wasm demo-page/public/static/
+#cp wasm_build/GenerateTexture.wasm demo-page/public/static/js/GenerateTexture.wasm
 #cp wasm_build/GenerateTexture.wasm.map demo-page/public/static/js/GenerateTexture.wasm.map
+#cp wasm_build/GenerateTexture.worker.js demo-page/public/static/js/GenerateTexture.worker.js
