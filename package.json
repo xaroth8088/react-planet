@@ -1,6 +1,6 @@
 {
 	"name": "@xaroth8088/react-planet",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "Procedurally generated planets in a React component",
 	"main": "build/index.js",
 	"repository": "https://github.com/xaroth8088/react-planet.git",
@@ -35,21 +35,22 @@
 		"eslint-plugin-react-hooks": "^1.6.0",
 		"rimraf": "^3.0.2",
 		"webpack": "^5.17.0",
-		"webpack-cli": "^4.4.0"
+		"webpack-cli": "^4.4.0",
+		"worker-loader": "^3.0.8"
 	},
 	"dependencies": {
 		"css-color-converter": "^2.0.0",
 		"prop-types": "^15.7.2"
 	},
 	"peerDependencies": {
-		"react": "^16.8.5",
-		"three": "^0.105.2"
+		"react": "^17.0.2",
+		"three": "^0.128.0"
 	},
 	"browserslist": [
-		"last 2 chrome versions",
-		"last 2 firefox versions",
-		"last 2 safari versions",
-		"last 2 ios versions",
-		"last 2 chromeandroid versions"
+		"last 1 chrome versions",
+		"last 1 firefox versions",
+		"last 1 safari versions",
+		"last 1 ios versions",
+		"last 1 chromeandroid versions"
 	]
 }

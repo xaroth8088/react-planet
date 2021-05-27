@@ -2961,9 +2961,9 @@
     "@xtuc/long" "4.2.2"
 
 "@xaroth8088/react-planet@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@xaroth8088/react-planet/-/react-planet-1.4.0.tgz#f6ebe01f1b6f474f22789453d4777cd2746337b2"
-  integrity sha512-WKhwcyFLWu4VOVcAoT4nOcJGV9QWZTUiw4u8zdb5fFSb2U2WKTWEtjwTDqJj+sDFR43Sp7tedZykJMHkrRbiAQ==
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@xaroth8088/react-planet/-/react-planet-1.5.0.tgz#34f13facd940623ec4799c420a2def3be3f88ad9"
+  integrity sha512-7WKJsd9/K8JIFvlQeGjtMd6y1W5e9h9ddp7uj9DZfngFFOTnrVW6sG9Da1HF6dsuHyUfSNSf6uGqmn/Oo7gI+Q==
   dependencies:
     css-color-converter "^2.0.0"
     prop-types "^15.7.2"

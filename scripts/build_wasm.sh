@@ -14,15 +14,21 @@ em++ \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
     -s SINGLE_FILE=1 \
-    -s USE_ES6_IMPORT_META=0 \
     -s EXPORT_ES6=1 \
     -s MODULARIZE=1 \
+    -s WASM_ASYNC_COMPILATION=0 \
     -s INVOKE_RUN=0 \
+    -s INCOMING_MODULE_JS_API=[] \
+    -s WASM_BIGINT=1 \
+    -s TEXTDECODER=2 \
+    -s SUPPORT_ERRNO=0 \
+    --closure 1 \
     --no-entry \
     -std=c++20 \
     -msimd128 \
     -O3 \
     -fno-exceptions \
+    -flto \
     --bind \
     -o wasm_build/GenerateTexture.js \
     emscripten/GenerateTexture.cpp \
