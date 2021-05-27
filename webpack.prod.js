@@ -48,6 +48,13 @@ module.exports = {
                 },
                 include: srcDir,
                 exclude: modulesDir
+            },
+            {
+                test: /\.worker\.js$/,
+                loader: 'worker-loader',
+                options: {
+                    inline: 'no-fallback'
+                }
             }
         ]
     },

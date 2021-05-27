@@ -2,21 +2,27 @@
 cd "$(dirname "$0")/.." || exit
 mkdir -p wasm_build
 rm wasm_build/*
+export NODE=''
 
 source ../emsdk/emsdk_env.sh
 em++ \
-    -s WASM=1 \
     -s ENVIRONMENT=worker \
+    -s STRICT=1 \
+    -s WASM=1 \
     -s ASSERTIONS=0 \
     -s MALLOC=emmalloc \
+    -s ALLOW_MEMORY_GROWTH=1 \
     -s FILESYSTEM=0 \
-    -s STRICT=1 \
     -s SINGLE_FILE=1 \
-    -s USE_ES6_IMPORT_META=0 \
     -s EXPORT_ES6=1 \
     -s MODULARIZE=1 \
+    -s WASM_ASYNC_COMPILATION=0 \
     -s INVOKE_RUN=0 \
-    -s ALLOW_BLOCKING_ON_MAIN_THREAD=0 \
+    -s INCOMING_MODULE_JS_API=[] \
+    -s WASM_BIGINT=1 \
+    -s TEXTDECODER=2 \
+    -s SUPPORT_ERRNO=0 \
+    --closure 1 \
     -s EXPORT_NAME=GenerateTextureModule \
     -pthread \
     --no-entry \
@@ -24,6 +30,7 @@ em++ \
     -msimd128 \
     -O3 \
     -fno-exceptions \
+    -flto \
     --bind \
     -o wasm_build/GenerateTexture.js \
     emscripten/GenerateTexture.cpp \
