@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@xaroth8088/react-planet": "^1.4.0",
+    "@xaroth8088/react-planet": "^1.5.0",
     "lodash": "^4.17.11",
     "prop-types": "^15.7.2",
     "rc-slider": "^9.7.2",
@@ -38,5 +38,5 @@
     "eslint-plugin-react-hooks": "^1.6.0",
     "gh-pages": "^2.0.1"
   },
-  "homepage": "http://xaroth8088.github.io/react-planet"
+  "homepage": "https://xaroth8088-react-planet.netlify.app/"
 }
