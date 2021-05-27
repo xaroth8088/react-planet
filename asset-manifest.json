@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/react-planet/static/css/main.0170f7b9.chunk.css",
-    "main.js": "/react-planet/static/js/main.3ccc8c78.chunk.js",
-    "main.js.map": "/react-planet/static/js/main.3ccc8c78.chunk.js.map",
+    "main.css": "/react-planet/static/css/main.619e03f0.chunk.css",
+    "main.js": "/react-planet/static/js/main.0947bf87.chunk.js",
+    "main.js.map": "/react-planet/static/js/main.0947bf87.chunk.js.map",
     "runtime-main.js": "/react-planet/static/js/runtime-main.cbd56bd4.js",
     "runtime-main.js.map": "/react-planet/static/js/runtime-main.cbd56bd4.js.map",
-    "static/css/2.d59c41ec.chunk.css": "/react-planet/static/css/2.d59c41ec.chunk.css",
-    "static/js/2.060d0a06.chunk.js": "/react-planet/static/js/2.060d0a06.chunk.js",
-    "static/js/2.060d0a06.chunk.js.map": "/react-planet/static/js/2.060d0a06.chunk.js.map",
+    "static/css/2.25f1cd1f.chunk.css": "/react-planet/static/css/2.25f1cd1f.chunk.css",
+    "static/js/2.0417aedd.chunk.js": "/react-planet/static/js/2.0417aedd.chunk.js",
+    "static/js/2.0417aedd.chunk.js.map": "/react-planet/static/js/2.0417aedd.chunk.js.map",
     "index.html": "/react-planet/index.html",
-    "static/css/2.d59c41ec.chunk.css.map": "/react-planet/static/css/2.d59c41ec.chunk.css.map",
-    "static/css/main.0170f7b9.chunk.css.map": "/react-planet/static/css/main.0170f7b9.chunk.css.map",
-    "static/js/2.060d0a06.chunk.js.LICENSE.txt": "/react-planet/static/js/2.060d0a06.chunk.js.LICENSE.txt",
-    "static/js/main.3ccc8c78.chunk.js.LICENSE.txt": "/react-planet/static/js/main.3ccc8c78.chunk.js.LICENSE.txt",
+    "static/css/2.25f1cd1f.chunk.css.map": "/react-planet/static/css/2.25f1cd1f.chunk.css.map",
+    "static/css/main.619e03f0.chunk.css.map": "/react-planet/static/css/main.619e03f0.chunk.css.map",
+    "static/js/2.0417aedd.chunk.js.LICENSE.txt": "/react-planet/static/js/2.0417aedd.chunk.js.LICENSE.txt",
+    "static/js/main.0947bf87.chunk.js.LICENSE.txt": "/react-planet/static/js/main.0947bf87.chunk.js.LICENSE.txt",
     "static/media/App.css": "/react-planet/static/media/seamless-starfield-texture.52b6cb54.jpg"
   },
   "entrypoints": [
     "static/js/runtime-main.cbd56bd4.js",
-    "static/css/2.d59c41ec.chunk.css",
-    "static/js/2.060d0a06.chunk.js",
-    "static/css/main.0170f7b9.chunk.css",
-    "static/js/main.3ccc8c78.chunk.js"
+    "static/css/2.25f1cd1f.chunk.css",
+    "static/js/2.0417aedd.chunk.js",
+    "static/css/main.619e03f0.chunk.css",
+    "static/js/main.0947bf87.chunk.js"
   ]
 }

@@ -12,6 +12,12 @@ object-assign
 
 /**
  * @license
+ * Copyright 2010-2021 Three.js Authors
+ * SPDX-License-Identifier: MIT
+ */
+
+/**
+ * @license
  * Lodash <https://lodash.com/>
  * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
  * Released under MIT license <https://lodash.com/license>
@@ -28,15 +34,6 @@ object-assign
  * LICENSE file in the root directory of this source tree.
  */
 
-/** @license React v16.8.6
- * react.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /** @license React v17.0.2
  * react-dom.production.min.js
  *
@@ -46,4 +43,20 @@ object-assign
  * LICENSE file in the root directory of this source tree.
  */
 
-//!\ DECLARE ALIAS AFTER assign prototype !
+/** @license React v17.0.2
+ * react-jsx-runtime.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/** @license React v17.0.2
+ * react.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
