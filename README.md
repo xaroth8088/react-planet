@@ -69,7 +69,7 @@ Not sure where to start contributing? Here's a few areas that would be helpful:
 
 # Developing
 ```
-$ yarn build:wasm   // Assumes you've got emsdk 2.0.22 installed in a sibling directory to this package's source
+$ yarn build:wasm   // Assumes you've got emsdk 2.0.18 installed in a sibling directory to this package's source
 $ yarn build:watch  // Development build, with file watching
 $ yarn build        // Production build
 ```
