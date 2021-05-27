@@ -39,7 +39,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.m?js$/,
                 loader: 'babel-loader',
                 options: {
                     presets: [
@@ -60,7 +60,7 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.js'],
+        extensions: ['.js', '.mjs'],
         modules: [
             srcDir,
             'node_modules'
