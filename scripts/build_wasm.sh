@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")/.." || exit
 mkdir -p wasm_build
-rm wasm_build/*
+rm lib/wasm/*
 export NODE=''
 
 source ../emsdk/emsdk_env.sh
@@ -23,7 +23,6 @@ em++ \
     -s WASM_BIGINT=1 \
     -s TEXTDECODER=2 \
     -s SUPPORT_ERRNO=0 \
-    --closure 1 \
     --no-entry \
     -std=c++20 \
     -msimd128 \
@@ -31,13 +30,12 @@ em++ \
     -fno-exceptions \
     -flto \
     --bind \
-    -o wasm_build/GenerateTexture.mjs \
+    -o lib/wasm/GenerateTexture.mjs \
     emscripten/GenerateTexture.cpp \
     emscripten/EmscriptenWrapper.cpp \
     wasm/OpenSimplexNoise.cpp \
     wasm/TextureGenerator.cpp \
     wasm/NoiseWrapper.cpp
-cp wasm_build/GenerateTexture.mjs lib/GenerateTexture.mjs
 
 # To enable debugging via the demo page...
 #    -s SINGLE_FILE=0 \

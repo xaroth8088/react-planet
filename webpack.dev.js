@@ -10,6 +10,10 @@ module.exports = {
     mode: 'development',
     devtool: 'source-map',
 
+    stats: {
+        children: true
+    },
+
     experiments: {
         asyncWebAssembly: true
     },
