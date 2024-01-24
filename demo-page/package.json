@@ -38,5 +38,6 @@
     "eslint-plugin-react-hooks": "^1.6.0",
     "gh-pages": "^2.0.1"
   },
-  "homepage": "https://xaroth8088-react-planet.netlify.app/"
+  "homepage": "https://xaroth8088-react-planet.netlify.app/",
+  "packageManager": "yarn@4.0.2"
 }

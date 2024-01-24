@@ -70,3 +70,12 @@ xcode/react-planet/react-planet.xcodeproj/project.xcworkspace/xcuserdata/
 xcode/react-planet/react-planet.xcodeproj/xcuserdata/
 demo-page/public/static/wasm
 demo-page/public/static/emscripten
+
+# Yarn
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

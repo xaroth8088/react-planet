@@ -6,7 +6,6 @@
 	"repository": "https://github.com/xaroth8088/react-planet.git",
 	"author": "Geoffrey Benson <xaroth@gmail.com>",
 	"license": "MIT",
-	"private": false,
 	"scripts": {
 		"build:watch": "webpack --config webpack.dev.js --color --progress",
 		"build": "yarn clean && yarn build:wasm && webpack --config webpack.prod.js --color --progress",
@@ -52,5 +51,6 @@
 		"last 1 safari versions",
 		"last 1 ios versions",
 		"last 1 chromeandroid versions"
-	]
+	],
+	"packageManager": "yarn@4.0.2"
 }
