@@ -1,5 +1,5 @@
 *.md
 .git*
 .idea
-/demo-page/
+/demo-page-old/
 /xcode/

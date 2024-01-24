@@ -6,7 +6,7 @@
     left: 0;
     right: 0;
     display: flex;
-    background-image: url(assets/seamless-starfield-texture.jpg);
+    background-image: url(seamless-starfield-texture.jpg);
     background-size: contain;
 }
 
