@@ -1,0 +1,17 @@
+const pi: f32 = radians(180.0);
+
+struct NoiseSettings {
+    seed: f32,
+    iScale: f32,
+    iOctaves: u32,
+    iFalloff: f32,
+    iIntensity: f32,
+    iRidginess: f32,
+    sScale: f32,
+    sOctaves: u32,
+    sFalloff: f32,
+    sIntensity: f32,
+};
+
+const landSpecularColor: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+const waterNormalPixel: vec4<f32> = vec4<f32>(0.5, 0.5, 1.0, 1.0);

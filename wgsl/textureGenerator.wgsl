@@ -1,5 +1,3 @@
-const pi: f32 = radians(180.0);
-
 fn sphereMap(u: f32, v: f32) -> vec3<f32> {
     let azimuth: f32 = 2.0 * pi * u;
     let inclination: f32 = pi * v;
@@ -11,115 +9,131 @@ fn sphereMap(u: f32, v: f32) -> vec3<f32> {
     );
 }
 
-/*
-    TODO: convert this to a WGSL compute shader.
-        It should take in the NoiseSettings structs for surface, land, and cloud noises,
-        as well as the various color settings/etc. as needed.
-    TODO: Decide whether this should be a single compute shader that does all 4 textures
-          at once, or if it should instead be 4 individual shaders, or if they're all together except for clouds, etc.
+fn surfaceColor(p: vec3<f32>, landNoise: NoiseSettings, landColor1: vec3<f32>, landColor2: vec3<f32>) -> vec4<f32> {
+    let c: f32 = sampleAtPoint(p, landNoise);
 
-void TextureGenerator::GenerateTextures() {
-    unsigned short int width = resolution;
+    // Blend landColor1 and landColor2
+    let q0: f32 = c;
+    let q1: f32 = 1.0 - c;
 
-    // The texture should have a 2:1 aspect ratio to wrap properly
-    unsigned short int height = resolution / 2;
-
-    RGB waterSpecularRGB = {
-        static_cast<unsigned char>(waterSpecular * 255),
-        static_cast<unsigned char>(waterSpecular * 255),
-        static_cast<unsigned char>(waterSpecular * 255)
-    };
-
-    RGB landSpecularRGB = {
-        0,
-        0,
-        0
-    };
-
-    RGB waterNormalPixel = {
-        128,
-        128,
-        255
-    };
-
-    RGB waterColor;
-
-    float *heightMap = new float[width * height];
-
-    // Pre-calculate the noise, since we'll need to refer to nearby points later
-    // when calculating normals
-    for (unsigned int x = 0; x < width; x++) {
-        for (unsigned int y = 0; y < height; y++) {
-            Point p0 = sphereMap(float(x) / (width - 1.0),
-                               float(y) / (height - 1.0));
-            heightMap[y * width + x] = surfaceNoise->sample(p0);
-        }
-    }
-
-    for (unsigned int x = 0; x < width; x++) {
-        for (unsigned int y = 0; y < height; y++) {
-            Point p0 = sphereMap(float(x) / (width - 1.0),
-                               float(y) / (height - 1.0));
-            float c0 = heightMap[y * width + x];
-
-            if (c0 > waterLevel) {
-                RGB c = surfaceColor(p0);
-                setPixel(diffuseBuffer, x, y, c);
-
-                setPixel(specularBuffer, x, y, landSpecularRGB);
-
-                // Look at the points next to us to determine what our normal
-                // should be
-                unsigned int tempX = (x + 1) % (width - 1);
-                unsigned int tempY = (y + 1) % (height - 1);
-
-                float cx = heightMap[y * width + tempX];
-                float cy = heightMap[tempY * width + x];
-
-                Point n = normalizedCrossProduct(
-                    1.0 / float(width),
-                    0.0,
-                    (cx - c0),
-                    0.0,
-                    1.0 / float(height),
-                    (cy - c0)
-                );
-                n = wasm_f32x4_mul(
-                    n,
-                    wasm_f32x4_make(
-                        1, -1, 1, 1
-                    )
-                );
-
-                RGB normalPixel = normalRGB(n);
-                setPixel(normalBuffer, x, y, normalPixel);
-            } else {
-                // For the "below water" case, there's no additional sampling -
-                // we simply blend the shallow and deep water colors based on
-                // how deep the water is at this point.
-                float q1 = smootherstep(pow(c0 / waterLevel, waterFalloff));
-                float q0 = 1.0 - q1;
-
-                waterColor.r = waterDeep.r * q0 + waterShallow.r * q1;
-                waterColor.g = waterDeep.g * q0 + waterShallow.g * q1;
-                waterColor.b = waterDeep.b * q0 + waterShallow.b * q1;
-
-                setPixel(diffuseBuffer, x, y, waterColor);
-
-                setPixel(specularBuffer, x, y, waterSpecularRGB);
-
-                setPixel(normalBuffer, x, y, waterNormalPixel);
-            }
-
-            setCloudPixel(
-                cloudBuffer,
-                x,
-                y,
-                cloudColor,
-                cloudNoise->sample(p0) * cloudOpacity * 255  // Cloud opacity at this point
-            );
-        }
-    }
+    return vec4<f32>(
+        (landColor1 * q0 + landColor2 * q1),
+    1.0);
 }
 
-*/
+// TODO: can this be replaced with the built-in smoothstep() function?
+fn smootherstep(t: f32) -> f32 {
+    return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
+}
+
+// Define uniform buffer for input parameters
+// TODO: The texture needs to have a 2:1 aspect ratio to wrap properly, so enforce that on the JS side
+// TODO: Similarly, the texture width and height need to be integer powers of 2
+struct Uniforms {
+    textureSize: vec2<u32>,
+    landColor1: vec3<f32>,
+    landColor2: vec3<f32>,
+    waterDeepColor: vec3<f32>,
+    waterShallowColor: vec3<f32>,
+    cloudColor: vec4<f32>,
+    waterLevel: f32,
+    waterSpecular: f32,
+    waterFalloff: f32,
+    @align(16) surfaceNoise: NoiseSettings,
+    @align(16) landNoise: NoiseSettings,
+    @align(16) cloudNoise: NoiseSettings,
+};
+
+// Bind group for uniforms
+@group(0) @binding(0) var<uniform> uniforms : Uniforms;
+
+// Texture outputs
+@group(1) @binding(0) var diffuseTexture : texture_storage_2d<rgba8unorm, write>;
+@group(1) @binding(1) var normalTexture : texture_storage_2d<rgba8unorm, write>;
+@group(1) @binding(2) var specularTexture : texture_storage_2d<rgba8unorm, write>;
+@group(1) @binding(3) var cloudsTexture : texture_storage_2d<rgba8unorm, write>;
+
+// Compute shader main entry point
+@compute @workgroup_size(16, 16)
+fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
+    // Calculate the pixel position
+    let x: u32 = global_id.x;
+    let y: u32 = global_id.y;
+
+    let width: f32 = f32(uniforms.textureSize.x);
+    let height: f32 = f32(uniforms.textureSize.y);
+
+    let p0: vec3<f32> = sphereMap(
+        f32(x) / (width - 1.0),
+        f32(y) / (height - 1.0)
+    );
+
+    let waterSpecularRGBA: vec4<f32> = vec4<f32>(
+        vec3<f32>(uniforms.waterSpecular),
+        1.0
+    );
+
+    // Clouds
+    let cloudFinalColor: vec4<f32> = vec4<f32>(
+        uniforms.cloudColor.xyz,
+        uniforms.cloudColor.w * sampleAtPoint(p0, uniforms.cloudNoise)
+    );
+    textureStore(cloudsTexture, vec2<u32>(x, y), cloudFinalColor);
+
+    // Land & sea
+    let c0: f32 = sampleAtPoint(p0, uniforms.surfaceNoise);
+
+    if (c0 > uniforms.waterLevel) {
+        textureStore(diffuseTexture, vec2<u32>(x, y), surfaceColor(p0, uniforms.landNoise, uniforms.landColor1, uniforms.landColor2));
+        textureStore(specularTexture, vec2<u32>(x, y), landSpecularColor);
+
+        // Get our neighbors to determine our normal
+        let cx: f32 = sampleAtPoint(
+            sphereMap(
+                f32(x + 1) / (width - 1.0),
+                f32(y) / (height - 1.0)
+            ),
+            uniforms.surfaceNoise
+        );
+        let cy: f32 = sampleAtPoint(
+            sphereMap(
+                f32(x) / (width - 1.0),
+                f32(y + 1) / (height - 1.0)
+            ),
+            uniforms.surfaceNoise
+        );
+
+        let n: vec3<f32> = normalize(cross(
+            vec3<f32>(
+                (1.0 / width),
+                0.0,
+                cx - c0
+            ),
+            vec3<f32>(
+                0.0,
+                1.0 / height,
+                cy - c0
+            )
+        ));
+        let n1: vec3<f32> = n * vec3<f32>(1.0, -1.0, 1.0);
+        let converted: vec3<f32> = n1 / 2.0 + 0.5;
+        textureStore(normalTexture, vec2<u32>(x, y), vec4<f32>(converted, 1.0));
+    } else {
+        // For the "below water" case, there's no additional sampling -
+        // we simply blend the shallow and deep water colors based on
+        // how deep the water is at this point.
+        let q1: f32 = smootherstep(pow(c0 / uniforms.waterLevel, uniforms.waterFalloff));
+        let q0: f32 = 1.0 - q1;
+
+        let waterColor: vec3<f32> = uniforms.waterDeepColor * q0 + uniforms.waterShallowColor * q1;
+
+        textureStore(
+            diffuseTexture,
+            vec2<u32>(x, y),
+            vec4<f32>(waterColor, 1.0)
+        );
+        textureStore(specularTexture, vec2<u32>(x, y), waterSpecularRGBA);
+
+        textureStore(normalTexture, vec2<u32>(x, y), waterNormalPixel);
+    }
+}
