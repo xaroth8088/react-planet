@@ -33,9 +33,9 @@ SOFTWARE.
 // Simplex Noise 3D: https://www.shadertoy.com/view/XsX3zB
 
 /* seeded discontinuous pseudorandom uniformly distributed in [-0.5, +0.5]^3 */
-fn random3(c: float3, seed: f32) -> float3 {
-    var j = 4096.0 * sin(dot(c, vec3(17.0, 59.4, 15.0)) + seed);
-    var r = float3(0.0, 0.0, 0.0);
+fn random3(c: vec3<f32>, seed: f32) -> vec3<f32> {
+    var j = 4096.0 * sin(dot(c, vec3<f32>(17.0, 59.4, 15.0)) + seed);
+    var r = vec3<f32>(0.0, 0.0, 0.0);
     r.z = fract(512.0 * j);
     j *= 0.125;
     r.x = fract(512.0 * j);
@@ -45,54 +45,53 @@ fn random3(c: float3, seed: f32) -> float3 {
 }
 
 /* skew constants for 3d simplex functions */
-const F3 = 1.0 / 3.0;
-const G3 = 1.0 / 6.0;
+const F3: f32 = 1.0 / 3.0;
+const G3: f32 = 1.0 / 6.0;
 
 /* 3d simplex noise */
-fn simplex3d(p: float3, seed: f32) -> float
-{
-    /* 1. find current tetrahedron T and it's four vertices */
-    /* s, s+i1, s+i2, s+1.0 - absolute skewed (integer) coordinates of T vertices */
-    /* x, x1, x2, x3 - unskewed coordinates of p relative to each of T vertices*/
+fn simplex3d(p: vec3<f32>, seed: f32) -> f32 {
+    // 1. find current tetrahedron T and it's four vertices
+    // s, s+i1, s+i2, s+1.0 - absolute skewed (integer) coordinates of T vertices
+    // x, x1, x2, x3 - unskewed coordinates of p relative to each of T vertices
 
-    /* calculate s and x */
-    let s = floor(p + dot(p, vec3(F3)));
-    let x = p - s + dot(s, vec3(G3));
+    // calculate s and x
+    let s = floor(p + dot(p, vec3<f32>(F3)));
+    let x = p - s + dot(s, vec3<f32>(G3));
 
-    /* calculate i1 and i2 */
-    let e = step(vec3(0.0), x - x.yzx);
-    let i1 = e*(1.0 - e.zxy);
-    let i2 = 1.0 - e.zxy*(1.0 - e);
+    // calculate i1 and i2
+    let e = step(vec3<f32>(0.0), x - x.yzx);
+    let i1 = e * (1.0 - e.zxy);
+    let i2 = 1.0 - e.zxy * (1.0 - e);
 
-    /* x1, x2, x3 */
+    // x1, x2, x3
     let x1 = x - i1 + G3;
-    let x2 = x - i2 + 2.0*G3;
-    let x3 = x - 1.0 + 3.0*G3;
+    let x2 = x - i2 + 2.0 * G3;
+    let x3 = x - 1.0 + 3.0 * G3;
 
-    /* 2. find four surflets and store them in d */
-    var w = float4(0.);
-    var d = float4(0.);
+    // 2. find four surflets and store them in d
+    var w = vec4<f32>(0.0);
+    var d = vec4<f32>(0.0);
 
-    /* calculate surflet weights */
+    // calculate surflet weights
     w.x = dot(x, x);
     w.y = dot(x1, x1);
     w.z = dot(x2, x2);
     w.w = dot(x3, x3);
 
-    /* w fades from 0.6 at the center of the surflet to 0.0 at the margin */
-    w = max(0.6 - w, float4(0.0));
+    // w fades from 0.6 at the center of the surflet to 0.0 at the margin
+    w = max(0.6 - w, vec4<f32>(0.0));
 
-    /* calculate surflet components */
+    // calculate surflet components
     d.x = dot(random3(s, seed), x);
     d.y = dot(random3(s + i1, seed), x1);
     d.z = dot(random3(s + i2, seed), x2);
     d.w = dot(random3(s + 1.0, seed), x3);
 
-    /* multiply d by w^4 */
+    // multiply d by w^4
     w *= w;
     w *= w;
     d *= w;
 
-    /* 3. return the sum of the four surflets */
-    return dot(d, vec4(52.0));
+    // 3. return the sum of the four surflets
+    return dot(d, vec4<f32>(52.0));
 }
