@@ -6,8 +6,6 @@ function Planet(props) {
     let app;
 
     // TODO: every time the props change, we're destroying and recreating the Application.
-    // TODO: if we can preserve it somehow, then we can try to kill the web workers every
-    // TODO: time the config changes (so that there's only ever the one running)
     const canvasRef = useCallback((node) => {
         if (node !== null) {
             // Filter out null props

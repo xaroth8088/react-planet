@@ -57,6 +57,27 @@ export default class Application {
         if (this.config.cloudColor) {
             config.cloudColor = convertColor(this.config.cloudColor);
         }
+
+        // Resolution must be bumped up to the nearest power of 2
+        const resolution = nearestPowerOfTwo(parseInt(this.config.resolution, 10));
+
+        const diffuseSAB = new Uint8Array(new ArrayBuffer(0));
+        const normalSAB = new Uint8Array(new ArrayBuffer(0));
+        const specularSAB = new Uint8Array(new ArrayBuffer(0));
+        const cloudSAB = new Uint8Array(new ArrayBuffer(0));
+
+        this.planetRenderer.init(
+            resolution,
+            diffuseSAB,
+            normalSAB,
+            specularSAB,
+            cloudSAB,
+            this.config.normalScale
+        );
+        this.element.appendChild(this.planetRenderer.canvas);
+
+        const size = this.element.clientWidth;
+        this.planetRenderer.setSize(size, size);
     }
 
     update = () => {
