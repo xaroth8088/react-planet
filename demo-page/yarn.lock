@@ -762,6 +762,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@xaroth8088/react-planet@portal:..::locator=demo-page%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@xaroth8088/react-planet@portal:..::locator=demo-page%40workspace%3A."
+  dependencies:
+    css-color-converter: "npm:^2.0.0"
+    prop-types: "npm:^15.7.2"
+  peerDependencies:
+    react: ^17.0.2
+    three: ^0.128.0
+  languageName: node
+  linkType: soft
+
 "abbrev@npm:^2.0.0":
   version: 2.0.0
   resolution: "abbrev@npm:2.0.0"
@@ -1097,6 +1109,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"color-convert@npm:^0.5.2":
+  version: 0.5.3
+  resolution: "color-convert@npm:0.5.3"
+  checksum: 324b863446bab6c5f88cb0010c3a16a6ca6bf6709eb7b7b3482d3e9ca6cfcfa690c25c1151bd2dc6279a0f4e2c593630486a2b9caae3c3eb96b82f5408e23e54
+  languageName: node
+  linkType: hard
+
 "color-convert@npm:^1.9.0":
   version: 1.9.3
   resolution: "color-convert@npm:1.9.3"
@@ -1122,7 +1141,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-name@npm:~1.1.4":
+"color-name@npm:^1.1.4, color-name@npm:~1.1.4":
   version: 1.1.4
   resolution: "color-name@npm:1.1.4"
   checksum: a1a3f914156960902f46f7f56bc62effc6c94e84b2cae157a526b1c1f74b677a47ec602bf68a61abfa2b42d15b7c5651c6dbe72a43af720bc588dff885b10f95
@@ -1164,6 +1183,24 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 5738c312387081c98d69c98e105b6327b069197f864a60593245d64c8089c8a0a744e16349281210d56835bb9274130d825a78b2ad6853ca13cfbeffc0c31750
+  languageName: node
+  linkType: hard
+
+"css-color-converter@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "css-color-converter@npm:2.0.0"
+  dependencies:
+    color-convert: "npm:^0.5.2"
+    color-name: "npm:^1.1.4"
+    css-unit-converter: "npm:^1.1.2"
+  checksum: e56ff4189683c56bf1bff17d5b8b7c59f8e8b4c6406afa5cb81c1852e9f1625b542123ca38d857c8fe5e28667af62ba7d37a028d768ddfe3a1c0707983722100
+  languageName: node
+  linkType: hard
+
+"css-unit-converter@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "css-unit-converter@npm:1.1.2"
+  checksum: 540e94213fa5305c49215c6a2ba24d934fa400c0ae0897a87632a3a3a8f4824d168448806180c511dcfb2ecf21cf16be51af0739ff09ef5bcd946f19e9a5624d
   languageName: node
   linkType: hard
 
@@ -1229,6 +1266,7 @@ __metadata:
     "@types/react": "npm:^18.2.43"
     "@types/react-dom": "npm:^18.2.17"
     "@vitejs/plugin-react-swc": "npm:^3.5.0"
+    "@xaroth8088/react-planet": "npm:^1.5.1"
     eslint: "npm:^8.55.0"
     eslint-plugin-react: "npm:^7.33.2"
     eslint-plugin-react-hooks: "npm:^4.6.0"
@@ -2936,7 +2974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.8.1":
+"prop-types@npm:^15.7.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:

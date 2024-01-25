@@ -1,11 +1,10 @@
 import * as PropTypes from 'prop-types';
 import 'rc-slider/assets/index.css';
-import React from 'react';
 import Tooltip from 'react-simple-tooltip';
-import ColorControl from './ColorControl';
+import ColorControl from './ColorControl.jsx';
 
 import './Controls.css';
-import SliderControl from './SliderControl';
+import SliderControl from './SliderControl.jsx';
 
 function Controls({
     normalScale, setNormalScale,

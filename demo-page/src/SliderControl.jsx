@@ -1,4 +1,3 @@
-import React from 'react';
 import * as PropTypes from 'prop-types';
 import Slider from 'rc-slider/lib/Slider';
 import Tooltip from 'react-simple-tooltip';
