@@ -1,56 +1,44 @@
 {
-	"name": "@xaroth8088/react-planet",
-	"version": "1.5.1",
-	"description": "Procedurally generated planets in a React component",
-	"main": "build/index.js",
-	"repository": "https://github.com/xaroth8088/react-planet.git",
-	"author": "Geoffrey Benson <xaroth@gmail.com>",
-	"license": "MIT",
-	"scripts": {
-		"build:watch": "webpack --config webpack.dev.js --color --progress",
-		"build": "yarn clean && webpack --config webpack.prod.js --color --progress",
-		"clean": "rimraf build wasm_build demo-page-old/public/static/js lib/GenerateTexture.js",
-		"lint": "eslint lib",
-		"lint:fix": "eslint --fix lib",
-		"build:wasm": "scripts/build_wasm.sh",
-		"profile:wasm": "scripts/build_wasm_for_profiling.sh && time node --experimental-wasm-simd --wasm-simd-post-mvp wasm_build/a.out.js && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep v128 | wc -l) SIMD stores\" && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep f32x4 | wc -l) SIMD f32x4 instructions\" && echo \"$(wasm2wat --enable-simd wasm_build/a.out.wasm | grep i32x4 | wc -l) SIMD i32x4 instructions\"",
-		"prepublish": "yarn run build"
-	},
-	"devDependencies": {
-		"@babel/cli": "^7.23.4",
-		"@babel/core": "^7.23.7",
-		"@babel/preset-env": "^7.23.8",
-		"@babel/preset-react": "^7.23.3",
-		"babel-eslint": "^10.1.0",
-		"babel-loader": "^8.3.0",
-		"babel-plugin-transform-class-properties": "^6.24.1",
-		"eslint": "^5.16.0",
-		"eslint-config-airbnb": "^17.1.1",
-		"eslint-config-airbnb-base": "^13.2.0",
-		"eslint-import-resolver-webpack": "^0.13.8",
-		"eslint-plugin-import": "^2.29.1",
-		"eslint-plugin-jsx-a11y": "^6.8.0",
-		"eslint-plugin-react": "^7.33.2",
-		"eslint-plugin-react-hooks": "^1.7.0",
-		"rimraf": "^5.0.5",
-		"webpack": "^5.90.0",
-		"webpack-cli": "^5.1.4",
-		"worker-loader": "^3.0.8"
-	},
-	"dependencies": {
-		"css-color-converter": "^2.0.0",
-		"prop-types": "^15.8.1"
-	},
-	"peerDependencies": {
-		"react": "^17.0.2",
-		"three": "^0.128.0"
-	},
-	"browserslist": [
-		"last 1 chrome versions",
-		"last 1 firefox versions",
-		"last 1 safari versions",
-		"last 1 ios versions",
-		"last 1 chromeandroid versions"
-	],
-	"packageManager": "yarn@4.0.2"
+  "name": "@xaroth8088/react-planet",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Procedurally generated planets in a React component",
+  "type": "module",
+  "main": "dist/main.js",
+  "repository": "https://github.com/xaroth8088/react-planet.git",
+  "author": "Geoffrey Benson <xaroth@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint . --fix --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "prepublish": "yarn run build"
+  },
+  "dependencies": {
+    "css-color-converter": "2.0.0",
+    "lodash": "4.17.20",
+    "rc-slider": "9.7.2",
+    "react-simple-tooltip": "2.6.3"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.160.1",
+    "vite": "^5.0.8"
+  },
+  "packageManager": "yarn@4.0.2",
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.160.1"
+  }
 }
