@@ -1,20 +1,8 @@
 import {useEffect, useRef} from 'react';
 import PropTypes from 'prop-types'
-import {
-    Mesh,
-    MeshPhongMaterial,
-    SphereGeometry,
-    Vector2,
-    BoxGeometry,
-    MeshNormalMaterial,
-    WebGLRenderer,
-    PerspectiveCamera, Scene
-} from 'three';
-import { textureStore, wgslFn, uint, instanceIndex } from 'three/nodes';
+import {Mesh, MeshNormalMaterial, PerspectiveCamera, Scene, SphereGeometry, WebGLRenderer} from 'three';
 import WebGPU from 'three/addons/capabilities/WebGPU.js';
 import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
-import StorageTexture from 'three/addons/renderers/common/StorageTexture.js';
-import simpleWGSL from '../wgsl/simple.wgsl?raw';
 
 // const wgslcode = import.meta.glob('../wgsl/*.wgsl', { as: 'raw', eager: true });
 
@@ -95,6 +83,11 @@ const Planet = (
     const threeInstance = useRef({renderer: null, scene: null, camera: null, animate: true, sphere: null});
 
     useEffect(() => {
+        if (WebGPU.isAvailable() === false) {
+            mountRef.current.replaceChildren(WebGPU.getErrorMessage());
+            return;
+        }
+
         threeInstance.current.animate = true;
 
         threeInstance.current.scene = new Scene();
@@ -106,12 +99,12 @@ const Planet = (
         threeInstance.current.camera.position.set(0, 3.5, 5);
         threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
 
-        threeInstance.current.renderer = new WebGLRenderer({ alpha: true, antialias: true });
+        threeInstance.current.renderer = new WebGPURenderer({ alpha: true, antialias: true });
+        threeInstance.current.renderer.setClearColor( 0, 0.0 );
         threeInstance.current.renderer.setSize(WIDTH, HEIGHT);
+        threeInstance.current.renderer.setPixelRatio(window.devicePixelRatio);
 
-        const segments = 4;
-        // const segments = 24;
-//        const sphere = new THREE.Mesh(new SphereGeometry(1, segments, segments), new THREE.MeshNormalMaterial());
+        const segments = 24;
         threeInstance.current.sphere = new Mesh(new SphereGeometry(1, segments, segments), new MeshNormalMaterial());
         threeInstance.current.scene.add(threeInstance.current.sphere);
 
@@ -381,7 +374,7 @@ const Planet = (
         // For example, updating objects, changing materials, etc.
     };
 
-    return <div ref={mountRef} style={{ border: '5px solid #f0f', width: '50%', height: '100%'}}/>;
+    return <div ref={mountRef} style={{border: '5px solid #f0f', width: '50%', height: '100%'}}/>;
 };
 
 Planet.propTypes = {
