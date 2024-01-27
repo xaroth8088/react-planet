@@ -1,6 +1,16 @@
 import {useEffect, useRef} from 'react';
 import PropTypes from 'prop-types'
-import {Color, Mesh, MeshPhongMaterial, PerspectiveCamera, Scene, SphereGeometry, Vector2} from 'three';
+import {
+    Color,
+    LinearFilter,
+    Mesh,
+    MeshPhongMaterial,
+    PerspectiveCamera,
+    RepeatWrapping,
+    Scene,
+    SphereGeometry,
+    Vector2
+} from 'three';
 import WebGPU from 'three/addons/capabilities/WebGPU.js';
 import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
 import StorageTexture from "three/addons/renderers/common/StorageTexture.js";
@@ -105,8 +115,6 @@ const Planet = (
         const containerHeight = mountRef.current.clientHeight;
 
         // Camera setup
-//        threeInstance.current.camera = new PerspectiveCamera(75, containerWidth / containerHeight, 0.1, 1000);
-//        threeInstance.current.camera.position.set(0, 3.5, 5);
         threeInstance.current.camera = new PerspectiveCamera(61, 1, 0.1, 10);
         threeInstance.current.camera.position.set(0, 0, 2);
         threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
@@ -123,9 +131,20 @@ const Planet = (
         const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
 
         const diffuseTexture = new StorageTexture(width, height);
+        diffuseTexture.wrapS = RepeatWrapping;
+        diffuseTexture.minFilter = LinearFilter;
+        diffuseTexture.maxFilter = LinearFilter;
+
         const normalTexture = new StorageTexture(width, height);
+        normalTexture.wrapS = RepeatWrapping;
+
         const specularTexture = new StorageTexture(width, height);
+        specularTexture.wrapS = RepeatWrapping;
+
         const cloudTexture = new StorageTexture(width, height);
+        cloudTexture.wrapS = RepeatWrapping;
+        cloudTexture.minFilter = LinearFilter;
+        cloudTexture.maxFilter = LinearFilter;
 
         // Generate textures
         const landColor1RGB = new Color(landColor1);
@@ -214,6 +233,14 @@ const Planet = (
         );
         threeInstance.current.scene.add(threeInstance.current.cloudsMesh);
 
+        // TODO: Lighting setup
+        //       This code seems to cause three.js to crash.  No doubt the way lighting works has changed,
+        //       and - honestly - we probably need to change the way the textures are generated to match the "new"
+        //       way that three.js is doing lighting/rendering.
+        // const light = new DirectionalLight(0xffffff);
+        // light.position.set(1, 0, 1);
+        // threeInstance.current.scene.add(light);
+
         // Run the compute shader
         threeInstance.current.renderer.compute(computeNode);
 
@@ -228,7 +255,6 @@ const Planet = (
                 threeInstance.current.cloudsMesh.rotation.y += 0.0002;
                 threeInstance.current.planetMesh.rotation.y += 0.0001;
             }
-            // ...
 
             threeInstance.current.renderer.render(threeInstance.current.scene, threeInstance.current.camera);
         };
@@ -240,9 +266,16 @@ const Planet = (
         return () => {
             threeInstance.current.animate = false;
             mountRef.current?.removeChild(threeInstance.current.renderer.domElement);
-            // Additional cleanup
+            diffuseTexture.dispose();
+            normalTexture.dispose();
+            specularTexture.dispose();
+            cloudTexture.dispose();
+            planetMaterial.dispose();
+            cloudsMaterial.dispose();
+            threeInstance.current?.planetMesh.geometry.dispose();
+            threeInstance.current?.cloudsMesh.geometry.dispose();
+            computeNode.dispose();
         };
-
     }, []);
 
     // Effect for handling props changes
