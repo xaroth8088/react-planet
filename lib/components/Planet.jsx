@@ -42,8 +42,8 @@ function nearestPowerOfTwo(number) {
 }
 
 
-const Planet = (
-    {
+const Planet = (props) => {
+    const {
         resolution,
 
         surfaceSeed,
@@ -90,8 +90,8 @@ const Planet = (
         cloudsIntensity,
         normalScale,
         animate
-    }
-) => {
+    } = props;
+
     const mountRef = useRef(null);
     const threeInstance = useRef({
         renderer: null,
@@ -279,9 +279,12 @@ const Planet = (
     }, []);
 
     // Effect for handling props changes
-    useEffect(() => {
-        if (threeInstance.current) {
-            // Function to interact with the Three.js instance
+    useEffect(
+        () => {
+            if (!threeInstance.current) {
+                return;
+            }
+
             updateThreeInstance(
                 resolution,
                 surfaceSeed,
@@ -329,54 +332,55 @@ const Planet = (
                 normalScale,
                 animate
             );
-        }
-    }, [
-        resolution,
-        surfaceSeed,
-        surfaceiScale,
-        surfaceiOctaves,
-        surfaceiFalloff,
-        surfaceiIntensity,
-        surfaceiRidginess,
-        surfacesScale,
-        surfacesOctaves,
-        surfacesFalloff,
-        surfacesIntensity,
+        },
+        [
+            resolution,
+            surfaceSeed,
+            surfaceiScale,
+            surfaceiOctaves,
+            surfaceiFalloff,
+            surfaceiIntensity,
+            surfaceiRidginess,
+            surfacesScale,
+            surfacesOctaves,
+            surfacesFalloff,
+            surfacesIntensity,
 
-        landSeed,
-        landColor1,
-        landColor2,
-        landiScale,
-        landiOctaves,
-        landiFalloff,
-        landiIntensity,
-        landiRidginess,
-        landsScale,
-        landsOctaves,
-        landsFalloff,
-        landsIntensity,
+            landSeed,
+            landColor1,
+            landColor2,
+            landiScale,
+            landiOctaves,
+            landiFalloff,
+            landiIntensity,
+            landiRidginess,
+            landsScale,
+            landsOctaves,
+            landsFalloff,
+            landsIntensity,
 
-        waterDeep,
-        waterShallow,
-        waterLevel,
-        waterSpecular,
-        waterFalloff,
+            waterDeep,
+            waterShallow,
+            waterLevel,
+            waterSpecular,
+            waterFalloff,
 
-        cloudSeed,
-        cloudColor,
-        cloudOpacity,
-        cloudiScale,
-        cloudiOctaves,
-        cloudiFalloff,
-        cloudiIntensity,
-        cloudiRidginess,
-        cloudsScale,
-        cloudsOctaves,
-        cloudsFalloff,
-        cloudsIntensity,
-        normalScale,
-        animate
-    ]); // Depend on props that should trigger updates
+            cloudSeed,
+            cloudColor,
+            cloudOpacity,
+            cloudiScale,
+            cloudiOctaves,
+            cloudiFalloff,
+            cloudiIntensity,
+            cloudiRidginess,
+            cloudsScale,
+            cloudsOctaves,
+            cloudsFalloff,
+            cloudsIntensity,
+            normalScale,
+            animate
+        ]
+    ); // Depend on props that should trigger updates
 
     const updateThreeInstance = (
         resolution,
@@ -426,8 +430,24 @@ const Planet = (
         // For example, updating objects, changing materials, etc.
     };
 
-    return <div ref={mountRef} style={{width: '50%', height: '100%'}}/>;
+    // Any props that the library doesn't care about should be passed on to the containing div
+    const divProps = {};
+    Object.keys(props).forEach(
+        (key) => {
+            if (!(key in Planet.propTypes)) {
+                divProps[key] = props[key];
+            }
+        }
+    );
+
+    return <div ref={mountRef} {...divProps} />;
 };
+
+Planet.defaultProps = {
+    normalScale: 0.05,
+    animate: true
+};
+
 
 Planet.propTypes = {
     resolution: PropTypes.number,
