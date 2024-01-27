@@ -95,7 +95,8 @@ function Controls({
                         <option value={128}>128</option>
                         <option value={256}>256</option>
                         <option value={512}>512</option>
-                        <option value={1024}>1024 (Slow!)</option>
+                        <option value={1024}>1024</option>
+                        <option value={2048}>2048</option>
                     </select>
                 </div>
             </div>

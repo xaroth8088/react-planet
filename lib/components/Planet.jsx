@@ -1,114 +1,399 @@
-import * as PropTypes from 'prop-types';
-import { useCallback } from 'react';
-import Application from './Application';
+import {useEffect, useRef} from 'react';
+import PropTypes from 'prop-types'
+import {Color, Mesh, MeshPhongMaterial, PerspectiveCamera, Scene, SphereGeometry, Vector2} from 'three';
+import WebGPU from 'three/addons/capabilities/WebGPU.js';
+import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+import StorageTexture from "three/addons/renderers/common/StorageTexture.js";
+import {float, instanceIndex, textureStore, uint, vec2, vec3, vec4, wgslFn} from "three/nodes";
+import mainWgsl from '../wgsl/main.wgsl?raw';
 
-function Planet(props) {
-    let app;
+const wgslcode = import.meta.glob('../wgsl/includes/*.wgsl', {as: 'raw', eager: true});
 
-    // TODO: every time the props change, we're destroying and recreating the Application.
-    const canvasRef = useCallback((node) => {
-        if (node !== null) {
-            // Filter out null props
-            const newProps = Object.keys(props)
-                .filter(key => props[key] !== null)
-                .reduce(
-                    (res, key) => {
-                        res[key] = props[key];
-                        return res;
-                    }, {}
-                );
+function fls(mask) {
+    /*
+        https://github.com/udp/freebsd-libc/blob/master/string/fls.c
+    */
+    let bit;
 
-            // Randomize any non-supplied seeds
-            const { surfaceSeed, landSeed, cloudSeed } = props;
+    if (mask === 0) {
+        return 0;
+    }
 
-            if (surfaceSeed === null) {
-                newProps.surfaceSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            }
+    for (bit = 1; mask !== 1; bit++) {
+        // eslint-disable-next-line no-bitwise, no-param-reassign
+        mask >>= 1;
+    }
 
-            if (landSeed === null) {
-                newProps.landSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            }
-
-            if (cloudSeed === null) {
-                newProps.cloudSeed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-            }
-
-            // Start up the application
-            app = new Application(node, newProps);
-            app.init();
-            app.update();
-        } else {
-            app = null;
-        }
-    }, []);
-
-    // Any props that the library doesn't care about should be passed on to the containing div
-    const divProps = {};
-    Object.keys(props).forEach(
-        (key) => {
-            if (!(key in Planet.defaultProps)) {
-                divProps[key] = props[key];
-            }
-        }
-    );
-
-    return (
-        <div ref={canvasRef} {...divProps} />
-    );
+    return (bit);
 }
 
-// The properties required by the WebAssembly texture generator
-const wasmProperties = {
-    resolution: null,
+function nearestPowerOfTwo(number) {
+    return 2 ** fls(number - 1);
+}
 
-    surfaceSeed: null,
-    surfaceiScale: null,
-    surfaceiOctaves: null,
-    surfaceiFalloff: null,
-    surfaceiIntensity: null,
-    surfaceiRidginess: null,
-    surfacesScale: null,
-    surfacesOctaves: null,
-    surfacesFalloff: null,
-    surfacesIntensity: null,
 
-    landSeed: null,
-    landColor1: null,
-    landColor2: null,
-    landiScale: null,
-    landiOctaves: null,
-    landiFalloff: null,
-    landiIntensity: null,
-    landiRidginess: null,
-    landsScale: null,
-    landsOctaves: null,
-    landsFalloff: null,
-    landsIntensity: null,
+const Planet = (
+    {
+        resolution,
 
-    waterDeep: null,
-    waterShallow: null,
-    waterLevel: null,
-    waterSpecular: null,
-    waterFalloff: null,
+        surfaceSeed,
+        surfaceiScale,
+        surfaceiOctaves,
+        surfaceiFalloff,
+        surfaceiIntensity,
+        surfaceiRidginess,
+        surfacesScale,
+        surfacesOctaves,
+        surfacesFalloff,
+        surfacesIntensity,
 
-    cloudSeed: null,
-    cloudColor: null,
-    cloudOpacity: null,
-    cloudiScale: null,
-    cloudiOctaves: null,
-    cloudiFalloff: null,
-    cloudiIntensity: null,
-    cloudiRidginess: null,
-    cloudsScale: null,
-    cloudsOctaves: null,
-    cloudsFalloff: null,
-    cloudsIntensity: null
-};
+        landSeed,
+        landColor1,
+        landColor2,
+        landiScale,
+        landiOctaves,
+        landiFalloff,
+        landiIntensity,
+        landiRidginess,
+        landsScale,
+        landsOctaves,
+        landsFalloff,
+        landsIntensity,
 
-Planet.defaultProps = {
-    normalScale: 0.05,
-    animate: true,
-    ...wasmProperties
+        waterDeep,
+        waterShallow,
+        waterLevel,
+        waterSpecular,
+        waterFalloff,
+
+        cloudSeed,
+        cloudColor,
+        cloudOpacity,
+        cloudiScale,
+        cloudiOctaves,
+        cloudiFalloff,
+        cloudiIntensity,
+        cloudiRidginess,
+        cloudsScale,
+        cloudsOctaves,
+        cloudsFalloff,
+        cloudsIntensity,
+        normalScale,
+        animate
+    }
+) => {
+    const mountRef = useRef(null);
+    const threeInstance = useRef({
+        renderer: null,
+        scene: null,
+        camera: null,
+        animate: true,
+        planetMesh: null,
+        cloudsMesh: null
+    });
+
+    useEffect(() => {
+        if (WebGPU.isAvailable() === false) {
+            mountRef.current.replaceChildren(WebGPU.getErrorMessage());
+            return;
+        }
+
+        threeInstance.current.animate = true;
+
+        threeInstance.current.scene = new Scene();
+        const containerWidth = mountRef.current.clientWidth;
+        const containerHeight = mountRef.current.clientHeight;
+
+        // Camera setup
+//        threeInstance.current.camera = new PerspectiveCamera(75, containerWidth / containerHeight, 0.1, 1000);
+//        threeInstance.current.camera.position.set(0, 3.5, 5);
+        threeInstance.current.camera = new PerspectiveCamera(61, 1, 0.1, 10);
+        threeInstance.current.camera.position.set(0, 0, 2);
+        threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
+
+        // Renderer setup
+        threeInstance.current.renderer = new WebGPURenderer({alpha: true, antialias: true});
+        threeInstance.current.renderer.setClearColor(0, 0.0);
+        threeInstance.current.renderer.setSize(containerWidth, containerHeight);
+        threeInstance.current.renderer.setPixelRatio(window.devicePixelRatio);
+
+        // Textures setup
+        const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
+        const width = textureResolution;
+        const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
+
+        const diffuseTexture = new StorageTexture(width, height);
+        const normalTexture = new StorageTexture(width, height);
+        const specularTexture = new StorageTexture(width, height);
+        const cloudTexture = new StorageTexture(width, height);
+
+        // Generate textures
+        const landColor1RGB = new Color(landColor1);
+        const landColor2RGB = new Color(landColor2);
+        const waterDeepColorRGB = new Color(waterDeep);
+        const waterShallowColorRGB = new Color(waterShallow);
+        const cloudColorRGB = new Color(cloudColor);
+
+        const computeWGSL = wgslFn(
+            [mainWgsl, ...Object.values(wgslcode)].join('\n')
+        );
+        const computeWGSLCall = computeWGSL({
+            index: instanceIndex,
+            diffuseTexture: textureStore(diffuseTexture),
+            normalTexture: textureStore(normalTexture),
+            specularTexture: textureStore(specularTexture),
+            cloudTexture: textureStore(cloudTexture),
+            textureSize: vec2(width, height),
+            landColor1: vec3(landColor1RGB.r, landColor1RGB.g, landColor1RGB.b),
+            landColor2: vec3(landColor2RGB.r, landColor2RGB.g, landColor2RGB.b),
+            waterDeepColor: vec3(waterDeepColorRGB.r, waterDeepColorRGB.g, waterDeepColorRGB.b),
+            waterShallowColor: vec3(waterShallowColorRGB.r, waterShallowColorRGB.g, waterShallowColorRGB.b),
+            cloudColor: vec4(cloudColorRGB.r, cloudColorRGB.g, cloudColorRGB.b, cloudOpacity),
+            waterLevel: float(waterLevel),
+            waterSpecular: float(waterSpecular),
+            waterFalloff: float(waterFalloff),
+            surfaceNoise_seed: float(surfaceSeed),
+            surfaceNoise_iScale: float(surfaceiScale),
+            surfaceNoise_iOctaves: uint(surfaceiOctaves),
+            surfaceNoise_iFalloff: float(surfaceiFalloff),
+            surfaceNoise_iIntensity: float(surfaceiIntensity),
+            surfaceNoise_iRidginess: float(surfaceiRidginess),
+            surfaceNoise_sScale: float(surfacesScale),
+            surfaceNoise_sOctaves: uint(surfacesOctaves),
+            surfaceNoise_sFalloff: float(surfacesFalloff),
+            surfaceNoise_sIntensity: float(surfacesIntensity),
+            landNoise_seed: float(landSeed),
+            landNoise_iScale: float(landiScale),
+            landNoise_iOctaves: uint(landiOctaves),
+            landNoise_iFalloff: float(landiFalloff),
+            landNoise_iIntensity: float(landiIntensity),
+            landNoise_iRidginess: float(landiRidginess),
+            landNoise_sScale: float(landsScale),
+            landNoise_sOctaves: uint(landsOctaves),
+            landNoise_sFalloff: float(landsFalloff),
+            landNoise_sIntensity: float(landsIntensity),
+            cloudNoise_seed: float(cloudSeed),
+            cloudNoise_iScale: float(cloudiScale),
+            cloudNoise_iOctaves: uint(cloudiOctaves),
+            cloudNoise_iFalloff: float(cloudiFalloff),
+            cloudNoise_iIntensity: float(cloudiIntensity),
+            cloudNoise_iRidginess: float(cloudiRidginess),
+            cloudNoise_sScale: float(cloudsScale),
+            cloudNoise_sOctaves: uint(cloudsOctaves),
+            cloudNoise_sFalloff: float(cloudsFalloff),
+            cloudNoise_sIntensity: float(cloudsIntensity),
+        });
+        const computeNode = computeWGSLCall.compute(width * height);
+
+        // Materials setup
+        const planetMaterial = new MeshPhongMaterial({
+            map: diffuseTexture,
+            normalMap: normalTexture,
+            specularMap: specularTexture,
+            normalScale: new Vector2(normalScale, normalScale),
+            specular: 0x777777,
+            shininess: 16
+        });
+
+        const cloudsMaterial = new MeshPhongMaterial({
+            map: cloudTexture,
+            transparent: true,
+            specular: 0x000000
+        });
+
+        // Meshes setup
+        const segments = 24;
+        threeInstance.current.planetMesh = new Mesh(
+            new SphereGeometry(1, segments, segments),
+            planetMaterial
+        );
+        threeInstance.current.scene.add(threeInstance.current.planetMesh);
+        threeInstance.current.cloudsMesh = new Mesh(
+            new SphereGeometry(1.01, segments, segments),
+            cloudsMaterial
+        );
+        threeInstance.current.scene.add(threeInstance.current.cloudsMesh);
+
+        // Run the compute shader
+        threeInstance.current.renderer.compute(computeNode);
+
+        // Kick off the rendering/animation loop
+        threeInstance.current.animate = true;
+        const animateLoop = () => {
+            if (!threeInstance.current.animate) return;
+            requestAnimationFrame(animateLoop);
+
+            // Update logic
+            if (animate) {
+                threeInstance.current.cloudsMesh.rotation.y += 0.0002;
+                threeInstance.current.planetMesh.rotation.y += 0.0001;
+            }
+            // ...
+
+            threeInstance.current.renderer.render(threeInstance.current.scene, threeInstance.current.camera);
+        };
+        animateLoop();
+
+        mountRef.current.appendChild(threeInstance.current.renderer.domElement);
+
+        // Cleanup
+        return () => {
+            threeInstance.current.animate = false;
+            mountRef.current?.removeChild(threeInstance.current.renderer.domElement);
+            // Additional cleanup
+        };
+
+    }, []);
+
+    // Effect for handling props changes
+    useEffect(() => {
+        if (threeInstance.current) {
+            // Function to interact with the Three.js instance
+            updateThreeInstance(
+                resolution,
+                surfaceSeed,
+                surfaceiScale,
+                surfaceiOctaves,
+                surfaceiFalloff,
+                surfaceiIntensity,
+                surfaceiRidginess,
+                surfacesScale,
+                surfacesOctaves,
+                surfacesFalloff,
+                surfacesIntensity,
+
+                landSeed,
+                landColor1,
+                landColor2,
+                landiScale,
+                landiOctaves,
+                landiFalloff,
+                landiIntensity,
+                landiRidginess,
+                landsScale,
+                landsOctaves,
+                landsFalloff,
+                landsIntensity,
+
+                waterDeep,
+                waterShallow,
+                waterLevel,
+                waterSpecular,
+                waterFalloff,
+
+                cloudSeed,
+                cloudColor,
+                cloudOpacity,
+                cloudiScale,
+                cloudiOctaves,
+                cloudiFalloff,
+                cloudiIntensity,
+                cloudiRidginess,
+                cloudsScale,
+                cloudsOctaves,
+                cloudsFalloff,
+                cloudsIntensity,
+                normalScale,
+                animate
+            );
+        }
+    }, [
+        resolution,
+        surfaceSeed,
+        surfaceiScale,
+        surfaceiOctaves,
+        surfaceiFalloff,
+        surfaceiIntensity,
+        surfaceiRidginess,
+        surfacesScale,
+        surfacesOctaves,
+        surfacesFalloff,
+        surfacesIntensity,
+
+        landSeed,
+        landColor1,
+        landColor2,
+        landiScale,
+        landiOctaves,
+        landiFalloff,
+        landiIntensity,
+        landiRidginess,
+        landsScale,
+        landsOctaves,
+        landsFalloff,
+        landsIntensity,
+
+        waterDeep,
+        waterShallow,
+        waterLevel,
+        waterSpecular,
+        waterFalloff,
+
+        cloudSeed,
+        cloudColor,
+        cloudOpacity,
+        cloudiScale,
+        cloudiOctaves,
+        cloudiFalloff,
+        cloudiIntensity,
+        cloudiRidginess,
+        cloudsScale,
+        cloudsOctaves,
+        cloudsFalloff,
+        cloudsIntensity,
+        normalScale,
+        animate
+    ]); // Depend on props that should trigger updates
+
+    const updateThreeInstance = (
+        resolution,
+        surfaceSeed,
+        surfaceiScale,
+        surfaceiOctaves,
+        surfaceiFalloff,
+        surfaceiIntensity,
+        surfaceiRidginess,
+        surfacesScale,
+        surfacesOctaves,
+        surfacesFalloff,
+        surfacesIntensity,
+        landSeed,
+        landColor1,
+        landColor2,
+        landiScale,
+        landiOctaves,
+        landiFalloff,
+        landiIntensity,
+        landiRidginess,
+        landsScale,
+        landsOctaves,
+        landsFalloff,
+        landsIntensity,
+        waterDeep,
+        waterShallow,
+        waterLevel,
+        waterSpecular,
+        waterFalloff,
+        cloudSeed,
+        cloudColor,
+        cloudOpacity,
+        cloudiScale,
+        cloudiOctaves,
+        cloudiFalloff,
+        cloudiIntensity,
+        cloudiRidginess,
+        cloudsScale,
+        cloudsOctaves,
+        cloudsFalloff,
+        cloudsIntensity,
+        normalScale,
+        animate
+    ) => {
+        // Logic to interact with Three.js based on prop changes
+        // For example, updating objects, changing materials, etc.
+    };
+
+    return <div ref={mountRef} style={{width: '50%', height: '100%'}}/>;
 };
 
 Planet.propTypes = {
@@ -158,6 +443,7 @@ Planet.propTypes = {
     cloudsIntensity: PropTypes.number,
     normalScale: PropTypes.number,
     animate: PropTypes.bool
-};
+}
 
 export default Planet;
+
