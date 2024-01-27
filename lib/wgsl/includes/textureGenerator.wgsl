@@ -17,8 +17,9 @@ fn surfaceColor(p: vec3<f32>, landNoise: NoiseSettings, landColor1: vec3<f32>, l
     let q1: f32 = 1.0 - c;
 
     return vec4<f32>(
-        (landColor1 * q0 + landColor2 * q1),
-    1.0);
+        landColor1 * q0 + landColor2 * q1,
+        1.0
+    );
 }
 
 // TODO: can this be replaced with the built-in smoothstep() function?

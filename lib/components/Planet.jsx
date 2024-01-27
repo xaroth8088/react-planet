@@ -260,7 +260,7 @@ const Planet = (props) => {
         };
         animateLoop();
 
-        mountRef.current.appendChild(threeInstance.current.renderer.domElement);
+        mountRef.current.replaceChildren(threeInstance.current.renderer.domElement);
 
         // Cleanup
         return () => {
