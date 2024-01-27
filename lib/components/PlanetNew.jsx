@@ -1,10 +1,13 @@
 import {useEffect, useRef} from 'react';
 import PropTypes from 'prop-types'
-import {Mesh, MeshNormalMaterial, PerspectiveCamera, Scene, SphereGeometry, WebGLRenderer} from 'three';
+import {Mesh, MeshPhongMaterial, PerspectiveCamera, Scene, SphereGeometry} from 'three';
 import WebGPU from 'three/addons/capabilities/WebGPU.js';
 import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
+import StorageTexture from "three/addons/renderers/common/StorageTexture.js";
+import {instanceIndex, textureStore, wgslFn, uint} from "three/nodes";
+import simpleWGSL from "../simple.wgsl?raw"
 
-// const wgslcode = import.meta.glob('../wgsl/*.wgsl', { as: 'raw', eager: true });
+const wgslcode = import.meta.glob('../wgsl/*.wgsl', { as: 'raw', eager: true });
 
 function fls(mask) {
     /*
@@ -91,28 +94,58 @@ const Planet = (
         threeInstance.current.animate = true;
 
         threeInstance.current.scene = new Scene();
-        const WIDTH = mountRef.current.clientWidth;
-        const HEIGHT = mountRef.current.clientHeight;
-        console.log(`${WIDTH} x ${HEIGHT}`);
+        const containerWidth = mountRef.current.clientWidth;
+        const containerHeight = mountRef.current.clientHeight;
 
-        threeInstance.current.camera = new PerspectiveCamera(70, WIDTH / HEIGHT, 1, 10);
+        // Camera setup
+        threeInstance.current.camera = new PerspectiveCamera(75, containerWidth / containerHeight, 0.1, 1000);
         threeInstance.current.camera.position.set(0, 3.5, 5);
         threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
 
-        threeInstance.current.renderer = new WebGPURenderer({ alpha: true, antialias: true });
-        threeInstance.current.renderer.setClearColor( 0, 0.0 );
-        threeInstance.current.renderer.setSize(WIDTH, HEIGHT);
+        // Renderer setup
+        threeInstance.current.renderer = new WebGPURenderer({alpha: true, antialias: true});
+        threeInstance.current.renderer.setClearColor(0, 0.0);
+        threeInstance.current.renderer.setSize(containerWidth, containerHeight);
         threeInstance.current.renderer.setPixelRatio(window.devicePixelRatio);
 
+        // Textures setup
+        const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
+        const width = textureResolution;
+        const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
+        const cloudTexture = new StorageTexture(width, height);
+
+        // Generate textures
+        const computeWGSL = wgslFn(simpleWGSL);
+        const computeWGSLCall = computeWGSL({
+            index: instanceIndex,
+            width: uint(width),
+            diffuseTexture: textureStore(cloudTexture),
+        });
+        const computeNode = computeWGSLCall.compute(width * height);
+
+        // Materials setup
+        const cloudsMaterial = new MeshPhongMaterial({
+            map: cloudTexture,
+            transparent: false,
+            specular: 0x000000
+        });
+
+        // Meshes setup
         const segments = 24;
-        threeInstance.current.sphere = new Mesh(new SphereGeometry(1, segments, segments), new MeshNormalMaterial());
+        threeInstance.current.sphere = new Mesh(
+            new SphereGeometry(1, segments, segments),
+            cloudsMaterial
+        );
         threeInstance.current.scene.add(threeInstance.current.sphere);
 
+        // Run the compute shader
+        threeInstance.current.renderer.compute(computeNode);
+
+        // Kick off the rendering/animation loop
         threeInstance.current.animate = true;
         const animateLoop = () => {
             if (!threeInstance.current.animate) return;
             requestAnimationFrame(animateLoop);
-            console.log('frame');
 
             // Update logic
             threeInstance.current.sphere.rotation.x += 0.01;
@@ -126,7 +159,6 @@ const Planet = (
 
         // Cleanup
         return () => {
-            console.log('cleanup!');
             threeInstance.current.animate = false;
             mountRef.current?.removeChild(threeInstance.current.renderer.domElement);
             // Additional cleanup
