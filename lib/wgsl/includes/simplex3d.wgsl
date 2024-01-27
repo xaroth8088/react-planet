@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2011 by Ashima Arts (Simplex noise)
 Copyright (C) 2011-2016 by Stefan Gustavson (Classic noise and others)
-Copyright (C) 2024 by Geoffrey Benson
+Copyright (C) 2024 by Geoffrey Benson (Random permutations, minor optimizations)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-fn simplex3d(point0: vec3f, seed: f32) -> f32 {
-    let C = vec2(1.0/6.0, 1.0/3.0) ;
-    let D = vec4(0.0, 0.5, 1.0, 2.0);
+fn simplex3d(point0: vec3<f32>, seed: f32) -> f32 {
+    let C : vec2<f32> = vec2<f32>(1.0/6.0, 1.0/3.0) ;
+    let D : vec4<f32> = vec4<f32>(0.0, 0.5, 1.0, 2.0);
 
     let v = point0 + seed;
 
@@ -46,7 +46,7 @@ fn simplex3d(point0: vec3f, seed: f32) -> f32 {
     let x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
 
     // Permutations
-    i = mod289_3(i);
+    i = i - floor(i * (1.0 / 289.0)) * 289.0;  // mod289_3
     let p = permute4( permute4( permute4(
                 i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
             + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
@@ -84,7 +84,7 @@ fn simplex3d(point0: vec3f, seed: f32) -> f32 {
     var p3 = vec3(a1.zw,h.w);
 
     //Normalise gradients
-    let norm = taylorInvSqrt4(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+    let norm = inverseSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
     p0 *= norm.x;
     p1 *= norm.y;
     p2 *= norm.z;
@@ -97,9 +97,7 @@ fn simplex3d(point0: vec3f, seed: f32) -> f32 {
                                 dot(p2,x2), dot(p3,x3) ) );
 }
 
-fn mod289_3(x: vec3f) -> vec3f { return x - floor(x * (1. / 289.)) * 289.; }
-fn mod289_4(x: vec4f) -> vec4f { return x - floor(x * (1. / 289.)) * 289.; }
-
-fn permute4(x: vec4f) -> vec4f { return mod289_4(((x * 34.0) + 1.0) * x); }
-
-fn taylorInvSqrt4(r: vec4f) -> vec4f { return 1.79284291400159 - 0.85373472095314 * r; }
+fn permute4(x: vec4<f32>) -> vec4<f32> {
+    let x_for_mod: vec4<f32> = ((x * 34.0) + 1.0) * x;
+    return x_for_mod - floor(x_for_mod * (1.0 / 289.0)) * 289.0;
+}
