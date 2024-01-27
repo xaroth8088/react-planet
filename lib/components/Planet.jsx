@@ -1,5 +1,5 @@
 import {useEffect, useRef} from 'react';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import {
     Color,
     LinearFilter,
