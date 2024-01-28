@@ -17,6 +17,7 @@
     "prepublish": "yarn run build"
   },
   "dependencies": {
+    "fast-shuffle": "^6.1.0",
     "lodash": "4.17.21",
     "rc-slider": "9.7.5",
     "react-simple-tooltip": "2.6.3"

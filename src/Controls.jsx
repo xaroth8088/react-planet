@@ -78,7 +78,7 @@ function Controls({
             </div>
             <div className="control">
                 <div className="control__label">
-                    <Tooltip content="Higher numbers take longer to generate, but look better." placement="right">
+                    <Tooltip content="Higher numbers take more resources to generate but look better." placement="right">
                         Texture Resolution:
                     </Tooltip>
                 </div>
@@ -128,7 +128,7 @@ function Controls({
                             value={surfaceSeed}
                             onChange={
                                 (event) => {
-                                    setSurfaceSeed(event.target.value);
+                                    setSurfaceSeed(parseFloat(event.target.value || 0));
                                 }
                             }
                         />
@@ -235,7 +235,7 @@ function Controls({
                             value={landSeed}
                             onChange={
                                 (event) => {
-                                    setLandSeed(event.target.value);
+                                    setLandSeed(parseFloat(event.target.value || 0));
                                 }
                             }
                         />
@@ -395,7 +395,7 @@ function Controls({
                             value={cloudSeed}
                             onChange={
                                 (event) => {
-                                    setCloudSeed(event.target.value);
+                                    setCloudSeed(parseFloat(event.target.value || 0));
                                 }
                             }
                         />

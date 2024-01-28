@@ -1,7 +1,7 @@
 const pi: f32 = radians(180.0);
 
 struct NoiseSettings {
-    seed: f32,
+    perm: array<u32, 578>,
     iScale: f32,
     iOctaves: u32,
     iFalloff: f32,

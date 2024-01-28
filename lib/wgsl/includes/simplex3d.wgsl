@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2011 by Ashima Arts (Simplex noise)
 Copyright (C) 2011-2016 by Stefan Gustavson (Classic noise and others)
-Copyright (C) 2024 by Geoffrey Benson (Random permutations, minor optimizations)
+Copyright (C) 2024 by Geoffrey Benson (Use passed-in pre-computed permutations table (to allow seeding of random permutations), other minor optimizations)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,14 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-fn simplex3d(point0: vec3<f32>, seed: f32) -> f32 {
+fn simplex3d(v: vec3<f32>, perm: array<u32, 578>) -> f32 {
     let C : vec2<f32> = vec2<f32>(1.0/6.0, 1.0/3.0) ;
     let D : vec4<f32> = vec4<f32>(0.0, 0.5, 1.0, 2.0);
 
-    let v = point0 + seed;
-
     // First corner
-    var i  = floor(v + dot(v, C.yyy) );
+    var i: vec3<f32> = floor(v + dot(v, C.yyy) );
     let x0 =   v - i + dot(i, C.xxx) ;
 
     // Other corners
@@ -47,10 +45,13 @@ fn simplex3d(point0: vec3<f32>, seed: f32) -> f32 {
 
     // Permutations
     i = i - floor(i * (1.0 / 289.0)) * 289.0;  // mod289_3
-    let p = permute4( permute4( permute4(
-                i.z + vec4(0.0, i1.z, i2.z, 1.0 ))
-            + i.y + vec4(0.0, i1.y, i2.y, 1.0 ))
-            + i.x + vec4(0.0, i1.x, i2.x, 1.0 ));
+
+    let p = vec4<f32>(
+        f32(perm[u32(i.x) + perm[u32(i.y) + perm[u32(i.z)]]]),
+        f32(perm[u32(i.x + i1.x) + perm[u32(i.y + i1.y) + perm[u32(i.z + i1.z)]]]),
+        f32(perm[u32(i.x + i2.x) + perm[u32(i.y + i2.y) + perm[u32(i.z + i2.z)]]]),
+        f32(perm[u32(i.x + 1.0) + perm[u32(i.y + 1.0) + perm[u32(i.z + 1.0)]]])
+    );
 
     // Gradients: 7x7 points over a square, mapped onto an octahedron.
     // The ring size 17*17 = 289 is close to a multiple of 49 (49*6 = 294)
@@ -95,9 +96,4 @@ fn simplex3d(point0: vec3<f32>, seed: f32) -> f32 {
     m = m * m;
     return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1),
                                 dot(p2,x2), dot(p3,x3) ) );
-}
-
-fn permute4(x: vec4<f32>) -> vec4<f32> {
-    let x_for_mod: vec4<f32> = ((x * 34.0) + 1.0) * x;
-    return x_for_mod - floor(x_for_mod * (1.0 / 289.0)) * 289.0;
 }

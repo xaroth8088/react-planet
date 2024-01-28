@@ -14,6 +14,7 @@ import {
 import WebGPU from 'three/addons/capabilities/WebGPU.js';
 import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
 import StorageTexture from "three/addons/renderers/common/StorageTexture.js";
+import {createShuffle} from 'fast-shuffle'
 import {float, instanceIndex, textureStore, uint, vec2, vec3, vec4, wgslFn} from "three/nodes";
 import mainWgsl from '../wgsl/main.wgsl?raw';
 
@@ -41,6 +42,15 @@ function nearestPowerOfTwo(number) {
     return 2 ** fls(number - 1);
 }
 
+function generatePermutationsTable(seed) {
+    // Create a permutation table for the noise generation
+    // These need to be a randomized array of integers from 0 to 288 (inc.), duplicated (Isn't optimization fun?)
+    const shuffler = createShuffle(seed);
+    const permutations = shuffler(Array(289).fill(0).map(Number.call, Number));
+
+    // TODO: maybe the %289's in the shader aren't as bad as passing the params list in twice...
+    return [...permutations, ...permutations];
+}
 
 const Planet = (props) => {
     const {
@@ -171,7 +181,7 @@ const Planet = (props) => {
             waterLevel: float(waterLevel),
             waterSpecular: float(waterSpecular),
             waterFalloff: float(waterFalloff),
-            surfaceNoise_seed: float(surfaceSeed),
+//            surfaceNoise_perm: generatePermutationsTable(surfaceSeed),
             surfaceNoise_iScale: float(surfaceiScale),
             surfaceNoise_iOctaves: uint(surfaceiOctaves),
             surfaceNoise_iFalloff: float(surfaceiFalloff),
@@ -181,7 +191,7 @@ const Planet = (props) => {
             surfaceNoise_sOctaves: uint(surfacesOctaves),
             surfaceNoise_sFalloff: float(surfacesFalloff),
             surfaceNoise_sIntensity: float(surfacesIntensity),
-            landNoise_seed: float(landSeed),
+//            landNoise_perm: generatePermutationsTable(landSeed),
             landNoise_iScale: float(landiScale),
             landNoise_iOctaves: uint(landiOctaves),
             landNoise_iFalloff: float(landiFalloff),
@@ -191,7 +201,7 @@ const Planet = (props) => {
             landNoise_sOctaves: uint(landsOctaves),
             landNoise_sFalloff: float(landsFalloff),
             landNoise_sIntensity: float(landsIntensity),
-            cloudNoise_seed: float(cloudSeed),
+//            cloudNoise_perm: generatePermutationsTable(cloudSeed),
             cloudNoise_iScale: float(cloudiScale),
             cloudNoise_iOctaves: uint(cloudiOctaves),
             cloudNoise_iFalloff: float(cloudiFalloff),
