@@ -1,5 +1,4 @@
 import Planet from '..';
-import { uniqueId } from 'lodash';
 import { useState } from 'react'
 import './App.css'
 import Controls from './Controls.jsx';
@@ -56,7 +55,6 @@ function App() {
     return (
         <div className="App">
             <Planet
-                key={uniqueId()}
                 className="planet"
                 normalScale={normalScale}
                 resolution={resolution}

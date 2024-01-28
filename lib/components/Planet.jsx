@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import PropTypes from 'prop-types';
 import {
     Color,
@@ -20,6 +20,7 @@ import mainWgsl from '../wgsl/main.wgsl?raw';
 
 const wgslcode = import.meta.glob('../wgsl/includes/*.wgsl', {as: 'raw', eager: true});
 
+// TODO: move these to a util file, to declutter this component
 function fls(mask) {
     /*
         https://github.com/udp/freebsd-libc/blob/master/string/fls.c
@@ -107,186 +108,192 @@ const Planet = (props) => {
         renderer: null,
         scene: null,
         camera: null,
-        animate: true,
+        renderLoopRunning: false,
         planetMesh: null,
-        cloudsMesh: null
+        cloudsMesh: null,
+        animateRotation: animate
     });
 
-    useEffect(() => {
-        if (WebGPU.isAvailable() === false) {
-            mountRef.current.replaceChildren(WebGPU.getErrorMessage());
+    const renderLoop = () => {
+        if (!threeInstance.current.renderLoopRunning) {
             return;
         }
+        requestAnimationFrame(renderLoop);
 
-        threeInstance.current.animate = true;
+        // Update logic
+        if (threeInstance.current.animateRotation) {
+            threeInstance.current.cloudsMesh.rotation.y += 0.0002;
+            threeInstance.current.planetMesh.rotation.y += 0.0001;
+        }
 
-        threeInstance.current.scene = new Scene();
-        const containerWidth = mountRef.current.clientWidth;
-        const containerHeight = mountRef.current.clientHeight;
+        threeInstance.current.renderer.render(threeInstance.current.scene, threeInstance.current.camera);
+    };
 
-        // Camera setup
-        threeInstance.current.camera = new PerspectiveCamera(61, 1, 0.1, 10);
-        threeInstance.current.camera.position.set(0, 0, 2);
-        threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
-
-        // Renderer setup
-        threeInstance.current.renderer = new WebGPURenderer({alpha: true, antialias: true});
-        threeInstance.current.renderer.setClearColor(0, 0.0);
-        threeInstance.current.renderer.setSize(containerWidth, containerHeight);
-        threeInstance.current.renderer.setPixelRatio(window.devicePixelRatio);
-
-        // Textures setup
-        const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
-        const width = textureResolution;
-        const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
-
-        const diffuseTexture = new StorageTexture(width, height);
-        diffuseTexture.wrapS = RepeatWrapping;
-        diffuseTexture.minFilter = LinearFilter;
-        diffuseTexture.maxFilter = LinearFilter;
-
-        const normalTexture = new StorageTexture(width, height);
-        normalTexture.wrapS = RepeatWrapping;
-
-        const specularTexture = new StorageTexture(width, height);
-        specularTexture.wrapS = RepeatWrapping;
-
-        const cloudTexture = new StorageTexture(width, height);
-        cloudTexture.wrapS = RepeatWrapping;
-        cloudTexture.minFilter = LinearFilter;
-        cloudTexture.maxFilter = LinearFilter;
-
-        // Generate textures
-        const landColor1RGB = new Color(landColor1);
-        const landColor2RGB = new Color(landColor2);
-        const waterDeepColorRGB = new Color(waterDeep);
-        const waterShallowColorRGB = new Color(waterShallow);
-        const cloudColorRGB = new Color(cloudColor);
-
-        const computeWGSL = wgslFn(
-            [mainWgsl, ...Object.values(wgslcode)].join('\n')
-        );
-        const computeWGSLCall = computeWGSL({
-            index: instanceIndex,
-            diffuseTexture: textureStore(diffuseTexture),
-            normalTexture: textureStore(normalTexture),
-            specularTexture: textureStore(specularTexture),
-            cloudTexture: textureStore(cloudTexture),
-            textureSize: vec2(width, height),
-            landColor1: vec3(landColor1RGB.r, landColor1RGB.g, landColor1RGB.b),
-            landColor2: vec3(landColor2RGB.r, landColor2RGB.g, landColor2RGB.b),
-            waterDeepColor: vec3(waterDeepColorRGB.r, waterDeepColorRGB.g, waterDeepColorRGB.b),
-            waterShallowColor: vec3(waterShallowColorRGB.r, waterShallowColorRGB.g, waterShallowColorRGB.b),
-            cloudColor: vec4(cloudColorRGB.r, cloudColorRGB.g, cloudColorRGB.b, cloudOpacity),
-            waterLevel: float(waterLevel),
-            waterSpecular: float(waterSpecular),
-            waterFalloff: float(waterFalloff),
-//            surfaceNoise_perm: generatePermutationsTable(surfaceSeed),
-            surfaceNoise_iScale: float(surfaceiScale),
-            surfaceNoise_iOctaves: uint(surfaceiOctaves),
-            surfaceNoise_iFalloff: float(surfaceiFalloff),
-            surfaceNoise_iIntensity: float(surfaceiIntensity),
-            surfaceNoise_iRidginess: float(surfaceiRidginess),
-            surfaceNoise_sScale: float(surfacesScale),
-            surfaceNoise_sOctaves: uint(surfacesOctaves),
-            surfaceNoise_sFalloff: float(surfacesFalloff),
-            surfaceNoise_sIntensity: float(surfacesIntensity),
-//            landNoise_perm: generatePermutationsTable(landSeed),
-            landNoise_iScale: float(landiScale),
-            landNoise_iOctaves: uint(landiOctaves),
-            landNoise_iFalloff: float(landiFalloff),
-            landNoise_iIntensity: float(landiIntensity),
-            landNoise_iRidginess: float(landiRidginess),
-            landNoise_sScale: float(landsScale),
-            landNoise_sOctaves: uint(landsOctaves),
-            landNoise_sFalloff: float(landsFalloff),
-            landNoise_sIntensity: float(landsIntensity),
-//            cloudNoise_perm: generatePermutationsTable(cloudSeed),
-            cloudNoise_iScale: float(cloudiScale),
-            cloudNoise_iOctaves: uint(cloudiOctaves),
-            cloudNoise_iFalloff: float(cloudiFalloff),
-            cloudNoise_iIntensity: float(cloudiIntensity),
-            cloudNoise_iRidginess: float(cloudiRidginess),
-            cloudNoise_sScale: float(cloudsScale),
-            cloudNoise_sOctaves: uint(cloudsOctaves),
-            cloudNoise_sFalloff: float(cloudsFalloff),
-            cloudNoise_sIntensity: float(cloudsIntensity),
-        });
-        const computeNode = computeWGSLCall.compute(width * height);
-
-        // Materials setup
-        const planetMaterial = new MeshPhongMaterial({
-            map: diffuseTexture,
-            normalMap: normalTexture,
-            specularMap: specularTexture,
-            normalScale: new Vector2(normalScale, normalScale),
-            specular: 0x777777,
-            shininess: 16
-        });
-
-        const cloudsMaterial = new MeshPhongMaterial({
-            map: cloudTexture,
-            transparent: true,
-            specular: 0x000000
-        });
-
-        // Meshes setup
-        const segments = 24;
-        threeInstance.current.planetMesh = new Mesh(
-            new SphereGeometry(1, segments, segments),
-            planetMaterial
-        );
-        threeInstance.current.scene.add(threeInstance.current.planetMesh);
-        threeInstance.current.cloudsMesh = new Mesh(
-            new SphereGeometry(1.01, segments, segments),
-            cloudsMaterial
-        );
-        threeInstance.current.scene.add(threeInstance.current.cloudsMesh);
-
-        // TODO: Lighting setup
-        //       This code seems to cause three.js to crash.  No doubt the way lighting works has changed,
-        //       and - honestly - we probably need to change the way the textures are generated to match the "new"
-        //       way that three.js is doing lighting/rendering.
-        // const light = new DirectionalLight(0xffffff);
-        // light.position.set(1, 0, 1);
-        // threeInstance.current.scene.add(light);
-
-        // Run the compute shader
-        threeInstance.current.renderer.compute(computeNode);
-
-        // Kick off the rendering/animation loop
-        threeInstance.current.animate = true;
-        const animateLoop = () => {
-            if (!threeInstance.current.animate) return;
-            requestAnimationFrame(animateLoop);
-
-            // Update logic
-            if (animate) {
-                threeInstance.current.cloudsMesh.rotation.y += 0.0002;
-                threeInstance.current.planetMesh.rotation.y += 0.0001;
+    useEffect(
+        () => {
+            threeInstance.current.animateRotation = animate;
+            if (WebGPU.isAvailable() === false) {
+                mountRef.current.replaceChildren(WebGPU.getErrorMessage());
+                return;
             }
 
-            threeInstance.current.renderer.render(threeInstance.current.scene, threeInstance.current.camera);
-        };
-        animateLoop();
+            threeInstance.current.scene = new Scene();
+            const containerWidth = mountRef.current.clientWidth;
+            const containerHeight = mountRef.current.clientHeight;
 
-        mountRef.current.replaceChildren(threeInstance.current.renderer.domElement);
+            // Camera setup
+            threeInstance.current.camera = new PerspectiveCamera(61, 1, 0.1, 10);
+            threeInstance.current.camera.position.set(0, 0, 2);
+            threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
 
-        // Cleanup
-        return () => {
-            threeInstance.current.animate = false;
-            mountRef.current?.removeChild(threeInstance.current.renderer.domElement);
-            diffuseTexture.dispose();
-            normalTexture.dispose();
-            specularTexture.dispose();
-            cloudTexture.dispose();
-            planetMaterial.dispose();
-            cloudsMaterial.dispose();
-            threeInstance.current?.planetMesh.geometry.dispose();
-            threeInstance.current?.cloudsMesh.geometry.dispose();
-            computeNode.dispose();
-        };
-    }, []);
+            // Renderer setup
+            threeInstance.current.renderer = new WebGPURenderer({alpha: true, antialias: true});
+            threeInstance.current.renderer.setClearColor(0, 0.0);
+            threeInstance.current.renderer.setSize(containerWidth, containerHeight);
+            threeInstance.current.renderer.setPixelRatio(window.devicePixelRatio);
+
+            // Textures setup
+            const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
+            const width = textureResolution;
+            const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
+
+            const diffuseTexture = new StorageTexture(width, height);
+            diffuseTexture.wrapS = RepeatWrapping;
+            diffuseTexture.minFilter = LinearFilter;
+            diffuseTexture.maxFilter = LinearFilter;
+
+            const normalTexture = new StorageTexture(width, height);
+            normalTexture.wrapS = RepeatWrapping;
+
+            const specularTexture = new StorageTexture(width, height);
+            specularTexture.wrapS = RepeatWrapping;
+
+            const cloudTexture = new StorageTexture(width, height);
+            cloudTexture.wrapS = RepeatWrapping;
+            cloudTexture.minFilter = LinearFilter;
+            cloudTexture.maxFilter = LinearFilter;
+
+            // Generate textures
+            const landColor1RGB = new Color(landColor1);
+            const landColor2RGB = new Color(landColor2);
+            const waterDeepColorRGB = new Color(waterDeep);
+            const waterShallowColorRGB = new Color(waterShallow);
+            const cloudColorRGB = new Color(cloudColor);
+
+            const computeWGSL = wgslFn(
+                [mainWgsl, ...Object.values(wgslcode)].join('\n')
+            );
+            const computeWGSLCall = computeWGSL({
+                index: instanceIndex,
+                diffuseTexture: textureStore(diffuseTexture),
+                normalTexture: textureStore(normalTexture),
+                specularTexture: textureStore(specularTexture),
+                cloudTexture: textureStore(cloudTexture),
+                textureSize: vec2(width, height),
+                landColor1: vec3(landColor1RGB.r, landColor1RGB.g, landColor1RGB.b),
+                landColor2: vec3(landColor2RGB.r, landColor2RGB.g, landColor2RGB.b),
+                waterDeepColor: vec3(waterDeepColorRGB.r, waterDeepColorRGB.g, waterDeepColorRGB.b),
+                waterShallowColor: vec3(waterShallowColorRGB.r, waterShallowColorRGB.g, waterShallowColorRGB.b),
+                cloudColor: vec4(cloudColorRGB.r, cloudColorRGB.g, cloudColorRGB.b, cloudOpacity),
+                waterLevel: float(waterLevel),
+                waterSpecular: float(waterSpecular),
+                waterFalloff: float(waterFalloff),
+//            surfaceNoise_perm: generatePermutationsTable(surfaceSeed),
+                surfaceNoise_iScale: float(surfaceiScale),
+                surfaceNoise_iOctaves: uint(surfaceiOctaves),
+                surfaceNoise_iFalloff: float(surfaceiFalloff),
+                surfaceNoise_iIntensity: float(surfaceiIntensity),
+                surfaceNoise_iRidginess: float(surfaceiRidginess),
+                surfaceNoise_sScale: float(surfacesScale),
+                surfaceNoise_sOctaves: uint(surfacesOctaves),
+                surfaceNoise_sFalloff: float(surfacesFalloff),
+                surfaceNoise_sIntensity: float(surfacesIntensity),
+//            landNoise_perm: generatePermutationsTable(landSeed),
+                landNoise_iScale: float(landiScale),
+                landNoise_iOctaves: uint(landiOctaves),
+                landNoise_iFalloff: float(landiFalloff),
+                landNoise_iIntensity: float(landiIntensity),
+                landNoise_iRidginess: float(landiRidginess),
+                landNoise_sScale: float(landsScale),
+                landNoise_sOctaves: uint(landsOctaves),
+                landNoise_sFalloff: float(landsFalloff),
+                landNoise_sIntensity: float(landsIntensity),
+//            cloudNoise_perm: generatePermutationsTable(cloudSeed),
+                cloudNoise_iScale: float(cloudiScale),
+                cloudNoise_iOctaves: uint(cloudiOctaves),
+                cloudNoise_iFalloff: float(cloudiFalloff),
+                cloudNoise_iIntensity: float(cloudiIntensity),
+                cloudNoise_iRidginess: float(cloudiRidginess),
+                cloudNoise_sScale: float(cloudsScale),
+                cloudNoise_sOctaves: uint(cloudsOctaves),
+                cloudNoise_sFalloff: float(cloudsFalloff),
+                cloudNoise_sIntensity: float(cloudsIntensity),
+            });
+            const computeNode = computeWGSLCall.compute(width * height);
+
+            // Materials setup
+            const planetMaterial = new MeshPhongMaterial({
+                map: diffuseTexture,
+                normalMap: normalTexture,
+                specularMap: specularTexture,
+                normalScale: new Vector2(normalScale, normalScale),
+                specular: 0x777777,
+                shininess: 16
+            });
+
+            const cloudsMaterial = new MeshPhongMaterial({
+                map: cloudTexture,
+                transparent: true,
+                specular: 0x000000
+            });
+
+            // Meshes setup
+            const segments = 24;
+            threeInstance.current.planetMesh = new Mesh(
+                new SphereGeometry(1, segments, segments),
+                planetMaterial
+            );
+            threeInstance.current.scene.add(threeInstance.current.planetMesh);
+            threeInstance.current.cloudsMesh = new Mesh(
+                new SphereGeometry(1.01, segments, segments),
+                cloudsMaterial
+            );
+            threeInstance.current.scene.add(threeInstance.current.cloudsMesh);
+
+            // TODO: Lighting setup
+            //       This code seems to cause three.js to crash.  No doubt the way lighting works has changed,
+            //       and - honestly - we probably need to change the way the textures are generated to match the "new"
+            //       way that three.js is doing lighting/rendering.
+            // const light = new DirectionalLight(0xffffff);
+            // light.position.set(1, 0, 1);
+            // threeInstance.current.scene.add(light);
+
+            // Run the compute shader
+            threeInstance.current.renderer.compute(computeNode);
+
+            // Kick off the rendering/animation loop
+            threeInstance.current.renderLoopRunning = true;
+            renderLoop();
+
+            mountRef.current.replaceChildren(threeInstance.current.renderer.domElement);
+
+            // Cleanup
+            return () => {
+                threeInstance.current.renderLoopRunning = false;
+                threeInstance.current?.renderer.domElement.remove();
+                diffuseTexture.dispose();
+                normalTexture.dispose();
+                specularTexture.dispose();
+                cloudTexture.dispose();
+                planetMaterial.dispose();
+                cloudsMaterial.dispose();
+                threeInstance.current?.planetMesh.geometry.dispose();
+                threeInstance.current?.cloudsMesh.geometry.dispose();
+                computeNode.dispose();
+            };
+        },
+        [resolution]    // TODO: it'd be nice to change the texture resolution at runtime, too, instead of restarting three.js
+    );
 
     // Effect for handling props changes
     useEffect(
@@ -295,8 +302,8 @@ const Planet = (props) => {
                 return;
             }
 
+            threeInstance.current.animateRotation = animate;
             updateThreeInstance(
-                resolution,
                 surfaceSeed,
                 surfaceiScale,
                 surfaceiOctaves,
@@ -344,7 +351,6 @@ const Planet = (props) => {
             );
         },
         [
-            resolution,
             surfaceSeed,
             surfaceiScale,
             surfaceiOctaves,
@@ -393,7 +399,6 @@ const Planet = (props) => {
     ); // Depend on props that should trigger updates
 
     const updateThreeInstance = (
-        resolution,
         surfaceSeed,
         surfaceiScale,
         surfaceiOctaves,
@@ -433,11 +438,11 @@ const Planet = (props) => {
         cloudsOctaves,
         cloudsFalloff,
         cloudsIntensity,
-        normalScale,
-        animate
+        normalScale
     ) => {
         // Logic to interact with Three.js based on prop changes
         // For example, updating objects, changing materials, etc.
+        console.log('prop updated!');
     };
 
     // Any props that the library doesn't care about should be passed on to the containing div
