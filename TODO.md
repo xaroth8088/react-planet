@@ -3,6 +3,7 @@
 * Finish work on sending noise params to the shader
 * Finish work on sending simplex permutations tables to the shader
 * Finish work on re-running the shader whenever the props change
+* Include Babylon, but tree-shaken, so that we don't have to have it as a peer dependency
 
 # Library 
 * Make the number of segments for the planet model configurable via props (PlanetRenderer.jsx::segments)

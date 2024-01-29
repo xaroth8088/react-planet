@@ -14,9 +14,9 @@ export default defineConfig({
         },
         copyPublicDir: false,
         rollupOptions: {
-            external: ['react', 'react/jsx-runtime'],
+            external: ['react', 'react/jsx-runtime', '@babylonjs/core'],
             output: {
-                entryFileNames: '[name].js',
+                entryFileNames: '[name].js'
             }
         },
         target: browserslistToEsbuild()
