@@ -94,18 +94,17 @@ const Planet = (
 ) => {
     const [showError, setError] = useState(false);
     const reactCanvas = useRef(null);
-    const babylonData = useRef({ uBuffer: null, terrainShader: null, width: 0, height: 0 });
+    const babylonData = useRef({ engine: null, resize: null, uBuffer: null, terrainShader: null, width: 0, height: 0 });
 
     // set up basic engine and scene
     useEffect(
         () => {
-            let engine, resize;
+            let isMounted = true;
 
             async function initBabylon() {
                 const {current: canvas} = reactCanvas;
 
                 if (!canvas) return;
-                console.log(canvas);
 
                 const engineOptions = {
                     adaptToDeviceRatio: true,
@@ -115,11 +114,13 @@ const Planet = (
                 };
                 const sceneOptions = {};
 
-                engine = await new WebGPUEngine(canvas, engineOptions);
+                const engine = await new WebGPUEngine(canvas, engineOptions);
                 await engine.initAsync();
 
                 if (!engine.getCaps().supportComputeShaders) {
-                    setError(true);
+                    if (isMounted) {
+                        setError(true);
+                    }
                     return;
                 }
 
@@ -247,24 +248,28 @@ const Planet = (
                     scene.render();
                 });
 
-                resize = () => {
+                const resize = () => {
                     engine.resize();
                 };
 
                 if (window) {
                     window.addEventListener("resize", resize);
                 }
+
+                babylonData.current.engine = engine;
+                babylonData.current.resize = resize;
             }
 
             initBabylon();
 
             return () => {
-                if (engine) {
-                    engine.dispose();
+                isMounted = false;
+                if (babylonData.current.engine) {
+                    babylonData.current.engine.dispose();
                 }
 
                 if (window) {
-                    window.removeEventListener("resize", resize);
+                    window.removeEventListener("resize", babylonData.current.resize);
                 }
             };
         },
