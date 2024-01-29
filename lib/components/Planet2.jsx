@@ -194,6 +194,8 @@ const Planet = (
                 cloudsTexture.hasAlpha = true;
 
                 babylonData.current.uBuffer = new UniformBuffer(engine);
+                // NOTE: Despite having a name param, uniforms must be added in the same order as they appear in the
+                //       shader!  Updates can happen in an arbitrary order, however.
                 babylonData.current.uBuffer.addUniform("textureWidth", 1);
                 babylonData.current.uBuffer.addUniform("textureHeight", 1);
                 babylonData.current.uBuffer.addUniform("landColor1", 3);
@@ -280,52 +282,19 @@ const Planet = (
     // Effect for handling generation parameter changes
     useEffect(
         () => {
-            updateParams(
-                surfaceSeed,
-                surfaceiScale,
-                surfaceiOctaves,
-                surfaceiFalloff,
-                surfaceiIntensity,
-                surfaceiRidginess,
-                surfacesScale,
-                surfacesOctaves,
-                surfacesFalloff,
-                surfacesIntensity,
-
-                landSeed,
-                landColor1,
-                landColor2,
-                landiScale,
-                landiOctaves,
-                landiFalloff,
-                landiIntensity,
-                landiRidginess,
-                landsScale,
-                landsOctaves,
-                landsFalloff,
-                landsIntensity,
-
-                waterDeep,
-                waterShallow,
-                waterLevel,
-                waterSpecular,
-                waterFalloff,
-
-                cloudSeed,
-                cloudColor,
-                cloudOpacity,
-                cloudiScale,
-                cloudiOctaves,
-                cloudiFalloff,
-                cloudiIntensity,
-                cloudiRidginess,
-                cloudsScale,
-                cloudsOctaves,
-                cloudsFalloff,
-                cloudsIntensity,
-                normalScale,
-                animate
-            );
+            // TODO: This looks like it'd be better as individual useEffect's instead of one giant one
+            //       so that less uniforms data is updated every time.
+            babylonData.current.uBuffer?.updateColor3("landColor1", Color3.FromHexString(landColor1));
+            babylonData.current.uBuffer?.updateColor3("landColor2", Color3.FromHexString(landColor2));
+            babylonData.current.uBuffer?.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
+            babylonData.current.uBuffer?.updateColor3("waterShallowColor", Color3.FromHexString(waterShallow));
+            babylonData.current.uBuffer?.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
+            babylonData.current.uBuffer?.updateFloat("waterLevel", waterLevel);
+            babylonData.current.uBuffer?.updateFloat("waterSpecular", waterSpecular);
+            babylonData.current.uBuffer?.updateFloat("waterFalloff", waterFalloff);
+            babylonData.current.uBuffer?.updateFloat("normalScale", normalScale);
+            babylonData.current.uBuffer?.update();
+            babylonData.current.terrainShader?.dispatch(babylonData.current.width, babylonData.current.height, 1);
         },
         [
             surfaceSeed,
@@ -374,63 +343,6 @@ const Planet = (
             animate
         ]
     );
-
-    const updateParams = (
-        surfaceSeed,
-        surfaceiScale,
-        surfaceiOctaves,
-        surfaceiFalloff,
-        surfaceiIntensity,
-        surfaceiRidginess,
-        surfacesScale,
-        surfacesOctaves,
-        surfacesFalloff,
-        surfacesIntensity,
-        landSeed,
-        landColor1,
-        landColor2,
-        landiScale,
-        landiOctaves,
-        landiFalloff,
-        landiIntensity,
-        landiRidginess,
-        landsScale,
-        landsOctaves,
-        landsFalloff,
-        landsIntensity,
-        waterDeep,
-        waterShallow,
-        waterLevel,
-        waterSpecular,
-        waterFalloff,
-        cloudSeed,
-        cloudColor,
-        cloudOpacity,
-        cloudiScale,
-        cloudiOctaves,
-        cloudiFalloff,
-        cloudiIntensity,
-        cloudiRidginess,
-        cloudsScale,
-        cloudsOctaves,
-        cloudsFalloff,
-        cloudsIntensity,
-        normalScale
-    ) => {
-        // TODO: This looks like it'd be better as individual useEffect's instead of one giant one
-        //       so that less uniforms data is updated every time.
-        babylonData.current.uBuffer?.updateColor3("landColor1", Color3.FromHexString(landColor1));
-        babylonData.current.uBuffer?.updateColor3("landColor2", Color3.FromHexString(landColor2));
-        babylonData.current.uBuffer?.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
-        babylonData.current.uBuffer?.updateColor3("waterShallowColor", Color3.FromHexString(waterShallow));
-        babylonData.current.uBuffer?.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
-        babylonData.current.uBuffer?.updateFloat("waterLevel", waterLevel);
-        babylonData.current.uBuffer?.updateFloat("waterSpecular", waterSpecular);
-        babylonData.current.uBuffer?.updateFloat("waterFalloff", waterFalloff);
-        babylonData.current.uBuffer?.updateFloat("normalScale", normalScale);
-        babylonData.current.uBuffer?.update();
-        babylonData.current.terrainShader?.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
-    };
 
     if (showError) {
         return (
