@@ -94,6 +94,7 @@ const Planet = (
 ) => {
     const [showError, setError] = useState(false);
     const reactCanvas = useRef(null);
+    const babylonData = useRef({ uBuffer: null, terrainShader: null, width: 0, height: 0 });
 
     // set up basic engine and scene
     useEffect(
@@ -135,7 +136,7 @@ const Planet = (
                 const planetMesh = MeshBuilder.CreateSphere("planet", { diameter: 1, segments }, scene);
                 const cloudsMesh = MeshBuilder.CreateSphere("clouds", { diameter: 1.01, segments }, scene);
 
-                const terrainShader = new ComputeShader(
+                babylonData.current.terrainShader = new ComputeShader(
                     "Terrain Shader",
                     engine,
                     {
@@ -154,73 +155,75 @@ const Planet = (
                 );
 
                 const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
-                const width = textureResolution;
-                const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
+                babylonData.current.width = textureResolution;
+                babylonData.current.height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
                 const diffuseTexture = RawTexture.CreateRGBAStorageTexture(
                     null,
-                    width,
-                    height,
+                    babylonData.current.width,
+                    babylonData.current.height,
                     scene,
                     false,
                     false
                 );
                 const normalTexture = RawTexture.CreateRGBAStorageTexture(
                     null,
-                    width,
-                    height,
+                    babylonData.current.width,
+                    babylonData.current.height,
                     scene,
                     false,
                     false
                 );
                 const specularTexture = RawTexture.CreateRGBAStorageTexture(
                     null,
-                    width,
-                    height,
+                    babylonData.current.width,
+                    babylonData.current.height,
                     scene,
                     false,
                     false
                 );
                 const cloudsTexture = RawTexture.CreateRGBAStorageTexture(
                     null,
-                    width,
-                    height,
+                    babylonData.current.width,
+                    babylonData.current.height,
                     scene,
                     false,
                     false
                 );
                 cloudsTexture.hasAlpha = true;
 
-                const uBuffer = new UniformBuffer(engine);
-                uBuffer.addUniform("textureWidth", 1);
-                uBuffer.addUniform("textureHeight", 1);
-                uBuffer.addUniform("landColor1", 3);
-                uBuffer.addUniform("landColor2", 3);
-                uBuffer.addUniform("waterDeepColor", 3);
-                uBuffer.addUniform("waterShallowColor", 3);
-                uBuffer.addUniform("cloudColor", 4);
-                uBuffer.addUniform("waterLevel", 1);
-                uBuffer.addUniform("waterSpecular", 1);
-                uBuffer.addUniform("waterFalloff", 1);
+                babylonData.current.uBuffer = new UniformBuffer(engine);
+                babylonData.current.uBuffer.addUniform("textureWidth", 1);
+                babylonData.current.uBuffer.addUniform("textureHeight", 1);
+                babylonData.current.uBuffer.addUniform("landColor1", 3);
+                babylonData.current.uBuffer.addUniform("landColor2", 3);
+                babylonData.current.uBuffer.addUniform("waterDeepColor", 3);
+                babylonData.current.uBuffer.addUniform("waterShallowColor", 3);
+                babylonData.current.uBuffer.addUniform("cloudColor", 4);
+                babylonData.current.uBuffer.addUniform("waterLevel", 1);
+                babylonData.current.uBuffer.addUniform("waterSpecular", 1);
+                babylonData.current.uBuffer.addUniform("waterFalloff", 1);
+                babylonData.current.uBuffer.addUniform("normalScale", 1);
 
-                uBuffer.updateInt("textureWidth", width);
-                uBuffer.updateInt("textureHeight", height);
-                uBuffer.updateColor3("landColor1", Color3.FromHexString(landColor1));
-                uBuffer.updateColor3("landColor2", Color3.FromHexString(landColor2));
-                uBuffer.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
-                uBuffer.updateColor3("waterShallowColor", Color3.FromHexString(waterShallow));
-                uBuffer.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
-                uBuffer.updateFloat("waterLevel", waterLevel);
-                uBuffer.updateFloat("waterSpecular", waterSpecular);
-                uBuffer.updateFloat("waterFalloff", waterFalloff);
-                uBuffer.update();
+                babylonData.current.uBuffer.updateInt("textureWidth", babylonData.current.width);
+                babylonData.current.uBuffer.updateInt("textureHeight", babylonData.current.height);
+                babylonData.current.uBuffer.updateColor3("landColor1", Color3.FromHexString(landColor1));
+                babylonData.current.uBuffer.updateColor3("landColor2", Color3.FromHexString(landColor2));
+                babylonData.current.uBuffer.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
+                babylonData.current.uBuffer.updateColor3("waterShallowColor", Color3.FromHexString(waterShallow));
+                babylonData.current.uBuffer.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
+                babylonData.current.uBuffer.updateFloat("waterLevel", waterLevel);
+                babylonData.current.uBuffer.updateFloat("waterSpecular", waterSpecular);
+                babylonData.current.uBuffer.updateFloat("waterFalloff", waterFalloff);
+                babylonData.current.uBuffer.updateFloat("normalScale", normalScale);
+                babylonData.current.uBuffer.update();
 
-                terrainShader.setUniformBuffer("uniforms", uBuffer);
-                terrainShader.setStorageTexture("diffuseTexture", diffuseTexture);
-                terrainShader.setStorageTexture("normalTexture", normalTexture);
-                terrainShader.setStorageTexture("specularTexture", specularTexture);
-                terrainShader.setStorageTexture("cloudsTexture", cloudsTexture);
+                babylonData.current.terrainShader.setUniformBuffer("uniforms", babylonData.current.uBuffer);
+                babylonData.current.terrainShader.setStorageTexture("diffuseTexture", diffuseTexture);
+                babylonData.current.terrainShader.setStorageTexture("normalTexture", normalTexture);
+                babylonData.current.terrainShader.setStorageTexture("specularTexture", specularTexture);
+                babylonData.current.terrainShader.setStorageTexture("cloudsTexture", cloudsTexture);
 
-                terrainShader.dispatchWhenReady(width, height, 1);
+                babylonData.current.terrainShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
 
                 const planetMaterial = new StandardMaterial("Planet", scene);
                 planetMaterial.diffuseTexture = diffuseTexture;
@@ -238,6 +241,9 @@ const Planet = (
                     // TODO: make rotation speeds a prop
                     planetMesh.rotation.y -= 0.0002;
                     cloudsMesh.rotation.y -= 0.0001;
+
+                    // TODO: maybe we can have the clouds be more dynamic by slowly moving the sphereMap around within the
+                    //       simplex noise space in a wandering loop (and regenerating the texture each time)?
                     scene.render();
                 });
 
@@ -408,6 +414,17 @@ const Planet = (
         // Logic to interact with Three.js based on prop changes
         // For example, updating objects, changing materials, etc.
         console.log('prop updated!');
+        babylonData.current.uBuffer?.updateColor3("landColor1", Color3.FromHexString(landColor1));
+        babylonData.current.uBuffer?.updateColor3("landColor2", Color3.FromHexString(landColor2));
+        babylonData.current.uBuffer?.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
+        babylonData.current.uBuffer?.updateColor3("waterShallowColor", Color3.FromHexString(waterShallow));
+        babylonData.current.uBuffer?.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
+        babylonData.current.uBuffer?.updateFloat("waterLevel", waterLevel);
+        babylonData.current.uBuffer?.updateFloat("waterSpecular", waterSpecular);
+        babylonData.current.uBuffer?.updateFloat("waterFalloff", waterFalloff);
+        babylonData.current.uBuffer?.updateFloat("normalScale", normalScale);
+        babylonData.current.uBuffer?.update();
+        babylonData.current.terrainShader?.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
     };
 
     if (showError) {

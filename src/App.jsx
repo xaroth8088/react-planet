@@ -4,7 +4,7 @@ import './App.css'
 import Controls from './Controls.jsx';
 
 function App() {
-    const [normalScale, setNormalScale] = useState(0.05);
+    const [normalScale, setNormalScale] = useState(0.33);
     const [resolution, setResolution] = useState(256);
     const [animate, setAnimate] = useState(true);
 

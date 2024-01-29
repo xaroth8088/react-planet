@@ -39,6 +39,7 @@ struct Uniforms {
     waterLevel: f32,
     waterSpecular: f32,
     waterFalloff: f32,
+    normalScale: f32
 //    @align(16) surfaceNoise: NoiseSettings,
 //    @align(16) landNoise: NoiseSettings,
 //    @align(16) cloudNoise: NoiseSettings,
@@ -162,7 +163,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
             )
         ));
         let n1: vec3<f32> = n * vec3<f32>(1.0, -1.0, 1.0);
-        let converted: vec3<f32> = n1 / 2.0 + 0.5;
+        let converted: vec3<f32> = (n1 / 2.0 + 0.5) * uniforms.normalScale;
         textureStore(normalTexture, vec2<u32>(x, y), vec4<f32>(converted, 1.0));
     } else {
         // For the "below water" case, there's no additional sampling -
