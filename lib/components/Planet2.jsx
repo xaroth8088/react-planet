@@ -416,9 +416,8 @@ const Planet = (
         cloudsIntensity,
         normalScale
     ) => {
-        // Logic to interact with Three.js based on prop changes
-        // For example, updating objects, changing materials, etc.
-        console.log('prop updated!');
+        // TODO: This looks like it'd be better as individual useEffect's instead of one giant one
+        //       so that less uniforms data is updated every time.
         babylonData.current.uBuffer?.updateColor3("landColor1", Color3.FromHexString(landColor1));
         babylonData.current.uBuffer?.updateColor3("landColor2", Color3.FromHexString(landColor2));
         babylonData.current.uBuffer?.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
