@@ -22,7 +22,6 @@ fn surfaceColor(p: vec3<f32>, landNoise: NoiseSettings, landColor1: vec3<f32>, l
     );
 }
 
-// TODO: can this be replaced with the built-in smoothstep() function?
 fn smootherstep(t: f32) -> f32 {
     return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
 }
