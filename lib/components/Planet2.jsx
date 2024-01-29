@@ -5,28 +5,41 @@ import {
     ComputeShader,
     FreeCamera,
     HemisphericLight,
-    MeshBuilder, RawTexture,
-    Scene, StandardMaterial, UniformBuffer,
+    MeshBuilder,
+    RawTexture,
+    Scene,
+    StandardMaterial,
+    UniformBuffer,
     Vector3,
     WebGPUEngine
 } from "@babylonjs/core";
 import PropTypes from "prop-types";
 
-const clearTextureComputeShader = `
-    @group(0) @binding(0) var tbuf : texture_storage_2d<rgba8unorm,write>;
+const wgslcode = import.meta.glob('../wgsl/includes/*.wgsl', {as: 'raw', eager: true});
+const terrainShaderSource = Object.values(wgslcode).join('\n');
 
-    struct Params {
-        color : vec4<f32>
-    };
-    @group(0) @binding(1) var<uniform> params : Params;
+// TODO: move these to a util file, to declutter this component
+function fls(mask) {
+    /*
+        https://github.com/udp/freebsd-libc/blob/master/string/fls.c
+    */
+    let bit;
 
-    @compute @workgroup_size(1, 1, 1)
-
-    fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
-        textureStore(tbuf, vec2<i32>(global_id.xy), params.color);
+    if (mask === 0) {
+        return 0;
     }
-`;
 
+    for (bit = 1; mask !== 1; bit++) {
+        // eslint-disable-next-line no-bitwise, no-param-reassign
+        mask >>= 1;
+    }
+
+    return (bit);
+}
+
+function nearestPowerOfTwo(number) {
+    return 2 ** fls(number - 1);
+}
 
 const Planet = (
     {
@@ -93,61 +106,138 @@ const Planet = (
                 if (!canvas) return;
                 console.log(canvas);
 
-                // const engineOptions = {
-                //     adaptToDeviceRatio: true,
-                //     antialias: true,
-                //     audioEngine: false,
-                //     doNotHandleTouchAction: true
-                // };
-                const engineOptions = {};
+                const engineOptions = {
+                    adaptToDeviceRatio: true,
+                    antialias: true,
+                    audioEngine: false,
+                    doNotHandleTouchAction: true
+                };
                 const sceneOptions = {};
 
                 engine = await new WebGPUEngine(canvas, engineOptions);
                 await engine.initAsync();
-                const scene = new Scene(engine, sceneOptions);
-                scene.clearColor = new Color4(0, 0, 0, 0);
-
-                const camera = new FreeCamera("camera1", new Vector3(0, 5, -10), scene);
-                camera.setTarget(Vector3.Zero());
-
-                const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
-                light.intensity = 0.7;
-
-                // Our built-in 'sphere' shape.
-                const sphere = MeshBuilder.CreateSphere("sphere", {diameter: 2, segments: 32}, scene);
-                sphere.position.y = 1;  // Move the sphere upward 1/2 its height
 
                 if (!engine.getCaps().supportComputeShaders) {
                     setError(true);
                     return;
                 }
 
-                const cs2 = new ComputeShader("myCompute2", engine, {computeSource: clearTextureComputeShader}, {
-                    bindingsMapping:
-                        {
-                            "tbuf": {group: 0, binding: 0},
-                            "params": {group: 0, binding: 1}
-                        }
-                });
+                const scene = new Scene(engine, sceneOptions);
+                scene.clearColor = new Color4(0, 0, 0, 0);
 
-                const dest2 = RawTexture.CreateRGBAStorageTexture(null, 512, 512, scene, false, false);
+                const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
+                camera.setTarget(Vector3.Zero());
+
+                const light = new HemisphericLight("light", new Vector3(-8, 8, -2), scene);
+                light.intensity = 0.7;
+
+                const segments = 32;    // TODO: make this configurable via a prop
+                const planetMesh = MeshBuilder.CreateSphere("planet", { diameter: 1, segments }, scene);
+                const cloudsMesh = MeshBuilder.CreateSphere("clouds", { diameter: 1.01, segments }, scene);
+
+                const terrainShader = new ComputeShader(
+                    "Terrain Shader",
+                    engine,
+                    {
+                        computeSource: terrainShaderSource
+                    },
+                    {
+                        bindingsMapping:
+                            {
+                                "uniforms": {group: 0, binding: 0},
+                                "diffuseTexture": {group: 1, binding: 0},
+                                "normalTexture": {group: 1, binding: 1},
+                                "specularTexture": {group: 1, binding: 2},
+                                "cloudsTexture": {group: 1, binding: 3},
+                            }
+                    }
+                );
+
+                const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
+                const width = textureResolution;
+                const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
+                const diffuseTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    width,
+                    height,
+                    scene,
+                    false,
+                    false
+                );
+                const normalTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    width,
+                    height,
+                    scene,
+                    false,
+                    false
+                );
+                const specularTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    width,
+                    height,
+                    scene,
+                    false,
+                    false
+                );
+                const cloudsTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    width,
+                    height,
+                    scene,
+                    false,
+                    false
+                );
+                cloudsTexture.hasAlpha = true;
 
                 const uBuffer = new UniformBuffer(engine);
+                uBuffer.addUniform("textureWidth", 1);
+                uBuffer.addUniform("textureHeight", 1);
+                uBuffer.addUniform("landColor1", 3);
+                uBuffer.addUniform("landColor2", 3);
+                uBuffer.addUniform("waterDeepColor", 3);
+                uBuffer.addUniform("waterShallowColor", 3);
+                uBuffer.addUniform("cloudColor", 4);
+                uBuffer.addUniform("waterLevel", 1);
+                uBuffer.addUniform("waterSpecular", 1);
+                uBuffer.addUniform("waterFalloff", 1);
 
-                uBuffer.updateColor4("color", new Color3(1, 0.6, 0.8), 1);
+                uBuffer.updateInt("textureWidth", width);
+                uBuffer.updateInt("textureHeight", height);
+                uBuffer.updateColor3("landColor1", Color3.FromHexString(landColor1));
+                uBuffer.updateColor3("landColor2", Color3.FromHexString(landColor2));
+                uBuffer.updateColor3("waterDeepColor", Color3.FromHexString(waterDeep));
+                uBuffer.updateColor3("waterShallowColor", Color3.FromHexString(waterShallow));
+                uBuffer.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
+                uBuffer.updateFloat("waterLevel", waterLevel);
+                uBuffer.updateFloat("waterSpecular", waterSpecular);
+                uBuffer.updateFloat("waterFalloff", waterFalloff);
                 uBuffer.update();
 
-                cs2.setStorageTexture("tbuf", dest2);
-                cs2.setUniformBuffer("params", uBuffer);
+                terrainShader.setUniformBuffer("uniforms", uBuffer);
+                terrainShader.setStorageTexture("diffuseTexture", diffuseTexture);
+                terrainShader.setStorageTexture("normalTexture", normalTexture);
+                terrainShader.setStorageTexture("specularTexture", specularTexture);
+                terrainShader.setStorageTexture("cloudsTexture", cloudsTexture);
 
-                cs2.dispatchWhenReady(dest2.getSize().width, dest2.getSize().height, 1);
+                terrainShader.dispatchWhenReady(width, height, 1);
 
-                const mat2 = new StandardMaterial("mat2", scene);
-                mat2.diffuseTexture = dest2;
+                const planetMaterial = new StandardMaterial("Planet", scene);
+                planetMaterial.diffuseTexture = diffuseTexture;
+                planetMaterial.specularTexture = specularTexture;
+                planetMaterial.bumpTexture = normalTexture; // TODO: something's wrong with this
+                planetMesh.material = planetMaterial;
 
-                sphere.material = mat2;
+                const cloudsMaterial = new StandardMaterial("Clouds", scene);
+                cloudsMaterial.diffuseTexture = cloudsTexture;
+                cloudsMaterial.useAlphaFromDiffuseTexture = true;
+                cloudsMesh.material = cloudsMaterial;
 
                 engine.runRenderLoop(() => {
+                    // TODO: Toggle based on animate property
+                    // TODO: make rotation speeds a prop
+                    planetMesh.rotation.y -= 0.0002;
+                    cloudsMesh.rotation.y -= 0.0001;
                     scene.render();
                 });
 
