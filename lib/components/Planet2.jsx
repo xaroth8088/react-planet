@@ -127,6 +127,7 @@ const Planet = (
                 const scene = new Scene(engine, sceneOptions);
                 scene.clearColor = new Color4(0, 0, 0, 0);
 
+                // TODO: get it so that the planet always fits in the canvas, regardless of container size
                 const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
                 camera.setTarget(Vector3.Zero());
 

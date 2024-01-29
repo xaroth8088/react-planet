@@ -35,7 +35,7 @@ function App() {
     const [waterDeep, setWaterDeep] = useState('#000033');
     const [waterShallow, setWaterShallow] = useState('#0000ff');
     const [waterLevel, setWaterLevel] = useState(0.68);
-    const [waterSpecular, setWaterSpecular] = useState(1);
+    const [waterSpecular, setWaterSpecular] = useState(0.75);
     const [waterFalloff, setWaterFalloff] = useState(1);
 
 

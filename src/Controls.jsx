@@ -364,8 +364,8 @@ function Controls({
                     name="Specular"
                     tooltip="Higher values means shinier water"
                     min={0}
-                    max={5}
-                    step={0.1}
+                    max={1}
+                    step={0.01}
                     value={waterSpecular}
                     onChange={setWaterSpecular}
                 />
