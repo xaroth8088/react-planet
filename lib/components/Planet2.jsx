@@ -94,7 +94,7 @@ const Planet = (
 ) => {
     const [showError, setError] = useState(false);
     const reactCanvas = useRef(null);
-    const babylonData = useRef({ engine: null, resize: null, uBuffer: null, terrainShader: null, width: 0, height: 0 });
+    const babylonData = useRef({engine: null, resize: null, uBuffer: null, terrainShader: null, width: 0, height: 0});
 
     // set up basic engine and scene
     useEffect(
@@ -134,8 +134,8 @@ const Planet = (
                 light.intensity = 0.7;
 
                 const segments = 32;    // TODO: make this configurable via a prop
-                const planetMesh = MeshBuilder.CreateSphere("planet", { diameter: 1, segments }, scene);
-                const cloudsMesh = MeshBuilder.CreateSphere("clouds", { diameter: 1.01, segments }, scene);
+                const planetMesh = MeshBuilder.CreateSphere("planet", {diameter: 1, segments}, scene);
+                const cloudsMesh = MeshBuilder.CreateSphere("clouds", {diameter: 1.01, segments}, scene);
 
                 babylonData.current.terrainShader = new ComputeShader(
                     "Terrain Shader",
