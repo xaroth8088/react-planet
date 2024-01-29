@@ -76,6 +76,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babylonjs/core@npm:^6.40.0":
+  version: 6.40.0
+  resolution: "@babylonjs/core@npm:6.40.0"
+  checksum: 564e4c3bc655dc871e27088387d3ef74f71ee427b537f56a88cd8ca01e6d7ee123123421858ef27a8e1d9dfbc8071d325fd371414881083f362b049352844887
+  languageName: node
+  linkType: hard
+
 "@emotion/cache@npm:^10.0.27":
   version: 10.0.29
   resolution: "@emotion/cache@npm:10.0.29"
@@ -775,6 +782,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@xaroth8088/react-planet@workspace:."
   dependencies:
+    "@babylonjs/core": "npm:^6.40.0"
     "@types/react": "npm:^18.2.48"
     "@types/react-dom": "npm:^18.2.18"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"
@@ -791,13 +799,12 @@ __metadata:
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-simple-tooltip: "npm:2.6.3"
-    three: "npm:^0.160.1"
     vite: "npm:^5.0.12"
   peerDependencies:
+    "@babylonjs/core": ^6.40.0
     prop-types: "*"
     react: ^18.2.0
     react-dom: ^18.2.0
-    three: ^0.160.1
   languageName: unknown
   linkType: soft
 
@@ -3620,13 +3627,6 @@ __metadata:
   version: 0.2.0
   resolution: "text-table@npm:0.2.0"
   checksum: 02805740c12851ea5982686810702e2f14369a5f4c5c40a836821e3eefc65ffeec3131ba324692a37608294b0fd8c1e55a2dd571ffed4909822787668ddbee5c
-  languageName: node
-  linkType: hard
-
-"three@npm:^0.160.1":
-  version: 0.160.1
-  resolution: "three@npm:0.160.1"
-  checksum: b14b54a8b0799bc337ea2a841a1f01322dc50198d8a438ff4fbdf83ad95a15bd405ba43bd398c05b1ffc2e40a7685b73481a048c288389acb949cea5510269ea
   languageName: node
   linkType: hard
 
