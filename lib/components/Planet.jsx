@@ -1,60 +1,29 @@
-import {useEffect, useRef, useState} from 'react';
-import PropTypes from 'prop-types';
+import {useEffect, useRef, useState} from "react";
 import {
-    Color,
-    LinearFilter,
-    Mesh,
-    MeshPhongMaterial,
-    PerspectiveCamera,
-    RepeatWrapping,
+    Color3,
+    Color4,
+    ComputeShader,
+    Constants,
+    FreeCamera,
+    HemisphericLight,
+    MeshBuilder,
+    RawTexture,
     Scene,
-    SphereGeometry,
-    Vector2
-} from 'three';
-import WebGPU from 'three/addons/capabilities/WebGPU.js';
-import WebGPURenderer from 'three/addons/renderers/webgpu/WebGPURenderer.js';
-import StorageTexture from "three/addons/renderers/common/StorageTexture.js";
-import {createShuffle} from 'fast-shuffle'
-import {float, instanceIndex, textureStore, uint, vec2, vec3, vec4, wgslFn} from "three/nodes";
-import mainWgsl from '../wgsl/main.wgsl?raw';
+    StandardMaterial,
+    StorageBuffer,
+    UniformBuffer,
+    Vector3,
+    WebGPUEngine
+} from "@babylonjs/core";
+import PropTypes from "prop-types";
+import {nearestPowerOfTwo, PERMUTATION_BUFFER_LENGTH} from '../utils/Math.js';
+import {addNoiseSettingsToBuffer, addUniformsToBuffer, updateNoiseSettings} from '../utils/UniformBuffers.js';
 
-const wgslcode = import.meta.glob('../wgsl/includes/*.wgsl', {as: 'raw', eager: true});
+const wgslcode = import.meta.glob('../wgsl/*.wgsl', {as: 'raw', eager: true});
+const terrainShaderSource = Object.values(wgslcode).join('\n');
 
-// TODO: move these to a util file, to declutter this component
-function fls(mask) {
-    /*
-        https://github.com/udp/freebsd-libc/blob/master/string/fls.c
-    */
-    let bit;
-
-    if (mask === 0) {
-        return 0;
-    }
-
-    for (bit = 1; mask !== 1; bit++) {
-        // eslint-disable-next-line no-bitwise, no-param-reassign
-        mask >>= 1;
-    }
-
-    return (bit);
-}
-
-function nearestPowerOfTwo(number) {
-    return 2 ** fls(number - 1);
-}
-
-function generatePermutationsTable(seed) {
-    // Create a permutation table for the noise generation
-    // These need to be a randomized array of integers from 0 to 288 (inc.), duplicated (Isn't optimization fun?)
-    const shuffler = createShuffle(seed);
-    const permutations = shuffler(Array(289).fill(0).map(Number.call, Number));
-
-    // TODO: maybe the %289's in the shader aren't as bad as passing the params list in twice...
-    return [...permutations, ...permutations];
-}
-
-const Planet = (props) => {
-    const {
+const Planet = (
+    {
         resolution,
 
         surfaceSeed,
@@ -100,255 +69,278 @@ const Planet = (props) => {
         cloudsFalloff,
         cloudsIntensity,
         normalScale,
-        animate
-    } = props;
-
-    const mountRef = useRef(null);
-    const threeInstance = useRef({
-        renderer: null,
-        scene: null,
-        camera: null,
-        renderLoopRunning: false,
-        planetMesh: null,
-        cloudsMesh: null,
-        animateRotation: animate
+        animate,
+        ...rest
+    }
+) => {
+    const [showError, setError] = useState(false);
+    const reactCanvas = useRef(null);
+    const babylonData = useRef({
+        engine: null,
+        resize: null,
+        uBuffer: null,
+        terrainShader: null,
+        width: 0,
+        height: 0,
+        surfaceNoiseBuffer: null,
+        landNoiseBuffer: null,
+        cloudNoiseBuffer: null
     });
 
-    const renderLoop = () => {
-        if (!threeInstance.current.renderLoopRunning) {
+    function updateUniforms() {
+        if (!babylonData.current.uBuffer) {
             return;
         }
-        requestAnimationFrame(renderLoop);
 
-        // Update logic
-        if (threeInstance.current.animateRotation) {
-            threeInstance.current.cloudsMesh.rotation.y += 0.0002;
-            threeInstance.current.planetMesh.rotation.y += 0.0001;
-        }
+        babylonData.current.uBuffer.updateInt("textureWidth", babylonData.current.width);
+        babylonData.current.uBuffer.updateInt("textureHeight", babylonData.current.height);
+        babylonData.current.uBuffer.updateColor4("landColor1", Color3.FromHexString(landColor1), 1.0);
+        babylonData.current.uBuffer.updateColor4("landColor2", Color3.FromHexString(landColor2), 1.0);
+        babylonData.current.uBuffer.updateColor4("waterDeepColor", Color3.FromHexString(waterDeep), 1.0);
+        babylonData.current.uBuffer.updateColor4("waterShallowColor", Color3.FromHexString(waterShallow), 1.0);
+        babylonData.current.uBuffer.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
+        babylonData.current.uBuffer.updateFloat("waterLevel", waterLevel);
+        babylonData.current.uBuffer.updateFloat("waterSpecular", waterSpecular);
+        babylonData.current.uBuffer.updateFloat("waterFalloff", waterFalloff);
+        babylonData.current.uBuffer.updateFloat("normalScale", normalScale);
+        updateNoiseSettings(babylonData.current.uBuffer, babylonData.current.surfaceNoiseBuffer, "surfaceNoise", {
+            seed: surfaceSeed,
+            iScale: surfaceiScale,
+            iOctaves: surfaceiOctaves,
+            iFalloff: surfaceiFalloff,
+            iIntensity: surfaceiIntensity,
+            iRidginess: surfaceiRidginess,
+            sScale: surfacesScale,
+            sOctaves: surfacesOctaves,
+            sFalloff: surfacesFalloff,
+            sIntensity: surfacesIntensity
+        });
+        updateNoiseSettings(babylonData.current.uBuffer, babylonData.current.landNoiseBuffer, "landNoise", {
+            seed: landSeed,
+            iScale: landiScale,
+            iOctaves: landiOctaves,
+            iFalloff: landiFalloff,
+            iIntensity: landiIntensity,
+            iRidginess: landiRidginess,
+            sScale: landsScale,
+            sOctaves: landsOctaves,
+            sFalloff: landsFalloff,
+            sIntensity: landsIntensity
+        });
+        updateNoiseSettings(babylonData.current.uBuffer, babylonData.current.cloudNoiseBuffer, "cloudNoise", {
+            seed: cloudSeed,
+            iScale: cloudiScale,
+            iOctaves: cloudiOctaves,
+            iFalloff: cloudiFalloff,
+            iIntensity: cloudiIntensity,
+            iRidginess: cloudiRidginess,
+            sScale: cloudsScale,
+            sOctaves: cloudsOctaves,
+            sFalloff: cloudsFalloff,
+            sIntensity: cloudsIntensity
+        });
+        babylonData.current.uBuffer.update();
+    }
 
-        threeInstance.current.renderer.render(threeInstance.current.scene, threeInstance.current.camera);
-    };
-
+    // set up basic engine and scene
     useEffect(
         () => {
-            threeInstance.current.animateRotation = animate;
-            if (WebGPU.isAvailable() === false) {
-                mountRef.current.replaceChildren(WebGPU.getErrorMessage());
-                return;
+            let isMounted = true;
+
+            async function initBabylon() {
+                const {current: canvas} = reactCanvas;
+
+                if (!canvas) return;
+
+                const engineOptions = {
+                    adaptToDeviceRatio: true,
+                    antialias: true,
+                    audioEngine: false,
+                    doNotHandleTouchAction: true
+                };
+                const sceneOptions = {};
+
+                const engine = await new WebGPUEngine(canvas, engineOptions);
+                await engine.initAsync();
+
+                if (!engine.getCaps().supportComputeShaders) {
+                    if (isMounted) {
+                        setError(true);
+                    }
+                    return;
+                }
+
+                const scene = new Scene(engine, sceneOptions);
+                scene.clearColor = new Color4(0, 0, 0, 0);
+
+                const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
+                camera.setTarget(Vector3.Zero());
+
+                const light = new HemisphericLight("light", new Vector3(-8, 8, -2), scene);
+                light.intensity = 0.7;
+
+                const segments = 32;
+                const planetMesh = MeshBuilder.CreateSphere("planet", {diameter: 1, segments}, scene);
+                const cloudsMesh = MeshBuilder.CreateSphere("clouds", {diameter: 1.01, segments}, scene);
+
+                babylonData.current.terrainShader = new ComputeShader(
+                    "Terrain Shader",
+                    engine,
+                    {
+                        computeSource: terrainShaderSource
+                    },
+                    {
+                        bindingsMapping:
+                            {
+                                "uniforms": {group: 0, binding: 0},
+                                "diffuseTexture": {group: 1, binding: 0},
+                                "normalTexture": {group: 1, binding: 1},
+                                "specularTexture": {group: 1, binding: 2},
+                                "cloudsTexture": {group: 1, binding: 3},
+                                "surfaceNoisePermutations": {group: 2, binding: 0},
+                                "landNoisePermutations": {group: 2, binding: 1},
+                                "cloudNoisePermutations": {group: 2, binding: 2},
+                            }
+                    }
+                );
+
+                const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
+                babylonData.current.width = textureResolution;
+                babylonData.current.height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
+                const diffuseTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    babylonData.current.width,
+                    babylonData.current.height,
+                    scene,
+                    false,
+                    false
+                );
+                const normalTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    babylonData.current.width,
+                    babylonData.current.height,
+                    scene,
+                    false,
+                    false
+                );
+                const specularTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    babylonData.current.width,
+                    babylonData.current.height,
+                    scene,
+                    false,
+                    false
+                );
+                const cloudsTexture = RawTexture.CreateRGBAStorageTexture(
+                    null,
+                    babylonData.current.width,
+                    babylonData.current.height,
+                    scene,
+                    false,
+                    false
+                );
+                cloudsTexture.hasAlpha = true;
+
+                babylonData.current.surfaceNoiseBuffer = new StorageBuffer(
+                    engine,
+                    PERMUTATION_BUFFER_LENGTH * 4,
+                    Constants.BUFFER_CREATIONFLAG_WRITE
+                );
+                babylonData.current.terrainShader.setStorageBuffer('surfaceNoisePermutations', babylonData.current.surfaceNoiseBuffer);
+                babylonData.current.landNoiseBuffer = new StorageBuffer(
+                    engine,
+                    PERMUTATION_BUFFER_LENGTH * 4,
+                    Constants.BUFFER_CREATIONFLAG_WRITE
+                );
+                babylonData.current.terrainShader.setStorageBuffer('landNoisePermutations', babylonData.current.landNoiseBuffer);
+                babylonData.current.cloudNoiseBuffer = new StorageBuffer(
+                    engine,
+                    PERMUTATION_BUFFER_LENGTH * 4,
+                    Constants.BUFFER_CREATIONFLAG_WRITE
+                );
+                babylonData.current.terrainShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
+
+                babylonData.current.uBuffer = new UniformBuffer(engine);
+                // NOTE: Despite having a name param, uniforms must be added in the same order as they appear in the
+                //       shader!  Updates can happen in an arbitrary order, however.
+                addUniformsToBuffer(babylonData.current.uBuffer, [
+                    ["textureWidth", 1],
+                    ["textureHeight", 1],
+                    ["landColor1", 4],
+                    ["landColor2", 4],
+                    ["waterDeepColor", 4],
+                    ["waterShallowColor", 4],
+                    ["cloudColor", 4],
+                    ["waterLevel", 1],
+                    ["waterSpecular", 1],
+                    ["waterFalloff", 1],
+                    ["normalScale", 1]
+                ]);
+                addNoiseSettingsToBuffer(babylonData.current.uBuffer, "surfaceNoise");
+                addNoiseSettingsToBuffer(babylonData.current.uBuffer, "landNoise");
+                addNoiseSettingsToBuffer(babylonData.current.uBuffer, "cloudNoise");
+
+                updateUniforms();
+
+                babylonData.current.terrainShader.setUniformBuffer("uniforms", babylonData.current.uBuffer);
+                babylonData.current.terrainShader.setStorageTexture("diffuseTexture", diffuseTexture);
+                babylonData.current.terrainShader.setStorageTexture("normalTexture", normalTexture);
+                babylonData.current.terrainShader.setStorageTexture("specularTexture", specularTexture);
+                babylonData.current.terrainShader.setStorageTexture("cloudsTexture", cloudsTexture);
+
+                babylonData.current.terrainShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
+
+                const planetMaterial = new StandardMaterial("Planet", scene);
+                planetMaterial.diffuseTexture = diffuseTexture;
+                planetMaterial.specularTexture = specularTexture;
+                planetMaterial.bumpTexture = normalTexture;
+                planetMesh.material = planetMaterial;
+
+                const cloudsMaterial = new StandardMaterial("Clouds", scene);
+                cloudsMaterial.diffuseTexture = cloudsTexture;
+                cloudsMaterial.useAlphaFromDiffuseTexture = true;
+                cloudsMesh.material = cloudsMaterial;
+
+                engine.runRenderLoop(() => {
+                    planetMesh.rotation.y -= 0.0002;
+                    cloudsMesh.rotation.y -= 0.0001;
+
+                    scene.render();
+                });
+
+                const resize = () => {
+                    engine.resize();
+                };
+
+                if (window) {
+                    window.addEventListener("resize", resize);
+                }
+
+                babylonData.current.engine = engine;
+                babylonData.current.resize = resize;
             }
 
-            threeInstance.current.scene = new Scene();
-            const containerWidth = mountRef.current.clientWidth;
-            const containerHeight = mountRef.current.clientHeight;
+            initBabylon();
 
-            // Camera setup
-            threeInstance.current.camera = new PerspectiveCamera(61, 1, 0.1, 10);
-            threeInstance.current.camera.position.set(0, 0, 2);
-            threeInstance.current.camera.lookAt(threeInstance.current.scene.position);
-
-            // Renderer setup
-            threeInstance.current.renderer = new WebGPURenderer({alpha: true, antialias: true});
-            threeInstance.current.renderer.setClearColor(0, 0.0);
-            threeInstance.current.renderer.setSize(containerWidth, containerHeight);
-            threeInstance.current.renderer.setPixelRatio(window.devicePixelRatio);
-
-            // Textures setup
-            const textureResolution = nearestPowerOfTwo(resolution);    // Resolution must be bumped up to the nearest power of 2
-            const width = textureResolution;
-            const height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
-
-            const diffuseTexture = new StorageTexture(width, height);
-            diffuseTexture.wrapS = RepeatWrapping;
-            diffuseTexture.minFilter = LinearFilter;
-            diffuseTexture.maxFilter = LinearFilter;
-
-            const normalTexture = new StorageTexture(width, height);
-            normalTexture.wrapS = RepeatWrapping;
-
-            const specularTexture = new StorageTexture(width, height);
-            specularTexture.wrapS = RepeatWrapping;
-
-            const cloudTexture = new StorageTexture(width, height);
-            cloudTexture.wrapS = RepeatWrapping;
-            cloudTexture.minFilter = LinearFilter;
-            cloudTexture.maxFilter = LinearFilter;
-
-            // Generate textures
-            const landColor1RGB = new Color(landColor1);
-            const landColor2RGB = new Color(landColor2);
-            const waterDeepColorRGB = new Color(waterDeep);
-            const waterShallowColorRGB = new Color(waterShallow);
-            const cloudColorRGB = new Color(cloudColor);
-
-            const computeWGSL = wgslFn(
-                [mainWgsl, ...Object.values(wgslcode)].join('\n')
-            );
-            const computeWGSLCall = computeWGSL({
-                index: instanceIndex,
-                diffuseTexture: textureStore(diffuseTexture),
-                normalTexture: textureStore(normalTexture),
-                specularTexture: textureStore(specularTexture),
-                cloudTexture: textureStore(cloudTexture),
-                textureSize: vec2(width, height),
-                landColor1: vec3(landColor1RGB.r, landColor1RGB.g, landColor1RGB.b),
-                landColor2: vec3(landColor2RGB.r, landColor2RGB.g, landColor2RGB.b),
-                waterDeepColor: vec3(waterDeepColorRGB.r, waterDeepColorRGB.g, waterDeepColorRGB.b),
-                waterShallowColor: vec3(waterShallowColorRGB.r, waterShallowColorRGB.g, waterShallowColorRGB.b),
-                cloudColor: vec4(cloudColorRGB.r, cloudColorRGB.g, cloudColorRGB.b, cloudOpacity),
-                waterLevel: float(waterLevel),
-                waterSpecular: float(waterSpecular),
-                waterFalloff: float(waterFalloff),
-//            surfaceNoise_perm: generatePermutationsTable(surfaceSeed),
-                surfaceNoise_iScale: float(surfaceiScale),
-                surfaceNoise_iOctaves: uint(surfaceiOctaves),
-                surfaceNoise_iFalloff: float(surfaceiFalloff),
-                surfaceNoise_iIntensity: float(surfaceiIntensity),
-                surfaceNoise_iRidginess: float(surfaceiRidginess),
-                surfaceNoise_sScale: float(surfacesScale),
-                surfaceNoise_sOctaves: uint(surfacesOctaves),
-                surfaceNoise_sFalloff: float(surfacesFalloff),
-                surfaceNoise_sIntensity: float(surfacesIntensity),
-//            landNoise_perm: generatePermutationsTable(landSeed),
-                landNoise_iScale: float(landiScale),
-                landNoise_iOctaves: uint(landiOctaves),
-                landNoise_iFalloff: float(landiFalloff),
-                landNoise_iIntensity: float(landiIntensity),
-                landNoise_iRidginess: float(landiRidginess),
-                landNoise_sScale: float(landsScale),
-                landNoise_sOctaves: uint(landsOctaves),
-                landNoise_sFalloff: float(landsFalloff),
-                landNoise_sIntensity: float(landsIntensity),
-//            cloudNoise_perm: generatePermutationsTable(cloudSeed),
-                cloudNoise_iScale: float(cloudiScale),
-                cloudNoise_iOctaves: uint(cloudiOctaves),
-                cloudNoise_iFalloff: float(cloudiFalloff),
-                cloudNoise_iIntensity: float(cloudiIntensity),
-                cloudNoise_iRidginess: float(cloudiRidginess),
-                cloudNoise_sScale: float(cloudsScale),
-                cloudNoise_sOctaves: uint(cloudsOctaves),
-                cloudNoise_sFalloff: float(cloudsFalloff),
-                cloudNoise_sIntensity: float(cloudsIntensity),
-            });
-            const computeNode = computeWGSLCall.compute(width * height);
-
-            // Materials setup
-            const planetMaterial = new MeshPhongMaterial({
-                map: diffuseTexture,
-                normalMap: normalTexture,
-                specularMap: specularTexture,
-                normalScale: new Vector2(normalScale, normalScale),
-                specular: 0x777777,
-                shininess: 16
-            });
-
-            const cloudsMaterial = new MeshPhongMaterial({
-                map: cloudTexture,
-                transparent: true,
-                specular: 0x000000
-            });
-
-            // Meshes setup
-            const segments = 24;
-            threeInstance.current.planetMesh = new Mesh(
-                new SphereGeometry(1, segments, segments),
-                planetMaterial
-            );
-            threeInstance.current.scene.add(threeInstance.current.planetMesh);
-            threeInstance.current.cloudsMesh = new Mesh(
-                new SphereGeometry(1.01, segments, segments),
-                cloudsMaterial
-            );
-            threeInstance.current.scene.add(threeInstance.current.cloudsMesh);
-
-            // TODO: Lighting setup
-            //       This code seems to cause three.js to crash.  No doubt the way lighting works has changed,
-            //       and - honestly - we probably need to change the way the textures are generated to match the "new"
-            //       way that three.js is doing lighting/rendering.
-            // const light = new DirectionalLight(0xffffff);
-            // light.position.set(1, 0, 1);
-            // threeInstance.current.scene.add(light);
-
-            // Run the compute shader
-            threeInstance.current.renderer.compute(computeNode);
-
-            // Kick off the rendering/animation loop
-            threeInstance.current.renderLoopRunning = true;
-            renderLoop();
-
-            mountRef.current.replaceChildren(threeInstance.current.renderer.domElement);
-
-            // Cleanup
             return () => {
-                threeInstance.current.renderLoopRunning = false;
-                threeInstance.current?.renderer.domElement.remove();
-                diffuseTexture.dispose();
-                normalTexture.dispose();
-                specularTexture.dispose();
-                cloudTexture.dispose();
-                planetMaterial.dispose();
-                cloudsMaterial.dispose();
-                threeInstance.current?.planetMesh.geometry.dispose();
-                threeInstance.current?.cloudsMesh.geometry.dispose();
-                computeNode.dispose();
+                isMounted = false;
+                if (babylonData.current.engine) {
+                    babylonData.current.engine.dispose();
+                }
+
+                if (window) {
+                    window.removeEventListener("resize", babylonData.current.resize);
+                }
             };
         },
-        [resolution]    // TODO: it'd be nice to change the texture resolution at runtime, too, instead of restarting three.js
+        [resolution]
     );
 
-    // Effect for handling props changes
+    // Effect for handling generation parameter changes
     useEffect(
         () => {
-            if (!threeInstance.current) {
-                return;
-            }
-
-            threeInstance.current.animateRotation = animate;
-            updateThreeInstance(
-                surfaceSeed,
-                surfaceiScale,
-                surfaceiOctaves,
-                surfaceiFalloff,
-                surfaceiIntensity,
-                surfaceiRidginess,
-                surfacesScale,
-                surfacesOctaves,
-                surfacesFalloff,
-                surfacesIntensity,
-
-                landSeed,
-                landColor1,
-                landColor2,
-                landiScale,
-                landiOctaves,
-                landiFalloff,
-                landiIntensity,
-                landiRidginess,
-                landsScale,
-                landsOctaves,
-                landsFalloff,
-                landsIntensity,
-
-                waterDeep,
-                waterShallow,
-                waterLevel,
-                waterSpecular,
-                waterFalloff,
-
-                cloudSeed,
-                cloudColor,
-                cloudOpacity,
-                cloudiScale,
-                cloudiOctaves,
-                cloudiFalloff,
-                cloudiIntensity,
-                cloudiRidginess,
-                cloudsScale,
-                cloudsOctaves,
-                cloudsFalloff,
-                cloudsIntensity,
-                normalScale,
-                animate
-            );
+            updateUniforms();
+            babylonData.current.terrainShader?.dispatch(babylonData.current.width, babylonData.current.height, 1);
         },
         [
             surfaceSeed,
@@ -396,66 +388,17 @@ const Planet = (props) => {
             normalScale,
             animate
         ]
-    ); // Depend on props that should trigger updates
-
-    const updateThreeInstance = (
-        surfaceSeed,
-        surfaceiScale,
-        surfaceiOctaves,
-        surfaceiFalloff,
-        surfaceiIntensity,
-        surfaceiRidginess,
-        surfacesScale,
-        surfacesOctaves,
-        surfacesFalloff,
-        surfacesIntensity,
-        landSeed,
-        landColor1,
-        landColor2,
-        landiScale,
-        landiOctaves,
-        landiFalloff,
-        landiIntensity,
-        landiRidginess,
-        landsScale,
-        landsOctaves,
-        landsFalloff,
-        landsIntensity,
-        waterDeep,
-        waterShallow,
-        waterLevel,
-        waterSpecular,
-        waterFalloff,
-        cloudSeed,
-        cloudColor,
-        cloudOpacity,
-        cloudiScale,
-        cloudiOctaves,
-        cloudiFalloff,
-        cloudiIntensity,
-        cloudiRidginess,
-        cloudsScale,
-        cloudsOctaves,
-        cloudsFalloff,
-        cloudsIntensity,
-        normalScale
-    ) => {
-        // Logic to interact with Three.js based on prop changes
-        // For example, updating objects, changing materials, etc.
-        console.log('prop updated!');
-    };
-
-    // Any props that the library doesn't care about should be passed on to the containing div
-    const divProps = {};
-    Object.keys(props).forEach(
-        (key) => {
-            if (!(key in Planet.propTypes)) {
-                divProps[key] = props[key];
-            }
-        }
     );
 
-    return <div ref={mountRef} {...divProps} />;
+    if (showError) {
+        return (
+            <div {...rest}>
+                WebGPU is not supported
+            </div>
+        );
+    }
+
+    return <canvas ref={reactCanvas} {...rest} />;
 };
 
 Planet.defaultProps = {
@@ -514,4 +457,3 @@ Planet.propTypes = {
 }
 
 export default Planet;
-
