@@ -3,12 +3,14 @@ import {
     Color3,
     Color4,
     ComputeShader,
+    Constants,
     FreeCamera,
     HemisphericLight,
     MeshBuilder,
     RawTexture,
     Scene,
     StandardMaterial,
+    StorageBuffer,
     UniformBuffer,
     Vector3,
     WebGPUEngine
@@ -56,19 +58,17 @@ function addUniformsToBuffer(uBuffer, uniforms) {
 const memoizedPermutationsFunction = memoize(generatePermutationsTable);
 
 function generatePermutationsTable(seed) {
-    // TODO: memoize this function
     // Create a permutation table for the noise generation
     // These need to be a randomized array of integers from 0 to 288 (inc.), duplicated (Isn't optimization fun?)
     const shuffler = createShuffle(seed);
     const permutations = shuffler(Array(289).fill(0).map(Number.call, Number));
 
-    // TODO: maybe the %289's in the shader aren't as bad as passing the params list in twice...
-    const retval = new Int32Array(578);
-    retval.set([...permutations, ...permutations])
+    const retval = new Int32Array(289);
+    retval.set([...permutations])
     return retval;
 }
 
-function updateNoiseSettings(uBuffer, name, data) {
+function updateNoiseSettings(uBuffer, sBuffer, name, data) {
     uBuffer.updateFloat(`${name}.iScale`, data.iScale);
     uBuffer.updateInt(`${name}.iOctaves`, data.iOctaves);
     uBuffer.updateFloat(`${name}.iFalloff`, data.iFalloff);
@@ -78,6 +78,8 @@ function updateNoiseSettings(uBuffer, name, data) {
     uBuffer.updateInt(`${name}.sOctaves`, data.sOctaves);
     uBuffer.updateFloat(`${name}.sFalloff`, data.sFalloff);
     uBuffer.updateFloat(`${name}.sIntensity`, data.sIntensity);
+
+    sBuffer.update(memoizedPermutationsFunction(data.seed));
 }
 
 function addNoiseSettingsToBuffer(uBuffer, name) {
@@ -153,7 +155,17 @@ const Planet = (
 ) => {
     const [showError, setError] = useState(false);
     const reactCanvas = useRef(null);
-    const babylonData = useRef({engine: null, resize: null, uBuffer: null, terrainShader: null, width: 0, height: 0});
+    const babylonData = useRef({
+        engine: null,
+        resize: null,
+        uBuffer: null,
+        terrainShader: null,
+        width: 0,
+        height: 0,
+        surfaceNoiseBuffer: null,
+        landNoiseBuffer: null,
+        cloudNoiseBuffer: null
+    });
 
     function updateUniforms() {
         if (!babylonData.current.uBuffer) {
@@ -171,7 +183,7 @@ const Planet = (
         babylonData.current.uBuffer.updateFloat("waterSpecular", waterSpecular);
         babylonData.current.uBuffer.updateFloat("waterFalloff", waterFalloff);
         babylonData.current.uBuffer.updateFloat("normalScale", normalScale);
-        updateNoiseSettings(babylonData.current.uBuffer, "surfaceNoise", {
+        updateNoiseSettings(babylonData.current.uBuffer, babylonData.current.surfaceNoiseBuffer, "surfaceNoise", {
             seed: surfaceSeed,
             iScale: surfaceiScale,
             iOctaves: surfaceiOctaves,
@@ -183,7 +195,7 @@ const Planet = (
             sFalloff: surfacesFalloff,
             sIntensity: surfacesIntensity
         });
-        updateNoiseSettings(babylonData.current.uBuffer, "landNoise", {
+        updateNoiseSettings(babylonData.current.uBuffer, babylonData.current.landNoiseBuffer, "landNoise", {
             seed: landSeed,
             iScale: landiScale,
             iOctaves: landiOctaves,
@@ -195,7 +207,7 @@ const Planet = (
             sFalloff: landsFalloff,
             sIntensity: landsIntensity
         });
-        updateNoiseSettings(babylonData.current.uBuffer, "cloudNoise", {
+        updateNoiseSettings(babylonData.current.uBuffer, babylonData.current.cloudNoiseBuffer, "cloudNoise", {
             seed: cloudSeed,
             iScale: cloudiScale,
             iOctaves: cloudiOctaves,
@@ -266,6 +278,9 @@ const Planet = (
                                 "normalTexture": {group: 1, binding: 1},
                                 "specularTexture": {group: 1, binding: 2},
                                 "cloudsTexture": {group: 1, binding: 3},
+                                "surfaceNoisePermutations": {group: 2, binding: 0},
+                                "landNoisePermutations": {group: 2, binding: 1},
+                                "cloudNoisePermutations": {group: 2, binding: 2},
                             }
                     }
                 );
@@ -307,6 +322,25 @@ const Planet = (
                 );
                 cloudsTexture.hasAlpha = true;
 
+                babylonData.current.surfaceNoiseBuffer = new StorageBuffer(
+                    engine,
+                    289 * 4,
+                    Constants.BUFFER_CREATIONFLAG_WRITE
+                );
+                babylonData.current.terrainShader.setStorageBuffer('surfaceNoisePermutations', babylonData.current.surfaceNoiseBuffer);
+                babylonData.current.landNoiseBuffer = new StorageBuffer(
+                    engine,
+                    289 * 4,
+                    Constants.BUFFER_CREATIONFLAG_WRITE
+                );
+                babylonData.current.terrainShader.setStorageBuffer('landNoisePermutations', babylonData.current.landNoiseBuffer);
+                babylonData.current.cloudNoiseBuffer = new StorageBuffer(
+                    engine,
+                    289 * 4,
+                    Constants.BUFFER_CREATIONFLAG_WRITE
+                );
+                babylonData.current.terrainShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
+
                 babylonData.current.uBuffer = new UniformBuffer(engine);
                 // NOTE: Despite having a name param, uniforms must be added in the same order as they appear in the
                 //       shader!  Updates can happen in an arbitrary order, however.
@@ -340,7 +374,7 @@ const Planet = (
                 const planetMaterial = new StandardMaterial("Planet", scene);
                 planetMaterial.diffuseTexture = diffuseTexture;
                 planetMaterial.specularTexture = specularTexture;
-                planetMaterial.bumpTexture = normalTexture; // TODO: something's wrong with this
+                planetMaterial.bumpTexture = normalTexture;
                 planetMesh.material = planetMaterial;
 
                 const cloudsMaterial = new StandardMaterial("Clouds", scene);
@@ -390,8 +424,8 @@ const Planet = (
     // Effect for handling generation parameter changes
     useEffect(
         () => {
-            // TODO: This looks like it'd be better as individual useEffect's instead of one giant one
-            //       so that less uniforms data is updated every time.
+            // TODO: This looks like it might be better as individual useEffect's instead of one giant one
+            //       so that less uniforms data is checked for updates every time.
             updateUniforms();
             babylonData.current.terrainShader?.dispatch(babylonData.current.width, babylonData.current.height, 1);
         },

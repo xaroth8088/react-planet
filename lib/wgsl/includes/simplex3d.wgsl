@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-fn simplex3d(v: vec3<f32>, perm: array<u32, 578>) -> f32 {
+fn simplex3d(v: vec3<f32>, perm: array<u32, 289>) -> f32 {
     let C : vec2<f32> = vec2<f32>(1.0/6.0, 1.0/3.0) ;
     let D : vec4<f32> = vec4<f32>(0.0, 0.5, 1.0, 2.0);
 
@@ -47,10 +47,34 @@ fn simplex3d(v: vec3<f32>, perm: array<u32, 578>) -> f32 {
     i = i - floor(i * (1.0 / 289.0)) * 289.0;  // mod289_3
 
     let p = vec4<f32>(
-        f32(perm[u32(i.x) + perm[u32(i.y) + perm[u32(i.z)]]]),
-        f32(perm[u32(i.x + i1.x) + perm[u32(i.y + i1.y) + perm[u32(i.z + i1.z)]]]),
-        f32(perm[u32(i.x + i2.x) + perm[u32(i.y + i2.y) + perm[u32(i.z + i2.z)]]]),
-        f32(perm[u32(i.x + 1.0) + perm[u32(i.y + 1.0) + perm[u32(i.z + 1.0)]]])
+        f32(perm[
+            (u32(i.x) + perm[
+                (u32(i.y) + perm[
+                    u32(i.z) % 289
+                ]) % 289
+            ]) % 289
+        ]),
+        f32(perm[
+            (u32(i.x + i1.x) + perm[
+                (u32(i.y + i1.y) + perm[
+                    u32(i.z + i1.z) % 289
+                ]) % 289
+            ]) % 289
+        ]),
+        f32(perm[
+            (u32(i.x + i2.x) + perm[
+                (u32(i.y + i2.y) + perm[
+                    u32(i.z + i2.z) % 289
+                ]) % 289
+            ]) % 289
+        ]),
+        f32(perm[
+            (u32(i.x + 1.0) + perm[
+                (u32(i.y + 1.0) + perm[
+                    u32(i.z + 1.0) % 289
+                ]) % 289
+            ]) % 289
+        ])
     );
 
     // Gradients: 7x7 points over a square, mapped onto an octahedron.
