@@ -19,23 +19,23 @@ fn ridgify(value: f32) -> f32 {
     return 1.0 - (2.0 * abs(value - 0.5));
 }
 
-fn sampleAtPoint(p0: vec3<f32>, settings: NoiseSettings) -> f32 {
+fn sampleAtPoint(p0: vec3<f32>, settings: NoiseSettings, perm: array<u32, 578>) -> f32 {
     var offset: f32 = 0.0;
 
     if (settings.sOctaves > 0u) {
         var p: vec3<f32> = p0 / settings.sScale;
-        offset = getOctave(p, settings.sOctaves, settings.perm);
+        offset = getOctave(p, settings.sOctaves, perm);
 
         offset = pow(offset, settings.sFalloff);
         offset = offset * settings.sIntensity;
     }
 
     var i: vec3<f32> = (p0 / settings.iScale) + vec3<f32>(offset, offset, offset);
-    var value: f32 = getNormalizedOctave(i, settings.iOctaves, settings.perm);
+    var value: f32 = getNormalizedOctave(i, settings.iOctaves, perm);
 
     if (settings.iRidginess > 0.0) {
         var r: vec3<f32> = (p0 / settings.iScale) + vec3<f32>(offset, offset, offset + 11.0);
-        var ridge: f32 = getNormalizedOctave(r, settings.iOctaves, settings.perm);
+        var ridge: f32 = getNormalizedOctave(r, settings.iOctaves, perm);
 
         value = settings.iRidginess * ridgify(ridge) + (1.0 - settings.iRidginess) * value;
     }
