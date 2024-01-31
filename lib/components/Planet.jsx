@@ -150,8 +150,6 @@ const Planet = (
             async function initBabylon() {
                 const {current: canvas} = reactCanvas;
 
-                if (!canvas) return;
-
                 const engineOptions = {
                     adaptToDeviceRatio: true,
                     antialias: true,
@@ -248,19 +246,22 @@ const Planet = (
                 babylonData.current.surfaceNoiseBuffer = new StorageBuffer(
                     babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
-                    Constants.BUFFER_CREATIONFLAG_WRITE
+                    Constants.BUFFER_CREATIONFLAG_WRITE,
+                    "surfaceNoiseBuffer"
                 );
                 babylonData.current.terrainShader.setStorageBuffer('surfaceNoisePermutations', babylonData.current.surfaceNoiseBuffer);
                 babylonData.current.landNoiseBuffer = new StorageBuffer(
                     babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
-                    Constants.BUFFER_CREATIONFLAG_WRITE
+                    Constants.BUFFER_CREATIONFLAG_WRITE,
+                    "landNoiseBuffer"
                 );
                 babylonData.current.terrainShader.setStorageBuffer('landNoisePermutations', babylonData.current.landNoiseBuffer);
                 babylonData.current.cloudNoiseBuffer = new StorageBuffer(
                     babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
-                    Constants.BUFFER_CREATIONFLAG_WRITE
+                    Constants.BUFFER_CREATIONFLAG_WRITE,
+                    "cloudNoiseBuffer"
                 );
                 babylonData.current.terrainShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
 
@@ -337,7 +338,7 @@ const Planet = (
                 }
             };
         },
-        []
+        [resolution]
     );
 
     useEffect(() => {
