@@ -145,12 +145,12 @@ const Planet = (
     // set up basic engine and scene
     useEffect(
         () => {
-            let isMounted = true;
+            let isComponentMounted = true;
 
             async function initBabylon() {
                 const {current: canvas} = reactCanvas;
 
-                if (!canvas) return;
+//                if (!canvas) return;
 
                 const engineOptions = {
                     adaptToDeviceRatio: true,
@@ -158,19 +158,23 @@ const Planet = (
                     audioEngine: false,
                     doNotHandleTouchAction: true
                 };
-                const sceneOptions = {};
 
                 const engine = await new WebGPUEngine(canvas, engineOptions);
-                await engine.initAsync();
+                if (!isComponentMounted) {
+                    // The component may have been unmounted before getting here, so bail on further setup
+                    await engine.initAsync();   // HACK - work around bug that prevents cleanly disposing before the engine is initialized and has run for a frame or so
+                    setTimeout(() => engine.dispose(), 100);   // HACK - work around bug that prevents cleanly disposing before the engine is initialized and has run for a frame or so
+                    return;
+                }
+                babylonData.current.engine = engine;
+                await babylonData.current.engine.initAsync();
 
-                if (!engine.getCaps().supportComputeShaders) {
-                    if (isMounted) {
-                        setError(true);
-                    }
+                if (!babylonData.current.engine.getCaps().supportComputeShaders) {
+                    setError(true);
                     return;
                 }
 
-                const scene = new Scene(engine, sceneOptions);
+                const scene = new Scene(babylonData.current.engine, {});
                 scene.clearColor = new Color4(0, 0, 0, 0);
 
                 const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
@@ -185,7 +189,7 @@ const Planet = (
 
                 babylonData.current.terrainShader = new ComputeShader(
                     "Terrain Shader",
-                    engine,
+                    babylonData.current.engine,
                     {
                         computeSource: terrainShaderSource
                     },
@@ -242,25 +246,25 @@ const Planet = (
                 cloudsTexture.hasAlpha = true;
 
                 babylonData.current.surfaceNoiseBuffer = new StorageBuffer(
-                    engine,
+                    babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
                     Constants.BUFFER_CREATIONFLAG_WRITE
                 );
                 babylonData.current.terrainShader.setStorageBuffer('surfaceNoisePermutations', babylonData.current.surfaceNoiseBuffer);
                 babylonData.current.landNoiseBuffer = new StorageBuffer(
-                    engine,
+                    babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
                     Constants.BUFFER_CREATIONFLAG_WRITE
                 );
                 babylonData.current.terrainShader.setStorageBuffer('landNoisePermutations', babylonData.current.landNoiseBuffer);
                 babylonData.current.cloudNoiseBuffer = new StorageBuffer(
-                    engine,
+                    babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
                     Constants.BUFFER_CREATIONFLAG_WRITE
                 );
                 babylonData.current.terrainShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
 
-                babylonData.current.uBuffer = new UniformBuffer(engine);
+                babylonData.current.uBuffer = new UniformBuffer(babylonData.current.engine);
                 // NOTE: Despite having a name param, uniforms must be added in the same order as they appear in the
                 //       shader!  Updates can happen in an arbitrary order, however.
                 addUniformsToBuffer(babylonData.current.uBuffer, [
@@ -301,7 +305,7 @@ const Planet = (
                 cloudsMaterial.useAlphaFromDiffuseTexture = true;
                 cloudsMesh.material = cloudsMaterial;
 
-                engine.runRenderLoop(() => {
+                babylonData.current.engine.runRenderLoop(() => {
                     planetMesh.rotation.y -= 0.0002;
                     cloudsMesh.rotation.y -= 0.0001;
 
@@ -309,23 +313,23 @@ const Planet = (
                 });
 
                 const resize = () => {
-                    engine.resize();
+                    babylonData.current.engine.resize();
                 };
 
                 if (window) {
                     window.addEventListener("resize", resize);
                 }
 
-                babylonData.current.engine = engine;
                 babylonData.current.resize = resize;
             }
 
             initBabylon();
 
             return () => {
-                isMounted = false;
+                isComponentMounted = false;
                 if (babylonData.current.engine) {
                     babylonData.current.engine.dispose();
+                    babylonData.current.engine = null;
                 }
 
                 if (window) {
@@ -333,8 +337,12 @@ const Planet = (
                 }
             };
         },
-        [resolution]
+        []
     );
+
+    useEffect(() => {
+        // TODO: handle resolution changes
+    }, [resolution]);
 
     // Effect for handling generation parameter changes
     useEffect(
