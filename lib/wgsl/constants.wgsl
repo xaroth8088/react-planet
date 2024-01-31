@@ -17,3 +17,8 @@ struct NoiseSettings {
 
 const landSpecularColor: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 const waterNormalPixel: vec4<f32> = vec4<f32>(0.5, 0.5, 1.0, 1.0);
+
+alias Permutations = array<u32, 289>;
+alias Color4 = vec4<f32>;
+alias Color3 = vec3<f32>;
+alias Point3 = vec3<f32>;

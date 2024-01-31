@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-fn simplex3d(v: vec3<f32>, perm: array<u32, 289>) -> f32 {
+fn simplex3d(v: Point3, perm: Permutations) -> f32 {
     let C : vec2<f32> = vec2<f32>(1.0/6.0, 1.0/3.0) ;
     let D : vec4<f32> = vec4<f32>(0.0, 0.5, 1.0, 2.0);
 

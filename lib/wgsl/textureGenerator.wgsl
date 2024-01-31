@@ -1,11 +1,11 @@
 struct Uniforms {
     textureWidth: u32,
     textureHeight: u32,
-    landColor1: vec3<f32>,
-    landColor2: vec3<f32>,
-    waterDeepColor: vec3<f32>,
-    waterShallowColor: vec3<f32>,
-    cloudColor: vec4<f32>,
+    landColor1: Color3,
+    landColor2: Color3,
+    waterDeepColor: Color3,
+    waterShallowColor: Color3,
+    cloudColor: Color4,
     waterLevel: f32,
     waterSpecular: f32,
     waterFalloff: f32,
@@ -25,9 +25,9 @@ struct Uniforms {
 @group(1) @binding(3) var cloudsTexture : texture_storage_2d<rgba8unorm, write>;
 
 // Noise permutations
-@group(2) @binding(0) var<storage, read> surfaceNoisePermutations : array<u32, 289>;
-@group(2) @binding(1) var<storage, read> landNoisePermutations : array<u32, 289>;
-@group(2) @binding(2) var<storage, read> cloudNoisePermutations : array<u32, 289>;
+@group(2) @binding(0) var<storage, read> surfaceNoisePermutations : Permutations;
+@group(2) @binding(1) var<storage, read> landNoisePermutations : Permutations;
+@group(2) @binding(2) var<storage, read> cloudNoisePermutations : Permutations;
 
 // Compute shader main entry point
 @compute @workgroup_size(16, 16)
@@ -38,18 +38,18 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     let width: f32 = f32(uniforms.textureWidth);
     let height: f32 = f32(uniforms.textureHeight);
 
-    let p0: vec3<f32> = sphereMap(
+    let p0: Point3 = sphereMap(
         f32(x) / (width - 1.0),
         f32(y) / (height - 1.0)
     );
 
-    let waterSpecularRGBA: vec4<f32> = vec4<f32>(
-        vec3<f32>(uniforms.waterSpecular),
+    let waterSpecularRGBA: Color4 = Color4(
+        Color3(uniforms.waterSpecular),
         1.0
     );
 
     // Clouds
-    let cloudFinalColor: vec4<f32> = vec4<f32>(
+    let cloudFinalColor: Color4 = Color4(
         uniforms.cloudColor.xyz,
         uniforms.cloudColor.w * sampleAtPoint(p0, uniforms.cloudNoise, cloudNoisePermutations)
     );
@@ -94,7 +94,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         ));
         let n1: vec3<f32> = n * vec3<f32>(1.0, -1.0, 1.0);
         let converted: vec3<f32> = (n1 / 2.0 + 0.5) * uniforms.normalScale;
-        textureStore(normalTexture, vec2<u32>(x, y), vec4<f32>(converted, 1.0));
+        textureStore(normalTexture, vec2<u32>(x, y), Color4(converted, 1.0));
     } else {
         // For the "below water" case, there's no additional sampling -
         // we simply blend the shallow and deep water colors based on
@@ -102,12 +102,12 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         let q1: f32 = smootherstep(pow(c0 / uniforms.waterLevel, uniforms.waterFalloff));
         let q0: f32 = 1.0 - q1;
 
-        let waterColor: vec3<f32> = uniforms.waterDeepColor * q0 + uniforms.waterShallowColor * q1;
+        let waterColor: Color3 = uniforms.waterDeepColor * q0 + uniforms.waterShallowColor * q1;
 
         textureStore(
             diffuseTexture,
             vec2<u32>(x, y),
-            vec4<f32>(waterColor, 1.0)
+            Color4(waterColor, 1.0)
         );
         textureStore(specularTexture, vec2<u32>(x, y), waterSpecularRGBA);
 

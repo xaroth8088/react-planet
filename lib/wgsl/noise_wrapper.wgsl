@@ -1,4 +1,4 @@
-fn getOctave(p0: vec3<f32>, octaves: u32, perm: array<u32, 289>) -> f32 {
+fn getOctave(p0: Point3, octaves: u32, perm: Permutations) -> f32 {
     var val: f32 = 0.0;
     var scale: f32 = 1.0;
 
@@ -10,7 +10,7 @@ fn getOctave(p0: vec3<f32>, octaves: u32, perm: array<u32, 289>) -> f32 {
     return val;
 }
 
-fn getNormalizedOctave(p0: vec3<f32>, octaves: u32, perm: array<u32, 289>) -> f32 {
+fn getNormalizedOctave(p0: Point3, octaves: u32, perm: Permutations) -> f32 {
     let q: f32 = 2.0 - (1.0 / pow(2.0, f32(octaves - 1)));
     return getOctave(p0, octaves, perm) / q;
 }
@@ -19,11 +19,11 @@ fn ridgify(value: f32) -> f32 {
     return 1.0 - (2.0 * abs(value - 0.5));
 }
 
-fn sampleAtPoint(p0: vec3<f32>, settings: NoiseSettings, perm: array<u32, 289>) -> f32 {
+fn sampleAtPoint(p0: Point3, settings: NoiseSettings, perm: Permutations) -> f32 {
     var offset: f32 = 0.0;
 
     if (settings.sOctaves > 0u) {
-        var p: vec3<f32> = p0 / settings.sScale;
+        var p: Point3 = p0 / settings.sScale;
         offset = getOctave(p, settings.sOctaves, perm);
 
         offset = pow(offset, settings.sFalloff);
