@@ -25,6 +25,47 @@ const terrainShaderSource = Object.values(textureGeneratorWGSLCode).join('\n');
 const normalsGeneratorWGSLCode = import.meta.glob('../wgsl/NormalsGenerator/*.wgsl', {as: 'raw', eager: true});
 const normalsGeneratorSource = Object.values(normalsGeneratorWGSLCode).join('\n');
 
+function createTextures(width, height, scene) {
+    const diffuseTexture = RawTexture.CreateRGBAStorageTexture(
+        null,
+        width,
+        height,
+        scene,
+        false,
+        false
+    );
+    diffuseTexture.hasAlpha = false;
+    const specularTexture = RawTexture.CreateRGBAStorageTexture(
+        null,
+        width,
+        height,
+        scene,
+        false,
+        false
+    );
+    const cloudsTexture = RawTexture.CreateRGBAStorageTexture(
+        null,
+        width,
+        height,
+        scene,
+        false,
+        false
+    );
+    cloudsTexture.hasAlpha = true;
+    const normalsTexture = RawTexture.CreateRGBAStorageTexture(
+        null,
+        width,
+        height,
+        scene,
+        false,
+        false
+    );
+
+    return {
+        diffuseTexture, specularTexture, cloudsTexture, normalsTexture
+    }
+}
+
 const Planet = (
     {
         resolution,
@@ -153,6 +194,9 @@ const Planet = (
 
             async function initBabylon() {
                 const {current: canvas} = reactCanvas;
+                if( canvas === null) {
+                    return;
+                }
 
                 const engineOptions = {
                     adaptToDeviceRatio: true,
@@ -164,8 +208,6 @@ const Planet = (
                 const engine = await new WebGPUEngine(canvas, engineOptions);
                 if (!isComponentMounted) {
                     // The component may have been unmounted before getting here, so bail on further setup
-                    await engine.initAsync();   // HACK - work around bug that prevents cleanly disposing before the engine is initialized and has run for a frame or so
-                    setTimeout(() => engine.dispose(), 100);   // HACK - work around bug that prevents cleanly disposing before the engine is initialized and has run for a frame or so
                     return;
                 }
                 babylonData.current.engine = engine;
@@ -193,6 +235,17 @@ const Planet = (
                 babylonData.current.width = textureResolution;
                 babylonData.current.height = textureResolution / 2.0; // Textures must be 2:1 aspect ratio to wrap properly
 
+                const {
+                    diffuseTexture,
+                    specularTexture,
+                    cloudsTexture,
+                    normalsTexture
+                } = createTextures(
+                    babylonData.current.width,
+                    babylonData.current.height,
+                    scene
+                );
+
                 // START TERRAIN SHADER
                 babylonData.current.terrainShader = new ComputeShader(
                     "Terrain Shader",
@@ -213,33 +266,6 @@ const Planet = (
                             }
                     }
                 );
-
-                const diffuseTexture = RawTexture.CreateRGBAStorageTexture(
-                    null,
-                    babylonData.current.width,
-                    babylonData.current.height,
-                    scene,
-                    false,
-                    false
-                );
-                diffuseTexture.hasAlpha = false;
-                const specularTexture = RawTexture.CreateRGBAStorageTexture(
-                    null,
-                    babylonData.current.width,
-                    babylonData.current.height,
-                    scene,
-                    false,
-                    false
-                );
-                const cloudsTexture = RawTexture.CreateRGBAStorageTexture(
-                    null,
-                    babylonData.current.width,
-                    babylonData.current.height,
-                    scene,
-                    false,
-                    false
-                );
-                cloudsTexture.hasAlpha = true;
 
                 babylonData.current.surfaceNoiseBuffer = new StorageBuffer(
                     babylonData.current.engine,
@@ -303,19 +329,10 @@ const Planet = (
                         bindingsMapping:
                             {
                                 "uniforms": {group: 0, binding: 0},
-                                "diffuseTexture": {group: 1, binding: 0},
-                                "normalsTexture": {group: 1, binding: 1},
+                                "normalsTexture": {group: 1, binding: 0},
+                                "diffuseTexture": {group: 1, binding: 1},
                             }
                     }
-                );
-
-                const normalsTexture = RawTexture.CreateRGBAStorageTexture(
-                    null,
-                    babylonData.current.width,
-                    babylonData.current.height,
-                    scene,
-                    false,
-                    false
                 );
 
                 babylonData.current.normalsUBuffer = new UniformBuffer(babylonData.current.engine);
@@ -325,9 +342,9 @@ const Planet = (
                 babylonData.current.normalsUBuffer.updateFloat("normalScale", normalScale);
                 babylonData.current.normalsUBuffer.update();
 
-                babylonData.current.normalsShader.setUniformBuffer("uniforms", babylonData.current.terrainUBuffer);
-                babylonData.current.normalsShader.setTexture("diffuseTexture", diffuseTexture);
+                babylonData.current.normalsShader.setUniformBuffer("uniforms", babylonData.current.normalsUBuffer);
                 babylonData.current.normalsShader.setStorageTexture("normalsTexture", normalsTexture);
+                babylonData.current.normalsShader.setStorageTexture("diffuseTexture", diffuseTexture);
 
                 babylonData.current.normalsShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
                 /// END NORMALS SHADER
@@ -378,6 +395,16 @@ const Planet = (
         },
         [resolution]
     );
+
+    useEffect(() => {
+        if (babylonData.current.normalsUBuffer === null) {
+            return;
+        }
+
+        babylonData.current.normalsUBuffer.updateFloat("normalScale", normalScale);
+        babylonData.current.normalsUBuffer.update();
+        babylonData.current.normalsShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
+    }, [normalScale]);
 
     useEffect(() => {
         // TODO: handle resolution changes
@@ -433,7 +460,6 @@ const Planet = (
             cloudsOctaves,
             cloudsFalloff,
             cloudsIntensity,
-            normalScale,
             animate
         ]
     );
