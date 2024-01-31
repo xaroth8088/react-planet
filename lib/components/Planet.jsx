@@ -150,7 +150,7 @@ const Planet = (
             async function initBabylon() {
                 const {current: canvas} = reactCanvas;
 
-//                if (!canvas) return;
+                if (!canvas) return;
 
                 const engineOptions = {
                     adaptToDeviceRatio: true,
