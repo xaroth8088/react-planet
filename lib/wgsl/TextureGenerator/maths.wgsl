@@ -15,17 +15,25 @@ fn surfaceColor(
     landNoisePermutations: Permutations,
     landColor1: Color3,
     landColor2: Color3
-) -> Color4 {
+) -> Color3 {
     let c: f32 = sampleAtPoint(p, landNoise, landNoisePermutations);
 
     // Blend landColor1 and landColor2
     let q0: f32 = c;
     let q1: f32 = 1.0 - c;
 
-    return Color4(
-        landColor1 * q0 + landColor2 * q1,
-        1.0
-    );
+    return landColor1 * q0 + landColor2 * q1;
+}
+
+fn waterColor(
+    c0: f32
+) -> Color3 {
+    // For the "below water" case, there's no additional sampling -
+    // we simply blend the shallow and deep water colors based on
+    // how deep the water is at this point.
+    let q1: f32 = smootherstep(pow(c0 / uniforms.waterLevel, uniforms.waterFalloff));
+
+    return mix(uniforms.waterShallowColor, uniforms.waterDeepColor, q1);
 }
 
 fn smootherstep(t: f32) -> f32 {
