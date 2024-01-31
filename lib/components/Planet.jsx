@@ -134,6 +134,12 @@ const Planet = (
     });
 
     function updateUniforms() {
+        // Get all our data in a row
+        updateTerrainUniforms();
+        updateNormals();
+    }
+
+    function updateTerrainUniforms() {
         if (!babylonData.current.terrainUBuffer) {
             return;
         }
@@ -185,6 +191,17 @@ const Planet = (
             sIntensity: cloudsIntensity
         });
         babylonData.current.terrainUBuffer.update();
+        babylonData.current.terrainShader.dispatch(babylonData.current.width, babylonData.current.height, 1);
+    }
+
+    function updateNormals() {
+        if (!babylonData.current.normalsUBuffer) {
+            return;
+        }
+
+        babylonData.current.normalsUBuffer.updateFloat("normalScale", normalScale);
+        babylonData.current.normalsUBuffer.update();
+        babylonData.current.normalsShader.dispatch(babylonData.current.width, babylonData.current.height, 1);
     }
 
     // set up basic engine and scene
@@ -194,7 +211,7 @@ const Planet = (
 
             async function initBabylon() {
                 const {current: canvas} = reactCanvas;
-                if( canvas === null) {
+                if (canvas === null) {
                     return;
                 }
 
@@ -289,7 +306,12 @@ const Planet = (
                 );
                 babylonData.current.terrainShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
 
-                babylonData.current.terrainUBuffer = new UniformBuffer(babylonData.current.engine);
+                babylonData.current.terrainUBuffer = new UniformBuffer(
+                    babylonData.current.engine,
+                    undefined,
+                    undefined,
+                    "Terrain Buffer"
+                );
                 // NOTE: Despite having a name param, uniforms must be added in the same order as they appear in the
                 //       shader!  Updates can happen in an arbitrary order, however.
                 addNoiseSettingsToBuffer(babylonData.current.terrainUBuffer, "surfaceNoise");
@@ -308,14 +330,10 @@ const Planet = (
                     ["waterFalloff", 1]
                 ]);
 
-                updateUniforms();
-
                 babylonData.current.terrainShader.setUniformBuffer("uniforms", babylonData.current.terrainUBuffer);
                 babylonData.current.terrainShader.setStorageTexture("diffuseTexture", diffuseTexture);
                 babylonData.current.terrainShader.setStorageTexture("specularTexture", specularTexture);
                 babylonData.current.terrainShader.setStorageTexture("cloudsTexture", cloudsTexture);
-
-                babylonData.current.terrainShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
                 /// END TERRAIN SHADER
 
                 /// START NORMALS SHADER
@@ -335,20 +353,23 @@ const Planet = (
                     }
                 );
 
-                babylonData.current.normalsUBuffer = new UniformBuffer(babylonData.current.engine);
+                babylonData.current.normalsUBuffer = new UniformBuffer(
+                    babylonData.current.engine,
+                    undefined,
+                    undefined,
+                    "Normals Buffer"
+                );
                 addUniformsToBuffer(babylonData.current.normalsUBuffer, [
                     ["normalScale", 1],
                 ]);
-                babylonData.current.normalsUBuffer.updateFloat("normalScale", normalScale);
-                babylonData.current.normalsUBuffer.update();
-
                 babylonData.current.normalsShader.setUniformBuffer("uniforms", babylonData.current.normalsUBuffer);
                 babylonData.current.normalsShader.setStorageTexture("normalsTexture", normalsTexture);
                 babylonData.current.normalsShader.setStorageTexture("diffuseTexture", diffuseTexture);
 
-                babylonData.current.normalsShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
                 /// END NORMALS SHADER
 
+                // Initial shader run
+                updateUniforms();
 
                 const planetMaterial = new StandardMaterial("Planet", scene);
                 planetMaterial.diffuseTexture = diffuseTexture;
@@ -361,6 +382,7 @@ const Planet = (
                 cloudsMaterial.useAlphaFromDiffuseTexture = true;
                 cloudsMesh.material = cloudsMaterial;
 
+                // Render loop
                 babylonData.current.engine.runRenderLoop(() => {
                     planetMesh.rotation.y -= 0.0002;
                     cloudsMesh.rotation.y -= 0.0001;
@@ -400,10 +422,7 @@ const Planet = (
         if (babylonData.current.normalsUBuffer === null) {
             return;
         }
-
-        babylonData.current.normalsUBuffer.updateFloat("normalScale", normalScale);
-        babylonData.current.normalsUBuffer.update();
-        babylonData.current.normalsShader.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
+        updateNormals();
     }, [normalScale]);
 
     useEffect(() => {
@@ -414,8 +433,6 @@ const Planet = (
     useEffect(
         () => {
             updateUniforms();
-            babylonData.current.terrainShader?.dispatch(babylonData.current.width, babylonData.current.height, 1);
-            babylonData.current.normalsShader?.dispatchWhenReady(babylonData.current.width, babylonData.current.height, 1);
         },
         [
             surfaceSeed,

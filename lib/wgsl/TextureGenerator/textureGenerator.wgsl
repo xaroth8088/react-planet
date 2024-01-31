@@ -53,18 +53,22 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
     var diffuseColor: Color3;
     var specularColor: Color3;
+    var heightMapValue: f32 = c0;
 
     if (c0 > uniforms.waterLevel) {
+        // Land
         diffuseColor = surfaceColor(p0, uniforms.landNoise, landNoisePermutations, uniforms.landColor1, uniforms.landColor2);
         specularColor = landSpecularColor;
     } else {
+        // Water
         diffuseColor = waterColor(c0);
         specularColor = Color3(uniforms.waterSpecular);
+        heightMapValue = uniforms.waterLevel;
     }
 
     textureStore(specularTexture, vec2<u32>(x, y), Color4(specularColor, 1.0));
 
     // NOTE: we're storing the height value into the alpha channel, so that we can use it to generate a normal map
     //       The renderer will just need to be told not to render this texture with alpha.
-    textureStore(diffuseTexture, vec2<u32>(x, y), Color4(diffuseColor, c0));
+    textureStore(diffuseTexture, vec2<u32>(x, y), Color4(diffuseColor, heightMapValue));
 }
