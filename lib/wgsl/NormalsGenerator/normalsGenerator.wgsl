@@ -11,14 +11,10 @@ struct Uniforms {
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
-//    let pixelValue: vec4<f32> = textureLoad(diffuseTexture, global_id.xy, 0);
-//
-//    textureStore(normalsTexture, global_id.xy, vec4<f32>(0.5, 0.5, pixelValue.w * uniforms.normalScale, 0.0));
-
     textureStore(
         normalsTexture,
         global_id.xy,
-        vec4<f32>(calcNormalHeight(global_id.xy) * uniforms.normalScale, 1.0)
+        vec4<f32>(calcNormalHeight(global_id.xy) * uniforms.normalScale * -64.0, 0.0)
     );
 }
 fn calcNormalFrom4Samples(r: vec3<f32>, l: vec3<f32>, a: vec3<f32>, b: vec3<f32>, h: f32) -> vec3<f32> {
