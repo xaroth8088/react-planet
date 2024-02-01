@@ -26,15 +26,12 @@ struct Uniforms {
 // Compute shader main entry point
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
-    let x: u32 = global_id.x;
-    let y: u32 = global_id.y;
-
-    let width: f32 = f32(uniforms.textureWidth);
-    let height: f32 = f32(uniforms.textureHeight);
+    let width: f32 = f32(uniforms.textureWidth - 1);
+    let height: f32 = f32(uniforms.textureHeight - 1);
 
     let p0: Point3 = sphereMap(
-        f32(x) / (width - 1.0),
-        f32(y) / (height - 1.0)
+        f32(global_id.x) / width,
+        f32(global_id.y) / height
     );
 
     // Land & sea
@@ -63,9 +60,9 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         heightMapValue = uniforms.waterLevel;
     }
 
-    textureStore(specularTexture, vec2<u32>(x, y), Color4(specularColor, 1.0));
+    textureStore(specularTexture, global_id.xy, Color4(specularColor, 1.0));
 
     // NOTE: we're storing the height value into the alpha channel, so that we can use it to generate a normal map
     //       The renderer will just need to be told not to render this texture with alpha.
-    textureStore(diffuseTexture, vec2<u32>(x, y), Color4(diffuseColor, heightMapValue));
+    textureStore(diffuseTexture, global_id.xy, Color4(diffuseColor, heightMapValue));
 }
