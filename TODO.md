@@ -3,8 +3,9 @@
 * Include Babylon, but tree-shaken, so that we don't have to have it as a peer dependency
 * Get it so that the planet always fits in the canvas, regardless of container size
 * Toggle based on animate property
-* Having all the params in the uniform buffer has slowed things down a lot
-    * Breaking apart param updates into all the separate useEffect's didn't seem to help at all
+* When resolution changes, make changes to textures without needing to restart Babylon
+* Demo page + GitHub pages deployment
+* 2k texture hangs the GPU, due to generation taking too long
 
 
 # Library 

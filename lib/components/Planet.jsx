@@ -482,7 +482,7 @@ const Planet = (
     }, [normalScale]);
 
     useEffect(() => {
-        // TODO: handle resolution changes
+        // TODO: handle resolution changes without needing to restart Babylon (if possible)
     }, [resolution]);
 
     // Effect for handling generation parameter changes
