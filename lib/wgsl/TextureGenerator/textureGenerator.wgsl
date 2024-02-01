@@ -39,7 +39,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
     var diffuseColor: Color3;
     var specularColor: Color3;
-    var heightMapValue: f32 = c0;
+    var heightMapValue: f32;
 
     if (c0 > uniforms.waterLevel) {
         // Land
@@ -47,6 +47,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
         diffuseColor = mix(uniforms.landColor1, uniforms.landColor2, c);
         specularColor = landSpecularColor;
+        heightMapValue = c0;
     } else {
         // Water
         // For the "below water" case, there's no additional sampling -
@@ -55,7 +56,6 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         let q1: f32 = smoothstep(0.0, 1.0, pow(c0 / uniforms.waterLevel, uniforms.waterFalloff));
 
         diffuseColor = mix(uniforms.waterDeepColor, uniforms.waterShallowColor, q1);
-
         specularColor = Color3(uniforms.waterSpecular);
         heightMapValue = uniforms.waterLevel;
     }
