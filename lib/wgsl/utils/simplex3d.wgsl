@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2011 by Ashima Arts (Simplex noise)
 Copyright (C) 2011-2016 by Stefan Gustavson (Classic noise and others)
-Copyright (C) 2024 by Geoffrey Benson (Use passed-in pre-computed permutations table (to allow seeding of random permutations), other minor optimizations)
+Copyright (C) 2024 by Geoffrey Benson (Use passed-in pre-computed permutations table, other minor optimizations)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

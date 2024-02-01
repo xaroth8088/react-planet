@@ -12,6 +12,7 @@
 * Add params for planet and cloud rotation speeds
 * Add params for planet and cloud rotation speeds on the other axes
 * Ice caps!
+* Snow lines!
 * Maybe we can have the clouds be more dynamic by slowly moving the sphereMap around within the simplex noise space in a wandering loop (and regenerating the texture each time)?
 * Make the number of segments in the sphere mesh configurable via a prop
 * Make rotation speeds into props, including giving one speed per axis, and one set of speeds for each of (land, clouds)
