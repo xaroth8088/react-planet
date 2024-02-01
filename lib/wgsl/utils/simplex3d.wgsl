@@ -44,7 +44,7 @@ fn simplex3d(v: Point3, perm: Permutations) -> f32 {
     let x3 = x0 - D.yyy;      // -1.0+3.0*C.x = -0.5 = -D.y
 
     // Permutations
-    i = i - floor(i * (1.0 / 289.0)) * 289.0;  // mod289_3
+    i = i % 289.0;
 
     let p = vec4<f32>(
         f32(perm[
@@ -103,17 +103,11 @@ fn simplex3d(v: Point3, perm: Permutations) -> f32 {
     let a0 = b0.xzyw + s0.xzyw*sh.xxyy ;
     let a1 = b1.xzyw + s1.xzyw*sh.zzww ;
 
-    var p0 = vec3(a0.xy,h.x);
-    var p1 = vec3(a0.zw,h.y);
-    var p2 = vec3(a1.xy,h.z);
-    var p3 = vec3(a1.zw,h.w);
-
     //Normalise gradients
-    let norm = inverseSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
-    p0 *= norm.x;
-    p1 *= norm.y;
-    p2 *= norm.z;
-    p3 *= norm.w;
+    var p0 = normalize(vec3(a0.xy,h.x));
+    var p1 = normalize(vec3(a0.zw,h.y));
+    var p2 = normalize(vec3(a1.xy,h.z));
+    var p3 = normalize(vec3(a1.zw,h.w));
 
     // Mix final noise value
     var m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), vec4(0.0));
