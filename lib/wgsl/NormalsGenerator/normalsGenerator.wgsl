@@ -14,31 +14,37 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     textureStore(
         normalsTexture,
         global_id.xy,
-        vec4<f32>(calcNormalHeight(global_id.xy) * uniforms.normalScale * -64.0, 0.0)
+        vec4<f32>(calcNormalHeight(global_id.xy), 0.0)
     );
 }
+
 fn calcNormalFrom4Samples(r: vec3<f32>, l: vec3<f32>, a: vec3<f32>, b: vec3<f32>, h: f32) -> vec3<f32> {
+    // Get a modifiable copy of each of the vectors
     var r_mod: vec3<f32> = r;
     var l_mod: vec3<f32> = l;
     var a_mod: vec3<f32> = a;
     var b_mod: vec3<f32> = b;
 
-    r_mod.z = (r_mod.z - h);
-    l_mod.z = (l_mod.z - h);
-    a_mod.z = (a_mod.z - h);
-    b_mod.z = (b_mod.z - h);
+    // Get the height deltas for each direction
+    // This is equivalent to taking the whole shebang and moving it so that h sits at 0.
+    r_mod.z = (r_mod.z - h) * 64.0;
+    l_mod.z = (l_mod.z - h) * 64.0;
+    a_mod.z = (a_mod.z - h) * 64.0;
+    b_mod.z = (b_mod.z - h) * 64.0;
 
+    // Normalize the vectors for the 4 directions
     r_mod = normalize(r_mod);
     l_mod = normalize(l_mod);
     a_mod = normalize(a_mod);
     b_mod = normalize(b_mod);
 
+    // Find the average normal within this set
     return normalize(
         cross(r_mod, a_mod) -
         cross(l_mod, a_mod) -
         cross(r_mod, b_mod) +
         cross(l_mod, b_mod)
-    ) * vec3<f32>(1.0, -1.0, 1.0); // invert Y-Axis
+    ) * vec3<f32>(1.0, -1.0, 1.0); // invert Y-Axis because of chirality of coord system
 }
 
 fn calcNormalHeight(texCoord: vec2<u32>) -> vec3<f32> {
@@ -55,7 +61,22 @@ fn calcNormalHeight(texCoord: vec2<u32>) -> vec3<f32> {
     let a: f32 = getHeight(getAdjacentCoord(texCoord, v2a, textureDims));
     let b: f32 = getHeight(getAdjacentCoord(texCoord, v2b, textureDims));
 
-    return calcNormalFrom4Samples(vec3<f32>(vec2<f32>(v2r), r), vec3<f32>(vec2<f32>(v2l), l), vec3<f32>(vec2<f32>(v2a), a), vec3<f32>(vec2<f32>(v2b), b), h);
+    let rawNormal: vec3<f32> = calcNormalFrom4Samples(
+        vec3<f32>(vec2<f32>(v2r), r),
+        vec3<f32>(vec2<f32>(v2l), l),
+        vec3<f32>(vec2<f32>(v2a), a),
+        vec3<f32>(vec2<f32>(v2b), b),
+        h
+    ) * uniforms.normalScale;
+
+    // Our normal map requires that "neutral" sit at 0.5, 0.5, 0.5, where z can't be at or below 0.5
+    let adjNormal: vec3<f32> = vec3<f32>(
+        (rawNormal.x + 1.0) / 2.0,
+        (rawNormal.y + 1.0) / 2.0,
+        rawNormal.z + 1.00000001
+    );
+
+    return adjNormal;
 }
 
 fn getHeight(pos: vec2<u32>) -> f32 {

@@ -4,8 +4,8 @@ import {
     Color4,
     ComputeShader,
     Constants,
+    DirectionalLight,
     FreeCamera,
-    HemisphericLight,
     MeshBuilder,
     RawTexture,
     Scene,
@@ -241,7 +241,7 @@ const Planet = (
                 const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
                 camera.setTarget(Vector3.Zero());
 
-                const light = new HemisphericLight("light", new Vector3(-8, 8, -2), scene);
+                const light = new DirectionalLight("light", new Vector3(1, -1, 1), scene);
                 light.intensity = 0.7;
 
                 const segments = 32;
