@@ -55,7 +55,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         // For the "below water" case, there's no additional sampling -
         // we simply blend the shallow and deep water colors based on
         // how deep the water is at this point.
-        let q1: f32 = smootherstep(pow(c0 / uniforms.waterLevel, uniforms.waterFalloff));
+        let q1: f32 = smoothstep(0.0, 1.0, pow(c0 / uniforms.waterLevel, uniforms.waterFalloff));
 
         diffuseColor = mix(uniforms.waterDeepColor, uniforms.waterShallowColor, q1);
 

@@ -8,7 +8,3 @@ fn sphereMap(u: f32, v: f32) -> Point3 {
         cos(inclination)
     );
 }
-
-fn smootherstep(t: f32) -> f32 {
-    return 6.0 * (pow(t, 5.0)) - 15.0 * (pow(t, 4.0)) + 10.0 * (pow(t, 3));
-}
