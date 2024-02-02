@@ -1,4 +1,4 @@
-import Planet from '..';
+import Planet from '../lib/main.js';
 import { useState } from 'react'
 import './App.css'
 import Controls from './Controls.jsx';
