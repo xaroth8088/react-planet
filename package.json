@@ -23,7 +23,7 @@
     "lint:fix": "eslint . --fix --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "prepublish": "yarn run build",
-    "deploy": "yarn build:demo && gh-pages -D demo_page_dist",
+    "deploy": "yarn build:demo && gh-pages -d demo_page_dist",
     "build:demo": "vite build --config vite.demo.config.js"
   },
   "dependencies": {
