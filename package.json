@@ -33,11 +33,11 @@
     "react-simple-tooltip": "2.6.3"
   },
   "devDependencies": {
-    "@babylonjs/core": "^6.40.0",
-    "@types/react": "^18.2.48",
+    "@babylonjs/core": "^6.41.0",
+    "@types/react": "^18.2.51",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
-    "@vitejs/plugin-react-swc": "^3.5.0",
+    "@vitejs/plugin-react-swc": "^3.6.0",
     "browserslist": "^4.22.3",
     "browserslist-to-esbuild": "^2.1.1",
     "eslint": "^8.56.0",
@@ -63,5 +63,5 @@
     "last 1 ios versions",
     "last 1 chromeandroid versions"
   ],
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.1.0"
 }
