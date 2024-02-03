@@ -25,8 +25,7 @@ const NOISE_TYPES = {
     CLOUD_NOISE: 1
 };
 
-// TODO: rename to noiseShaderSource
-const terrainShaderSource = WGSLBuilder([
+const textureGeneratorShaderSource = WGSLBuilder([
     'TextureGenerator/textureGenerator.wgsl',
     'utils/constants.wgsl',
     'utils/maths.wgsl',
@@ -135,8 +134,8 @@ const Planet = (
     const babylonData = useRef({
         engine: null,
         resize: null,
-        terrainUBuffer: null,
-        terrainShader: null,
+        textureGeneratorUBuffer: null,
+        textureGeneratorShader: null,
         width: 0,
         height: 0,
         surfaceNoiseBuffer: null,
@@ -147,21 +146,21 @@ const Planet = (
     });
 
     function updateTerrain() {
-        if (!babylonData.current.terrainUBuffer) {
+        if (!babylonData.current.textureGeneratorUBuffer) {
             return;
         }
 
-        babylonData.current.terrainUBuffer.updateInt("renderType", NOISE_TYPES.LAND_NOISE);
-        babylonData.current.terrainUBuffer.updateInt("textureWidth", babylonData.current.width);
-        babylonData.current.terrainUBuffer.updateInt("textureHeight", babylonData.current.height);
-        babylonData.current.terrainUBuffer.updateColor4("landColor1", Color3.FromHexString(landColor1), 1.0);
-        babylonData.current.terrainUBuffer.updateColor4("landColor2", Color3.FromHexString(landColor2), 1.0);
-        babylonData.current.terrainUBuffer.updateColor4("waterDeepColor", Color3.FromHexString(waterDeep), 1.0);
-        babylonData.current.terrainUBuffer.updateColor4("waterShallowColor", Color3.FromHexString(waterShallow), 1.0);
-        babylonData.current.terrainUBuffer.updateFloat("waterLevel", waterLevel);
-        babylonData.current.terrainUBuffer.updateFloat("waterSpecular", waterSpecular);
-        babylonData.current.terrainUBuffer.updateFloat("waterFalloff", waterFalloff);
-        updateNoiseSettings(babylonData.current.terrainUBuffer, babylonData.current.surfaceNoiseBuffer, "surfaceNoise", {
+        babylonData.current.textureGeneratorUBuffer.updateInt("renderType", NOISE_TYPES.LAND_NOISE);
+        babylonData.current.textureGeneratorUBuffer.updateInt("textureWidth", babylonData.current.width);
+        babylonData.current.textureGeneratorUBuffer.updateInt("textureHeight", babylonData.current.height);
+        babylonData.current.textureGeneratorUBuffer.updateColor4("landColor1", Color3.FromHexString(landColor1), 1.0);
+        babylonData.current.textureGeneratorUBuffer.updateColor4("landColor2", Color3.FromHexString(landColor2), 1.0);
+        babylonData.current.textureGeneratorUBuffer.updateColor4("waterDeepColor", Color3.FromHexString(waterDeep), 1.0);
+        babylonData.current.textureGeneratorUBuffer.updateColor4("waterShallowColor", Color3.FromHexString(waterShallow), 1.0);
+        babylonData.current.textureGeneratorUBuffer.updateFloat("waterLevel", waterLevel);
+        babylonData.current.textureGeneratorUBuffer.updateFloat("waterSpecular", waterSpecular);
+        babylonData.current.textureGeneratorUBuffer.updateFloat("waterFalloff", waterFalloff);
+        updateNoiseSettings(babylonData.current.textureGeneratorUBuffer, babylonData.current.surfaceNoiseBuffer, "surfaceNoise", {
             seed: surfaceSeed,
             iScale: surfaceiScale,
             iOctaves: surfaceiOctaves,
@@ -173,7 +172,7 @@ const Planet = (
             sFalloff: surfacesFalloff,
             sIntensity: surfacesIntensity
         });
-        updateNoiseSettings(babylonData.current.terrainUBuffer, babylonData.current.landNoiseBuffer, "landNoise", {
+        updateNoiseSettings(babylonData.current.textureGeneratorUBuffer, babylonData.current.landNoiseBuffer, "landNoise", {
             seed: landSeed,
             iScale: landiScale,
             iOctaves: landiOctaves,
@@ -185,8 +184,8 @@ const Planet = (
             sFalloff: landsFalloff,
             sIntensity: landsIntensity
         });
-        babylonData.current.terrainUBuffer.update();
-        babylonData.current.terrainShader.dispatch(babylonData.current.width, babylonData.current.height, 1);
+        babylonData.current.textureGeneratorUBuffer.update();
+        babylonData.current.textureGeneratorShader.dispatch(babylonData.current.width, babylonData.current.height, 1);
         updateNormals();
     }
 
@@ -201,15 +200,15 @@ const Planet = (
     }
 
     function updateClouds() {
-        if (!babylonData.current.terrainUBuffer) {
+        if (!babylonData.current.textureGeneratorUBuffer) {
             return;
         }
 
-        babylonData.current.terrainUBuffer.updateInt("renderType", NOISE_TYPES.CLOUD_NOISE);
-        babylonData.current.terrainUBuffer.updateInt("textureWidth", babylonData.current.width);
-        babylonData.current.terrainUBuffer.updateInt("textureHeight", babylonData.current.height);
-        babylonData.current.terrainUBuffer.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
-        updateNoiseSettings(babylonData.current.terrainUBuffer, babylonData.current.cloudNoiseBuffer, "cloudNoise", {
+        babylonData.current.textureGeneratorUBuffer.updateInt("renderType", NOISE_TYPES.CLOUD_NOISE);
+        babylonData.current.textureGeneratorUBuffer.updateInt("textureWidth", babylonData.current.width);
+        babylonData.current.textureGeneratorUBuffer.updateInt("textureHeight", babylonData.current.height);
+        babylonData.current.textureGeneratorUBuffer.updateColor4("cloudColor", Color3.FromHexString(cloudColor), cloudOpacity);
+        updateNoiseSettings(babylonData.current.textureGeneratorUBuffer, babylonData.current.cloudNoiseBuffer, "cloudNoise", {
             seed: cloudSeed,
             iScale: cloudiScale,
             iOctaves: cloudiOctaves,
@@ -221,8 +220,8 @@ const Planet = (
             sFalloff: cloudsFalloff,
             sIntensity: cloudsIntensity
         });
-        babylonData.current.terrainUBuffer.update();
-        babylonData.current.terrainShader.dispatch(babylonData.current.width, babylonData.current.height, 1);
+        babylonData.current.textureGeneratorUBuffer.update();
+        babylonData.current.textureGeneratorShader.dispatch(babylonData.current.width, babylonData.current.height, 1);
     }
 
     // set up basic engine and scene
@@ -284,13 +283,12 @@ const Planet = (
                     scene
                 );
 
-                // START NOISE SHADER
-                // TODO: rename terrainShader -> noiseShader
-                babylonData.current.terrainShader = new ComputeShader(
-                    "Terrain Shader",
+                // START TEXTURE GENERATOR SHADER
+                babylonData.current.textureGeneratorShader = new ComputeShader(
+                    "Texture Generator Shader",
                     babylonData.current.engine,
                     {
-                        computeSource: terrainShaderSource
+                        computeSource: textureGeneratorShaderSource
                     },
                     {
                         bindingsMapping:
@@ -306,18 +304,18 @@ const Planet = (
                     }
                 );
 
-                babylonData.current.terrainUBuffer = new UniformBuffer(
+                babylonData.current.textureGeneratorUBuffer = new UniformBuffer(
                     babylonData.current.engine,
                     undefined,
                     undefined,
-                    "Terrain Buffer"
+                    "Texture Generator Buffer"
                 );
                 // NOTE: Despite having a name param, uniforms must be added in the same order as they appear in the
                 //       shader!  Updates can happen in an arbitrary order, however.
-                addNoiseSettingsToBuffer(babylonData.current.terrainUBuffer, "surfaceNoise");
-                addNoiseSettingsToBuffer(babylonData.current.terrainUBuffer, "landNoise");
-                addNoiseSettingsToBuffer(babylonData.current.terrainUBuffer, "cloudNoise");
-                addUniformsToBuffer(babylonData.current.terrainUBuffer, [
+                addNoiseSettingsToBuffer(babylonData.current.textureGeneratorUBuffer, "surfaceNoise");
+                addNoiseSettingsToBuffer(babylonData.current.textureGeneratorUBuffer, "landNoise");
+                addNoiseSettingsToBuffer(babylonData.current.textureGeneratorUBuffer, "cloudNoise");
+                addUniformsToBuffer(babylonData.current.textureGeneratorUBuffer, [
                     ["renderType", 1],
                     ["textureWidth", 1],
                     ["textureHeight", 1],
@@ -331,10 +329,10 @@ const Planet = (
                     ["cloudColor", 4],
                 ]);
 
-                babylonData.current.terrainShader.setUniformBuffer("uniforms", babylonData.current.terrainUBuffer);
-                babylonData.current.terrainShader.setStorageTexture("diffuseTexture", diffuseTexture);
-                babylonData.current.terrainShader.setStorageTexture("specularTexture", specularTexture);
-                babylonData.current.terrainShader.setStorageTexture("cloudsTexture", cloudsTexture);
+                babylonData.current.textureGeneratorShader.setUniformBuffer("uniforms", babylonData.current.textureGeneratorUBuffer);
+                babylonData.current.textureGeneratorShader.setStorageTexture("diffuseTexture", diffuseTexture);
+                babylonData.current.textureGeneratorShader.setStorageTexture("specularTexture", specularTexture);
+                babylonData.current.textureGeneratorShader.setStorageTexture("cloudsTexture", cloudsTexture);
                 // TODO: consider only doing a single permutations set for all types of noise, to reduce memory usage
                 //       better would definitely be to calculate the permutations shader-side, though.
                 babylonData.current.surfaceNoiseBuffer = new StorageBuffer(
@@ -343,22 +341,22 @@ const Planet = (
                     Constants.BUFFER_CREATIONFLAG_WRITE,
                     "surfaceNoiseBuffer"
                 );
-                babylonData.current.terrainShader.setStorageBuffer('surfaceNoisePermutations', babylonData.current.surfaceNoiseBuffer);
+                babylonData.current.textureGeneratorShader.setStorageBuffer('surfaceNoisePermutations', babylonData.current.surfaceNoiseBuffer);
                 babylonData.current.landNoiseBuffer = new StorageBuffer(
                     babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
                     Constants.BUFFER_CREATIONFLAG_WRITE,
                     "landNoiseBuffer"
                 );
-                babylonData.current.terrainShader.setStorageBuffer('landNoisePermutations', babylonData.current.landNoiseBuffer);
+                babylonData.current.textureGeneratorShader.setStorageBuffer('landNoisePermutations', babylonData.current.landNoiseBuffer);
                 babylonData.current.cloudNoiseBuffer = new StorageBuffer(
                     babylonData.current.engine,
                     PERMUTATION_BUFFER_LENGTH * 4,
                     Constants.BUFFER_CREATIONFLAG_WRITE,
                     "cloudNoiseBuffer"
                 );
-                babylonData.current.terrainShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
-                /// END TERRAIN SHADER
+                babylonData.current.textureGeneratorShader.setStorageBuffer('cloudNoisePermutations', babylonData.current.cloudNoiseBuffer);
+                /// END TEXTURE GENERATOR SHADER
 
                 /// START NORMALS SHADER
                 babylonData.current.normalsShader = new ComputeShader(
