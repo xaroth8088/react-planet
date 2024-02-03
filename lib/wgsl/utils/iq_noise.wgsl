@@ -15,7 +15,7 @@ fn reduceSeedEntropy(seed: u32, entropy: u32) -> u32 {
 }
 
 fn seedHash(a: f32, seed: u32) -> f32 {
-    let mixedSeed = reduceSeedEntropy(seed, 23);
+    let mixedSeed = reduceSeedEntropy(seed, 26);
     return bitcast<f32>(bitcast<u32>(a) ^ mixedSeed);
 }
 
