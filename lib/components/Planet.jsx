@@ -266,7 +266,7 @@ const Planet = (
                 camera.setTarget(Vector3.Zero());
 
                 const light = new DirectionalLight("light", new Vector3(1, -1, 1), scene);
-                light.intensity = 0.7;
+                light.intensity = 0.9;
 
                 const segments = 32;
                 const planetMesh = MeshBuilder.CreateSphere("planet", {diameter: 1, segments}, scene);

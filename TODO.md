@@ -4,7 +4,6 @@
 * Toggle based on animate property
 * When resolution changes, make changes to textures without needing to restart Babylon
 * Demo page + GitHub pages deployment
-* 2k texture hangs the GPU, due to generation taking too long
 
 
 # Library 
@@ -17,6 +16,7 @@
 * Make the number of segments in the sphere mesh configurable via a prop
 * Make rotation speeds into props, including giving one speed per axis, and one set of speeds for each of (land, clouds)
 * Make landSpecular configurable via prop
+* Make lighting configurable via props (direction, intensity, color, whether there's a second light coming from the opposite direction)
 
 
 # Demo Page

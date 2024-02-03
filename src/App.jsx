@@ -8,8 +8,8 @@ function App() {
     const [resolution, setResolution] = useState(256);
     const [animate, setAnimate] = useState(true);
 
-    const [surfaceSeed, setSurfaceSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
-    const [surfaceiScale, setSurfaceiScale] = useState(2);
+    const [surfaceSeed, setSurfaceSeed] = useState(parseInt(Math.random() * Number.MAX_SAFE_INTEGER));
+    const [surfaceiScale, setSurfaceiScale] = useState(1);
     const [surfaceiOctaves, setSurfaceiOctaves] = useState(8);
     const [surfaceiFalloff, setSurfaceiFalloff] = useState(1);
     const [surfaceiIntensity, setSurfaceiIntensity] = useState(1);
@@ -21,7 +21,7 @@ function App() {
 
     const [landColor1, setLandColor1] = useState('#e6af7e');
     const [landColor2, setLandColor2] = useState('#007200');
-    const [landSeed, setLandSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
+    const [landSeed, setLandSeed] = useState(parseInt(Math.random() * Number.MAX_SAFE_INTEGER));
     const [landiScale, setLandiScale] = useState(2);
     const [landiOctaves, setLandiOctaves] = useState(1);
     const [landiFalloff, setLandiFalloff] = useState(1);
@@ -38,7 +38,7 @@ function App() {
     const [waterSpecular, setWaterSpecular] = useState(0.75);
     const [waterFalloff, setWaterFalloff] = useState(1);
 
-    const [cloudSeed, setCloudSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
+    const [cloudSeed, setCloudSeed] = useState(parseInt(Math.random() * Number.MAX_SAFE_INTEGER));
     const [cloudColor, setCloudColor] = useState('#ffffff');
     const [cloudOpacity, setCloudOpacity] = useState(0.75);
     const [cloudiScale, setCloudiScale] = useState(0.4);
