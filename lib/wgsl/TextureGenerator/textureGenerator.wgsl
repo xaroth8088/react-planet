@@ -1,6 +1,8 @@
 struct Uniforms {
     surfaceNoise: NoiseSettings,
     landNoise: NoiseSettings,
+    cloudNoise: NoiseSettings,
+    renderType: u32,
     textureWidth: u32,
     textureHeight: u32,
     waterLevel: f32,
@@ -10,6 +12,7 @@ struct Uniforms {
     landColor2: Color3,
     waterDeepColor: Color3,
     waterShallowColor: Color3,
+    cloudColor: Color4,
 };
 
 // Bind group for uniforms
@@ -18,10 +21,12 @@ struct Uniforms {
 // Texture outputs
 @group(1) @binding(0) var diffuseTexture : texture_storage_2d<rgba8unorm, write>;
 @group(1) @binding(1) var specularTexture : texture_storage_2d<rgba8unorm, write>;
+@group(1) @binding(2) var cloudsTexture : texture_storage_2d<rgba8unorm, write>;
 
 // Noise permutations
 @group(2) @binding(0) var<storage, read> surfaceNoisePermutations : Permutations;
 @group(2) @binding(1) var<storage, read> landNoisePermutations : Permutations;
+@group(2) @binding(2) var<storage, read> cloudNoisePermutations : Permutations;
 
 // Compute shader main entry point
 @compute @workgroup_size(16, 16)
@@ -34,6 +39,14 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         f32(global_id.y) / height
     );
 
+    if(uniforms.renderType == 0) {
+        renderLand(global_id.xy, p0);
+    } else if(uniforms.renderType == 1){
+        renderClouds(global_id.xy, p0);
+    }
+}
+
+fn renderLand(pos: vec2<u32>, p0: vec3<f32>) {
     // Land & sea
     let c0: f32 = sampleAtPoint(p0, uniforms.surfaceNoise, surfaceNoisePermutations);
 
@@ -60,9 +73,17 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
         heightMapValue = uniforms.waterLevel;
     }
 
-    textureStore(specularTexture, global_id.xy, Color4(specularColor, 1.0));
+    textureStore(specularTexture, pos, Color4(specularColor, 1.0));
 
     // NOTE: we're storing the height value into the alpha channel, so that we can use it to generate a normal map
     //       The renderer will just need to be told not to render this texture with alpha.
-    textureStore(diffuseTexture, global_id.xy, Color4(diffuseColor, heightMapValue));
+    textureStore(diffuseTexture, pos, Color4(diffuseColor, heightMapValue));
+}
+
+fn renderClouds(pos: vec2<u32>, p0: vec3<f32>) {
+    let cloudFinalColor: Color4 = Color4(
+        uniforms.cloudColor.xyz,
+        uniforms.cloudColor.w * sampleAtPoint(p0, uniforms.cloudNoise, cloudNoisePermutations)
+    );
+    textureStore(cloudsTexture, pos, cloudFinalColor);
 }
