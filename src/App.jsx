@@ -38,18 +38,17 @@ function App() {
     const [waterSpecular, setWaterSpecular] = useState(0.75);
     const [waterFalloff, setWaterFalloff] = useState(1);
 
-
     const [cloudSeed, setCloudSeed] = useState(Math.random() * Number.MAX_SAFE_INTEGER);
     const [cloudColor, setCloudColor] = useState('#ffffff');
     const [cloudOpacity, setCloudOpacity] = useState(0.75);
-    const [cloudiScale, setCloudiScale] = useState(0.5);
-    const [cloudiOctaves, setCloudiOctaves] = useState(2);
-    const [cloudiFalloff, setCloudiFalloff] = useState(2);
-    const [cloudiIntensity, setCloudiIntensity] = useState(1.8);
-    const [cloudiRidginess, setCloudiRidginess] = useState(0);
-    const [cloudsScale, setCloudsScale] = useState(0.5);
+    const [cloudiScale, setCloudiScale] = useState(0.4);
+    const [cloudiOctaves, setCloudiOctaves] = useState(9);
+    const [cloudiFalloff, setCloudiFalloff] = useState(2.2);
+    const [cloudiIntensity, setCloudiIntensity] = useState(1.6);
+    const [cloudiRidginess, setCloudiRidginess] = useState(0.2);
+    const [cloudsScale, setCloudsScale] = useState(0.7);
     const [cloudsOctaves, setCloudsOctaves] = useState(5);
-    const [cloudsFalloff, setCloudsFalloff] = useState(1);
+    const [cloudsFalloff, setCloudsFalloff] = useState(0.8);
     const [cloudsIntensity, setCloudsIntensity] = useState(1);
 
     return (

@@ -34,6 +34,12 @@
   },
   "devDependencies": {
     "@babylonjs/core": "^6.41.0",
+    "@babylonjs/gui": "^6.41.0",
+    "@babylonjs/gui-editor": "^6.41.0",
+    "@babylonjs/inspector": "^6.41.0",
+    "@babylonjs/loaders": "^6.41.0",
+    "@babylonjs/materials": "^6.41.0",
+    "@babylonjs/serializers": "^6.41.0",
     "@types/react": "^18.2.52",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-basic-ssl": "^1.1.0",

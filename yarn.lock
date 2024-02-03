@@ -83,6 +83,76 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babylonjs/gui-editor@npm:^6.41.0":
+  version: 6.41.0
+  resolution: "@babylonjs/gui-editor@npm:6.41.0"
+  peerDependencies:
+    "@babylonjs/core": ^6.0.0
+    "@babylonjs/gui": ^6.0.0
+    "@types/react": ">=16.7.3"
+    "@types/react-dom": ">=16.0.9"
+  checksum: 10c0/94ce9e5a088f3620e99dfda862306e489d09e2c5e07be3f7850161f7f47a48ba770d93c753733c46d286c365a9374970876445526d7dfc7e61224e0f518d8fb4
+  languageName: node
+  linkType: hard
+
+"@babylonjs/gui@npm:^6.41.0":
+  version: 6.41.0
+  resolution: "@babylonjs/gui@npm:6.41.0"
+  peerDependencies:
+    "@babylonjs/core": ^6.0.0
+  checksum: 10c0/0bbf15820ae1cc74a1fea38b54b1a0e58dc7fb738a66dbae2024e3cb4156c00ce4e8859ed8d6398e96ed5297101500649b80551704cfd9638634393dd9eb4a00
+  languageName: node
+  linkType: hard
+
+"@babylonjs/inspector@npm:^6.41.0":
+  version: 6.41.0
+  resolution: "@babylonjs/inspector@npm:6.41.0"
+  dependencies:
+    "@fortawesome/fontawesome-svg-core": "npm:^6.1.0"
+    "@fortawesome/free-regular-svg-icons": "npm:^6.0.0"
+    "@fortawesome/free-solid-svg-icons": "npm:^6.0.0"
+  peerDependencies:
+    "@babylonjs/core": ^6.0.0
+    "@babylonjs/gui": ^6.0.0
+    "@babylonjs/gui-editor": ^6.0.0
+    "@babylonjs/loaders": ^6.0.0
+    "@babylonjs/materials": ^6.0.0
+    "@babylonjs/serializers": ^6.0.0
+    "@types/react": ">=16.7.3"
+    "@types/react-dom": ">=16.0.9"
+  checksum: 10c0/bd08cc0605a3b40b4e05e3901663bc1cc8e74ac43159dd10db3d6d43165a56fccd74b231f35857470407a1fd39e03077ee862ee935b82d56be3c16f591d8d38d
+  languageName: node
+  linkType: hard
+
+"@babylonjs/loaders@npm:^6.41.0":
+  version: 6.41.0
+  resolution: "@babylonjs/loaders@npm:6.41.0"
+  peerDependencies:
+    "@babylonjs/core": ^6.0.0
+    babylonjs-gltf2interface: ^6.0.0
+  checksum: 10c0/4669dfa693c25dee82df148ecfe4708e1be5c428436ceb0a24d8b63b8862fc75b4dafd53f310114910fd4dc6f4e165a424b784ea9a03886845560dd99aa7a739
+  languageName: node
+  linkType: hard
+
+"@babylonjs/materials@npm:^6.41.0":
+  version: 6.41.0
+  resolution: "@babylonjs/materials@npm:6.41.0"
+  peerDependencies:
+    "@babylonjs/core": ^6.0.0
+  checksum: 10c0/aa152967ef6d4c1524822a3127018459a3b1eacab997aac15acddc72621cdf746705d2b24d188aec61803a3973e744cfe413022949efec9d4e907cff1cdc265d
+  languageName: node
+  linkType: hard
+
+"@babylonjs/serializers@npm:^6.41.0":
+  version: 6.41.0
+  resolution: "@babylonjs/serializers@npm:6.41.0"
+  peerDependencies:
+    "@babylonjs/core": ^6.0.0
+    babylonjs-gltf2interface: ^6.0.0
+  checksum: 10c0/0b59cf5fc3cb628450457dcc23a50fec3fed0052f2bf7353473634c699e1612d3d73caf6699fd37be6f8018327a28f643212d99ac06fc870620297358653f13f
+  languageName: node
+  linkType: hard
+
 "@emotion/cache@npm:^10.0.27":
   version: 10.0.29
   resolution: "@emotion/cache@npm:10.0.29"
@@ -384,6 +454,40 @@ __metadata:
   version: 8.56.0
   resolution: "@eslint/js@npm:8.56.0"
   checksum: 10c0/60b3a1cf240e2479cec9742424224465dc50e46d781da1b7f5ef240501b2d1202c225bd456207faac4b34a64f4765833345bc4ddffd00395e1db40fa8c426f5a
+  languageName: node
+  linkType: hard
+
+"@fortawesome/fontawesome-common-types@npm:6.5.1":
+  version: 6.5.1
+  resolution: "@fortawesome/fontawesome-common-types@npm:6.5.1"
+  checksum: 10c0/afd4e6de0af60b1dc1557877f8f5fa95ee9f0fb0558581d25c46d24c2946bbcf54e351451d0ca2d6b043a283a66526450da7cf052a45702237b0c8383823a825
+  languageName: node
+  linkType: hard
+
+"@fortawesome/fontawesome-svg-core@npm:^6.1.0":
+  version: 6.5.1
+  resolution: "@fortawesome/fontawesome-svg-core@npm:6.5.1"
+  dependencies:
+    "@fortawesome/fontawesome-common-types": "npm:6.5.1"
+  checksum: 10c0/ba4f4f4f1a98a154ff89ed9a24c586809cd277e147d177fcdc5a76c0ea315087d5e383487d0658b9d27cfcb26971a45364f567c475b4e2df16cfb50cde4a83af
+  languageName: node
+  linkType: hard
+
+"@fortawesome/free-regular-svg-icons@npm:^6.0.0":
+  version: 6.5.1
+  resolution: "@fortawesome/free-regular-svg-icons@npm:6.5.1"
+  dependencies:
+    "@fortawesome/fontawesome-common-types": "npm:6.5.1"
+  checksum: 10c0/6e35a9b054854484e11d6e5b99bd7a59d421b43a252ce1cdd2054080738f2a4d4b7219245ba3753bd506fd847a7b7ad8e1a24fca270fa51b0bd9299ccc23401c
+  languageName: node
+  linkType: hard
+
+"@fortawesome/free-solid-svg-icons@npm:^6.0.0":
+  version: 6.5.1
+  resolution: "@fortawesome/free-solid-svg-icons@npm:6.5.1"
+  dependencies:
+    "@fortawesome/fontawesome-common-types": "npm:6.5.1"
+  checksum: 10c0/4874dca5780b74097a5ee8cb86eced74a61b175b6a0b1e5a963b932f6e87f98485d50b9bca208738316e0bccf4cadbea73ecb5678c9ba8d85f2f9f7cb455fd20
   languageName: node
   linkType: hard
 
@@ -794,6 +898,12 @@ __metadata:
   resolution: "@xaroth8088/react-planet@workspace:."
   dependencies:
     "@babylonjs/core": "npm:^6.41.0"
+    "@babylonjs/gui": "npm:^6.41.0"
+    "@babylonjs/gui-editor": "npm:^6.41.0"
+    "@babylonjs/inspector": "npm:^6.41.0"
+    "@babylonjs/loaders": "npm:^6.41.0"
+    "@babylonjs/materials": "npm:^6.41.0"
+    "@babylonjs/serializers": "npm:^6.41.0"
     "@types/react": "npm:^18.2.52"
     "@types/react-dom": "npm:^18.2.18"
     "@vitejs/plugin-basic-ssl": "npm:^1.1.0"

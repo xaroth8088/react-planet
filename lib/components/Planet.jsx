@@ -17,6 +17,7 @@ import PropTypes from "prop-types";
 import {nearestPowerOfTwo} from '../utils/Math.js';
 import {addNoiseSettingsToBuffer, addUniformsToBuffer, updateNoiseSettings} from '../utils/UniformBuffers.js';
 import {WGSLBuilder} from "../utils/WGSLBuilder.js";
+//import { Inspector } from '@babylonjs/inspector';
 
 const NOISE_TYPES = {
     LAND_NOISE: 0,
@@ -28,7 +29,7 @@ const textureGeneratorShaderSource = WGSLBuilder([
     'utils/constants.wgsl',
     'utils/maths.wgsl',
     'utils/noise_wrapper.wgsl',
-    'utils/simplex3d.wgsl'
+    'utils/iq_noise.wgsl'
 ]);
 
 const normalsGeneratorSource = WGSLBuilder([
@@ -44,6 +45,7 @@ function createTextures(width, height, scene) {
         false,
         false
     );
+    diffuseTexture.name = "diffuse";
     diffuseTexture.hasAlpha = false;
     const specularTexture = RawTexture.CreateRGBAStorageTexture(
         null,
@@ -53,6 +55,7 @@ function createTextures(width, height, scene) {
         false,
         false
     );
+    specularTexture.name = "specular";
     const cloudsTexture = RawTexture.CreateRGBAStorageTexture(
         null,
         width,
@@ -61,6 +64,7 @@ function createTextures(width, height, scene) {
         false,
         false
     );
+    cloudsTexture.name = "clouds";
     cloudsTexture.hasAlpha = true;
     const normalsTexture = RawTexture.CreateRGBAStorageTexture(
         null,
@@ -70,6 +74,7 @@ function createTextures(width, height, scene) {
         false,
         false
     );
+    normalsTexture.name = "normals";
 
     return {
         diffuseTexture, specularTexture, cloudsTexture, normalsTexture
@@ -254,6 +259,7 @@ const Planet = (
                 }
 
                 const scene = new Scene(babylonData.current.engine, {});
+                //Inspector.Show(scene, {});
                 scene.clearColor = new Color4(0, 0, 0, 0);
 
                 const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
@@ -382,8 +388,8 @@ const Planet = (
 
                 // Render loop
                 babylonData.current.engine.runRenderLoop(() => {
-                    planetMesh.rotation.y -= 0.0002;
-                    cloudsMesh.rotation.y -= 0.0001;
+                    planetMesh.rotation.y -= 0.0003;
+                    cloudsMesh.rotation.y -= 0.00025;
 
                     scene.render();
                 });

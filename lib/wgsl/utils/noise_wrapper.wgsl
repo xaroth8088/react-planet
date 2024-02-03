@@ -1,16 +1,16 @@
-fn getOctave(p0: Point3, octaves: u32, seed: f32) -> f32 {
+fn getOctave(p0: Point3, octaves: u32, seed: u32) -> f32 {
     var val: f32 = 0.0;
     var scale: f32 = 1.0;
 
     for (var i: u32 = 0; i < octaves; i = i + 1) {
-        val = val + (0.5 + simplex3d(p0 * scale, seed)) / scale;
+        val = val + (0.5 + noise(p0 * scale, seed)) / scale;
         scale = scale * 2.0;
     }
 
     return val;
 }
 
-fn getNormalizedOctave(p0: Point3, octaves: u32, seed: f32) -> f32 {
+fn getNormalizedOctave(p0: Point3, octaves: u32, seed: u32) -> f32 {
     let q: f32 = 2.0 - (1.0 / pow(2.0, f32(octaves - 1)));
     return getOctave(p0, octaves, seed) / q;
 }
@@ -19,7 +19,7 @@ fn ridgify(value: f32) -> f32 {
     return 1.0 - (2.0 * abs(value - 0.5));
 }
 
-fn sampleAtPoint(p0: Point3, settings: NoiseSettings, seed: f32) -> f32 {
+fn sampleAtPoint(p0: Point3, settings: NoiseSettings, seed: u32) -> f32 {
     var offset: f32 = 0.0;
 
     if (settings.sOctaves > 0u) {

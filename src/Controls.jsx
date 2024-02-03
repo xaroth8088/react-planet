@@ -128,7 +128,7 @@ function Controls({
                             value={surfaceSeed}
                             onChange={
                                 (event) => {
-                                    setSurfaceSeed(parseFloat(event.target.value || 0));
+                                    setSurfaceSeed(Math.abs(parseInt(event.target.value || 0)));
                                 }
                             }
                         />
@@ -235,7 +235,7 @@ function Controls({
                             value={landSeed}
                             onChange={
                                 (event) => {
-                                    setLandSeed(parseFloat(event.target.value || 0));
+                                    setLandSeed(Math.abs(parseInt(event.target.value || 0)));
                                 }
                             }
                         />
@@ -395,7 +395,7 @@ function Controls({
                             value={cloudSeed}
                             onChange={
                                 (event) => {
-                                    setCloudSeed(parseFloat(event.target.value || 0));
+                                    setCloudSeed(Math.abs(parseInt(event.target.value || 0)));
                                 }
                             }
                         />
