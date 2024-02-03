@@ -1,41 +1,41 @@
-fn getOctave(p0: Point3, octaves: u32, perm: Permutations) -> f32 {
+fn getOctave(p0: Point3, octaves: u32, seed: f32) -> f32 {
     var val: f32 = 0.0;
     var scale: f32 = 1.0;
 
     for (var i: u32 = 0; i < octaves; i = i + 1) {
-        val = val + (0.5 + simplex3d(p0 * scale, perm)) / scale;
+        val = val + (0.5 + simplex3d(p0 * scale, seed)) / scale;
         scale = scale * 2.0;
     }
 
     return val;
 }
 
-fn getNormalizedOctave(p0: Point3, octaves: u32, perm: Permutations) -> f32 {
+fn getNormalizedOctave(p0: Point3, octaves: u32, seed: f32) -> f32 {
     let q: f32 = 2.0 - (1.0 / pow(2.0, f32(octaves - 1)));
-    return getOctave(p0, octaves, perm) / q;
+    return getOctave(p0, octaves, seed) / q;
 }
 
 fn ridgify(value: f32) -> f32 {
     return 1.0 - (2.0 * abs(value - 0.5));
 }
 
-fn sampleAtPoint(p0: Point3, settings: NoiseSettings, perm: Permutations) -> f32 {
+fn sampleAtPoint(p0: Point3, settings: NoiseSettings, seed: f32) -> f32 {
     var offset: f32 = 0.0;
 
     if (settings.sOctaves > 0u) {
         var p: Point3 = p0 / settings.sScale;
-        offset = getOctave(p, settings.sOctaves, perm);
+        offset = getOctave(p, settings.sOctaves, seed);
 
         offset = pow(offset, settings.sFalloff);
         offset = offset * settings.sIntensity;
     }
 
     var i: vec3<f32> = (p0 / settings.iScale) + vec3<f32>(offset, offset, offset);
-    var value: f32 = getNormalizedOctave(i, settings.iOctaves, perm);
+    var value: f32 = getNormalizedOctave(i, settings.iOctaves, seed);
 
     if (settings.iRidginess > 0.0) {
         var r: vec3<f32> = (p0 / settings.iScale) + vec3<f32>(offset, offset, offset + 11.0);
-        var ridge: f32 = getNormalizedOctave(r, settings.iOctaves, perm);
+        var ridge: f32 = getNormalizedOctave(r, settings.iOctaves, seed);
 
         value = settings.iRidginess * ridgify(ridge) + (1.0 - settings.iRidginess) * value;
     }

@@ -5,6 +5,9 @@ struct Uniforms {
     renderType: u32,
     textureWidth: u32,
     textureHeight: u32,
+    surfaceSeed: f32,
+    landSeed: f32,
+    cloudSeed: f32,
     waterLevel: f32,
     waterSpecular: f32,
     waterFalloff: f32,
@@ -22,11 +25,6 @@ struct Uniforms {
 @group(1) @binding(0) var diffuseTexture : texture_storage_2d<rgba8unorm, write>;
 @group(1) @binding(1) var specularTexture : texture_storage_2d<rgba8unorm, write>;
 @group(1) @binding(2) var cloudsTexture : texture_storage_2d<rgba8unorm, write>;
-
-// Noise permutations
-@group(2) @binding(0) var<storage, read> surfaceNoisePermutations : Permutations;
-@group(2) @binding(1) var<storage, read> landNoisePermutations : Permutations;
-@group(2) @binding(2) var<storage, read> cloudNoisePermutations : Permutations;
 
 // Compute shader main entry point
 @compute @workgroup_size(16, 16)
@@ -48,7 +46,7 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
 
 fn renderLand(pos: vec2<u32>, p0: vec3<f32>) {
     // Land & sea
-    let c0: f32 = sampleAtPoint(p0, uniforms.surfaceNoise, surfaceNoisePermutations);
+    let c0: f32 = sampleAtPoint(p0, uniforms.surfaceNoise, uniforms.surfaceSeed);
 
     var diffuseColor: Color3;
     var specularColor: Color3;
@@ -56,7 +54,7 @@ fn renderLand(pos: vec2<u32>, p0: vec3<f32>) {
 
     if (c0 > uniforms.waterLevel) {
         // Land
-        let c: f32 = sampleAtPoint(p0, uniforms.landNoise, landNoisePermutations);
+        let c: f32 = sampleAtPoint(p0, uniforms.landNoise, uniforms.landSeed);
 
         diffuseColor = mix(uniforms.landColor1, uniforms.landColor2, c);
         specularColor = landSpecularColor;
@@ -83,7 +81,7 @@ fn renderLand(pos: vec2<u32>, p0: vec3<f32>) {
 fn renderClouds(pos: vec2<u32>, p0: vec3<f32>) {
     let cloudFinalColor: Color4 = Color4(
         uniforms.cloudColor.xyz,
-        uniforms.cloudColor.w * sampleAtPoint(p0, uniforms.cloudNoise, cloudNoisePermutations)
+        uniforms.cloudColor.w * sampleAtPoint(p0, uniforms.cloudNoise, uniforms.cloudSeed)
     );
     textureStore(cloudsTexture, pos, cloudFinalColor);
 }
