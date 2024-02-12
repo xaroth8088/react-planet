@@ -14,6 +14,7 @@ import {
     WebGPUEngine
 } from "@babylonjs/core";
 import PropTypes from "prop-types";
+import { useResizeObserver } from '../utils/ResizeObserver.jsx';
 import {nearestPowerOfTwo} from '../utils/Math.js';
 import {addNoiseSettingsToBuffer, addUniformsToBuffer, updateNoiseSettings} from '../utils/UniformBuffers.js';
 import {WGSLBuilder} from "../utils/WGSLBuilder.js";
@@ -134,9 +135,10 @@ const Planet = (
 ) => {
     const [showError, setError] = useState(false);
     const reactCanvas = useRef(null);
+    const dimensions = useResizeObserver(reactCanvas);
     const babylonData = useRef({
         engine: null,
-        resize: null,
+        isEngineReady: false,
         textureGeneratorUBuffer: null,
         textureGeneratorShader: null,
         width: 0,
@@ -246,6 +248,7 @@ const Planet = (
                 };
 
                 const engine = await new WebGPUEngine(canvas, engineOptions);
+                babylonData.current.isEngineReady = false;
                 if (!isComponentMounted) {
                     // The component may have been unmounted before getting here, so bail on further setup
                     return;
@@ -257,6 +260,8 @@ const Planet = (
                     setError(true);
                     return;
                 }
+
+                babylonData.current.isEngineReady = true;
 
                 const scene = new Scene(babylonData.current.engine, {});
                 //Inspector.Show(scene, {});
@@ -393,34 +398,27 @@ const Planet = (
 
                     scene.render();
                 });
-
-                const resize = () => {
-                    babylonData.current.engine.resize();
-                };
-
-                if (window) {
-                    window.addEventListener("resize", resize);
-                }
-
-                babylonData.current.resize = resize;
             }
 
             initBabylon();
 
             return () => {
                 isComponentMounted = false;
+                babylonData.current.isEngineReady = false;
                 if (babylonData.current.engine) {
                     babylonData.current.engine.dispose();
                     babylonData.current.engine = null;
-                }
-
-                if (window) {
-                    window.removeEventListener("resize", babylonData.current.resize);
                 }
             };
         },
         [resolution]
     );
+
+    useEffect(() => {
+        if(babylonData.current.isEngineReady) {
+            babylonData.current.engine.resize();
+        }
+    }, [dimensions]);
 
     useEffect(() => {
         if (babylonData.current.normalsUBuffer === null) {
