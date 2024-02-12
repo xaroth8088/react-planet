@@ -1,6 +1,5 @@
 # NEW FOR 2.0
 * Include Babylon, but tree-shaken, so that we don't have to have it as a peer dependency
-* Get it so that the planet always fits in the canvas, regardless of container size
 * Toggle based on animate property
 * When resolution changes, make changes to textures without needing to restart Babylon
 * Demo page + GitHub pages deployment

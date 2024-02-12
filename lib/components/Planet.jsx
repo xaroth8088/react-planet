@@ -14,7 +14,7 @@ import {
     WebGPUEngine
 } from "@babylonjs/core";
 import PropTypes from "prop-types";
-import { useResizeObserver } from '../utils/ResizeObserver.jsx';
+import {useResizeObserver} from '../utils/ResizeObserver.jsx';
 import {nearestPowerOfTwo} from '../utils/Math.js';
 import {addNoiseSettingsToBuffer, addUniformsToBuffer, updateNoiseSettings} from '../utils/UniformBuffers.js';
 import {WGSLBuilder} from "../utils/WGSLBuilder.js";
@@ -267,7 +267,7 @@ const Planet = (
                 //Inspector.Show(scene, {});
                 scene.clearColor = new Color4(0, 0, 0, 0);
 
-                const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.15), scene);
+                const camera = new FreeCamera("camera1", new Vector3(0, 0, -2.1), scene);
                 camera.setTarget(Vector3.Zero());
 
                 const light = new DirectionalLight("light", new Vector3(1, -1, 1), scene);
@@ -414,9 +414,23 @@ const Planet = (
         [resolution]
     );
 
+    function adjustCamera() {
+        const camera = babylonData.current.engine.scenes[0].cameras[0];
+
+        const aspectRatio = dimensions.width / dimensions.height;
+        const verticalFov = camera.fov;
+        const horizontalFov = 2 * Math.atan(Math.tan(camera.fov / 2) * aspectRatio);
+
+        // Determine the needed distance from the sphere to fit in view, depending on the smaller dimension
+        // Set the camera's position to ensure the entire sphere is visible
+        camera.position.z = 0.5 / Math.sin(Math.min(verticalFov, horizontalFov) / 2) + 0.1;
+        camera.position.z *= -1;
+    }
+
     useEffect(() => {
-        if(babylonData.current.isEngineReady) {
+        if (babylonData.current.isEngineReady) {
             babylonData.current.engine.resize();
+            adjustCamera();
         }
     }, [dimensions]);
 
