@@ -75,4 +75,4 @@ $ yarn build        // Production build
 # Credits
 Based on the wonderful work of [wwwtyro](https://github.com/wwwtyro/procedural.js).
 
-C port of OpenSimplex courtesy of [deerel](https://github.com/deerel/OpenSimplexNoise).
+Shader noise generation based on work by [Inigo Quilez](https://www.shadertoy.com/view/4sfGzS)
